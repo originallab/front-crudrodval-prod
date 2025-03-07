@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-// Define los campos del formulario que se va a mostrar en la pantalla
+// Configuración de las tablas y sus campos
 const TABLE_CONFIGS = {
   datos_empresa: {
     fields: [
@@ -14,7 +14,7 @@ const TABLE_CONFIGS = {
       { name: "cuenta_espejo", type: "text" },
       { name: "unidad", type: "select", reference: "tipos_unidades", displayKey: "nombre" },
       { name: "operadores", type: "select", reference: "operadores", displayKey: "nombre_operador" },
-      { name: "destinos", type: "checkbox", reference: "destinos", displayKey: "origen" },
+      { name: "destinos", type: "multiselect", reference: "origen", displayKey: "origen" },
       { name: "estadoss", type: "select", reference: "estado", displayKey: "estado" },
     ],
   },
@@ -34,7 +34,7 @@ const TABLE_CONFIGS = {
       { name: "licencia", type: "text" },
     ],
   },
-  destinos: {
+  origen: {
     fields: [
       { name: "origen", type: "text" },
       { name: "destino", type: "text" },
@@ -62,13 +62,15 @@ export default function Dashboard() {
   const [selectedDestinos, setSelectedDestinos] = useState([]);
   const [tablesLoaded, setTablesLoaded] = useState({});
   const [loadingTables, setLoadingTables] = useState({});
+  const [showMultiselectDropdown, setShowMultiselectDropdown] = useState(false);
+  const [multiselectSearchTerm, setMultiselectSearchTerm] = useState("");
 
-  // Inicializar el formData para todas las tablas cuando el componente se monta
+  // Inicializar el formData para todas las tablas
   useEffect(() => {
     const initialFormData = {};
     Object.keys(TABLE_CONFIGS).forEach((tableName) => {
       initialFormData[tableName] = Object.fromEntries(
-        TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "checkbox" ? [] : ""])
+        TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "multiselect" ? [] : ""])
       );
     });
     setFormData(initialFormData);
@@ -76,15 +78,18 @@ export default function Dashboard() {
 
   // Cargar datos de las tablas en orden
   useEffect(() => {
-    const referenceTables = ["tipos_unidades", "operadores", "destinos", "estado"];
+    const referenceTables = ["tipos_unidades", "operadores", "origen", "estado"]; // Asegúrate de incluir "origen"
     const loadTablesInOrder = async () => {
       try {
+        // Cargar primero las tablas de referencia
         for (const table of referenceTables) {
           await fetchTableData(table);
         }
+        // Luego cargar datos_empresa
         await fetchTableData("datos_empresa");
       } catch (err) {
         console.error("Error cargando tablas en secuencia:", err);
+        setError("Error cargando tablas. Verifica la consola para más detalles.");
       }
     };
     loadTablesInOrder();
@@ -92,7 +97,7 @@ export default function Dashboard() {
 
   // Función para obtener datos de la tabla
   const fetchTableData = async (tableName) => {
-    if (loadingTables[tableName]) return;
+    if (loadingTables[tableName]) return; // Evitar múltiples solicitudes simultáneas
 
     setLoadingTables((prev) => ({ ...prev, [tableName]: true }));
     setIsLoading(true);
@@ -103,6 +108,8 @@ export default function Dashboard() {
         headers: { "Content-Type": "application/json", apikey: API_KEY },
       });
 
+      console.log(`Respuesta de la API para ${tableName}:`, response.data); // Depuración
+
       if (response.data && response.data.records && Array.isArray(response.data.records)) {
         setTablas((prev) => ({ ...prev, [tableName]: response.data.records }));
         setTablesLoaded((prev) => ({ ...prev, [tableName]: true }));
@@ -110,7 +117,8 @@ export default function Dashboard() {
         setError(`Formato inesperado para ${tableName}`);
       }
     } catch (error) {
-      setError(`Error al obtener datos de ${tableName}: ${error.message}`);
+      console.error(`Error al obtener datos de ${tableName}:`, error);
+      setError(`Error al cargar ${tableName}: ${error.message}`);
     } finally {
       setIsLoading(false);
       setLoadingTables((prev) => ({ ...prev, [tableName]: false }));
@@ -119,31 +127,38 @@ export default function Dashboard() {
 
   // Manejar cambios en los inputs
   const handleInputChange = (e, tableName) => {
-    const { name, value, type, checked } = e.target;
-    if (type !== "checkbox") {
-      setFormData((prev) => ({
-        ...prev,
-        [tableName]: { ...prev[tableName], [name]: value },
-      }));
-    }
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [tableName]: { ...prev[tableName], [name]: value },
+    }));
   };
 
-  // Manejar cambios en los checkboxes de destinos
-  const handleDestinoChange = (e, destinoValue) => {
-    const { checked } = e.target;
+  // Manejar cambios en los items del multiselect
+  const handleDestinoChange = (destinoValue) => {
     let newSelectedDestinos = [...selectedDestinos];
-    
-    if (checked) {
-      if (!newSelectedDestinos.includes(destinoValue)) {
-        newSelectedDestinos.push(destinoValue);
-      }
-    } else {
+
+    if (newSelectedDestinos.includes(destinoValue)) {
       newSelectedDestinos = newSelectedDestinos.filter((d) => d !== destinoValue);
+    } else {
+      newSelectedDestinos.push(destinoValue);
     }
 
     setSelectedDestinos(newSelectedDestinos);
-    
+
     // Actualizar formData con la cadena de destinos separados por coma
+    setFormData((prev) => ({
+      ...prev,
+      [activeTable]: { ...prev[activeTable], destinos: newSelectedDestinos.join(",") },
+    }));
+  };
+
+  // Eliminar un destino seleccionado
+  const removeDestino = (destinoValue) => {
+    const newSelectedDestinos = selectedDestinos.filter((d) => d !== destinoValue);
+    setSelectedDestinos(newSelectedDestinos);
+
+    // Actualizar formData con la nueva lista
     setFormData((prev) => ({
       ...prev,
       [activeTable]: { ...prev[activeTable], destinos: newSelectedDestinos.join(",") },
@@ -155,7 +170,7 @@ export default function Dashboard() {
     const initialFormData = {};
     Object.keys(TABLE_CONFIGS).forEach((tableName) => {
       initialFormData[tableName] = Object.fromEntries(
-        TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "checkbox" ? [] : ""])
+        TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "multiselect" ? [] : ""])
       );
     });
     setFormData(initialFormData);
@@ -213,7 +228,7 @@ export default function Dashboard() {
   // Seleccionar un registro para editar
   const handleSelectItem = (item, tableName) => {
     setSelectedItem(item);
-    
+
     // Para datos_empresa, manejar los destinos seleccionados
     if (tableName === "datos_empresa" && item.destinos) {
       const destinosArray = item.destinos.split(",").filter((d) => d.trim() !== "");
@@ -221,7 +236,7 @@ export default function Dashboard() {
     } else {
       setSelectedDestinos([]);
     }
-    
+
     setFormData((prev) => ({ ...prev, [tableName]: { ...item } }));
   };
 
@@ -230,6 +245,11 @@ export default function Dashboard() {
     return Object.values(item).some((val) =>
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
     );
+  });
+
+  // Filtrar opciones del multiselect según el término de búsqueda
+  const filteredDestinos = tablas["origen"]?.filter((item) => {
+    return item.origen.toLowerCase().includes(multiselectSearchTerm.toLowerCase());
   });
 
   // Verificar si un destino está seleccionado
@@ -242,6 +262,7 @@ export default function Dashboard() {
     fetchTableData(tableName);
   };
 
+  // Renderizado del componente
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-cover bg-center bg-no-repeat bg-[url('/imagenes/rodval.png')]">
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl p-8 bg-opacity-100 ml-40">
@@ -283,7 +304,7 @@ export default function Dashboard() {
             ))}
           </ul>
         </div>
-
+        
         <div className="flex justify-center mb-6">
           {Object.keys(TABLE_CONFIGS).map((table) => (
             <button
@@ -357,10 +378,10 @@ export default function Dashboard() {
                     )}
                   </div>
                 );
-              } else if (field.type === "checkbox") {
+              } else if (field.type === "multiselect") {
                 const hasOptions = tablas[field.reference] && tablas[field.reference].length > 0;
                 return (
-                  <div key={field.name} className="mb-4">
+                  <div key={field.name} className="mb-4 relative" id="multiselect-dropdown">
                     <div className="flex items-center justify-between">
                       <label className="block text-sm font-medium mb-1">
                         {field.name.replace(/_/g, " ").toUpperCase()} (Selección múltiple)
@@ -374,26 +395,79 @@ export default function Dashboard() {
                         🔄
                       </button>
                     </div>
-                    {hasOptions ? (
-                      <div className="flex flex-wrap gap-3 border p-3 rounded-lg">
-                        {tablas[field.reference]?.map((item, index) => (
-                          <div key={index} className="flex items-center bg-gray-50 p-2 rounded">
-                            <input
-                              type="checkbox"
-                              id={`${field.name}-${index}`}
-                              name={field.name}
-                              value={item[field.displayKey]}
-                              checked={isDestinoSelected(item[field.displayKey])}
-                              onChange={(e) => handleDestinoChange(e, item[field.displayKey])}
-                              className="mr-2"
-                            />
-                            <label htmlFor={`${field.name}-${index}`} className="text-sm">
-                              {item[field.displayKey]}
-                            </label>
+                    
+                    {/* Campo de selección estilo multiselect moderno */}
+                    <div 
+                      className="p-2 border rounded-lg bg-white cursor-pointer flex flex-wrap gap-1 min-h-10"
+                      onClick={() => setShowMultiselectDropdown(!showMultiselectDropdown)}
+                    >
+                      {selectedDestinos.length > 0 ? (
+                        selectedDestinos.map((destino, idx) => (
+                          <div key={idx} className="bg-blue-500 text-white px-2 py-1 rounded-full flex items-center text-sm">
+                            {destino}
+                            <button 
+                              type="button"
+                              className="ml-1 text-white hover:text-red-200"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeDestino(destino);
+                              }}
+                            >
+                              ×
+                            </button>
                           </div>
-                        ))}
+                        ))
+                      ) : (
+                        <span className="text-gray-500">Seleccione destinos</span>
+                      )}
+                    </div>
+                    
+                    {/* Dropdown del multiselect */}
+                    {showMultiselectDropdown && hasOptions && (
+                      <div className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
+                        <div className="p-2 border-b sticky top-0 bg-white">
+                          <input
+                            type="text"
+                            className="w-full p-2 border rounded"
+                            placeholder="Buscar destinos..."
+                            value={multiselectSearchTerm}
+                            onChange={(e) => setMultiselectSearchTerm(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        <div>
+                          {filteredDestinos?.map((item, index) => (
+                            <div 
+                              key={index} 
+                              className={`p-2 hover:bg-gray-100 cursor-pointer ${
+                                isDestinoSelected(item[field.displayKey]) ? 'bg-blue-50' : ''
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDestinoChange(item[field.displayKey]);
+                              }}
+                            >
+                              <div className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  checked={isDestinoSelected(item[field.displayKey])}
+                                  onChange={() => {}}
+                                  className="mr-2"
+                                />
+                                <span>{item[field.displayKey]}</span>
+                              </div>
+                            </div>
+                          ))}
+                          {filteredDestinos?.length === 0 && (
+                            <div className="p-3 text-center text-gray-500">
+                              No se encontraron destinos
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    ) : (
+                    )}
+                    
+                    {!hasOptions && (
                       <div>
                         <p className="text-red-500 text-xs mt-1">
                           No hay datos disponibles para las opciones. Verifique la tabla {field.reference}.
@@ -407,14 +481,13 @@ export default function Dashboard() {
                         </button>
                       </div>
                     )}
-                    <div className="mt-2 p-2 bg-blue-50 rounded">
-                      <p className="text-sm font-medium">Destinos seleccionados:</p>
-                      <p className="text-sm">
-                        {selectedDestinos.length > 0
-                          ? selectedDestinos.join(", ")
-                          : "Ningún destino seleccionado"}
-                      </p>
-                    </div>
+                    
+                    {/* Área que muestra los destinos seleccionados como texto */}
+                    <input 
+                      type="hidden" 
+                      name={field.name} 
+                      value={selectedDestinos.join(",")} 
+                    />
                   </div>
                 );
               } else {
