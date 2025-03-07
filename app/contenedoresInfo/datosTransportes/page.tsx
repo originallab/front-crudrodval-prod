@@ -150,7 +150,7 @@ export default function Dashboard() {
     // Actualizar formData con la cadena de destinos separados por coma
     setFormData((prev) => ({
       ...prev,
-      [activeTable]: { ...prev[activeTable], destinos: newSelectedDestinos.join(",") },
+      [activeTable]: { ...prev[activeTable], destino: newSelectedDestinos.join(",") },
     }));
   };
 
@@ -162,7 +162,7 @@ export default function Dashboard() {
     // Actualizar formData con la nueva lista
     setFormData((prev) => ({
       ...prev,
-      [activeTable]: { ...prev[activeTable], destinos: newSelectedDestinos.join(",") },
+      [activeTable]: { ...prev[activeTable], destino: newSelectedDestinos.join(",") },
     }));
   };
 
@@ -231,8 +231,8 @@ export default function Dashboard() {
     setSelectedItem(item);
 
     // Para datos_empresa, manejar los destinos seleccionados
-    if (tableName === "datos_empresa" && item.destinos) {
-      const destinosArray = item.destinos.split(",").filter((d) => d.trim() !== "");
+    if (tableName === "datos_empresa" && item.destino) {
+      const destinosArray = item.destino.split(",").filter((d) => d.trim() !== "");
       setSelectedDestinos(destinosArray);
     } else {
       setSelectedDestinos([]);
@@ -266,19 +266,19 @@ export default function Dashboard() {
   // Renderizado del componente
   return (
     <div
-    className="min-h-screen flex items-center justify-center p-6"
-    style={{
-      backgroundImage: "url('/imagenes/rodval.png')",
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-      width: "100%",
-      minHeight: "100vh",
-      position: "absolute",
-      top: "0",
-      left: "0",
-    }}
-  >
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{
+        backgroundImage: "url('/imagenes/rodval.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        width: "100%",
+        minHeight: "100vh",
+        position: "absolute",
+        top: "0",
+        left: "0",
+      }}
+    >
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl p-8 bg-opacity-100 ml-40">
         <h1 className="text-3xl font-bold text-center mb-6">Mantenedor de los transportes</h1>
 
