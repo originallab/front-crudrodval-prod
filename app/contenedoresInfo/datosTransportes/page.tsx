@@ -7,15 +7,16 @@ const TABLE_CONFIGS = {
   datos_empresa: {
     fields: [
       { name: "fecha_registro", type: "text" },
+      { name: "nombre", type: "text" },
       { name: "rfc", type: "text" },
       { name: "direccion", type: "text" },
       { name: "telefono", type: "text" },
       { name: "cuenta_bancaria", type: "text" },
       { name: "cuenta_espejo", type: "text" },
-      { name: "unidad", type: "select", reference: "tipos_unidades", displayKey: "nombre" },
-      { name: "operadores", type: "select", reference: "operadores", displayKey: "nombre_operador" },
-      { name: "destinos", type: "multiselect", reference: "origen", displayKey: "origen" },
-      { name: "estadoss", type: "select", reference: "estado", displayKey: "estado" },
+      { name: "tipos_unidades", type: "select", reference: "tipos_unidades", displayKey: "nombre" },
+      { name: "operador", type: "select", reference: "operadores", displayKey: "nombre_operador" },
+      { name: "destino", type: "multiselect", reference: "origen", displayKey: "origen" },
+      { name: "estado", type: "select", reference: "estado", displayKey: "estado" },
     ],
   },
   tipos_unidades: {
@@ -78,7 +79,7 @@ export default function Dashboard() {
 
   // Cargar datos de las tablas en orden
   useEffect(() => {
-    const referenceTables = ["tipos_unidades", "operadores", "origen", "estado"]; // Asegúrate de incluir "origen"
+    const referenceTables = ["tipos_unidades", "operadores", "origen", "estado"]; // Tablas de referencia
     const loadTablesInOrder = async () => {
       try {
         // Cargar primero las tablas de referencia
@@ -264,7 +265,20 @@ export default function Dashboard() {
 
   // Renderizado del componente
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-cover bg-center bg-no-repeat bg-[url('/imagenes/rodval.png')]">
+    <div
+    className="min-h-screen flex items-center justify-center p-6"
+    style={{
+      backgroundImage: "url('/imagenes/rodval.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      width: "100%",
+      minHeight: "100vh",
+      position: "absolute",
+      top: "0",
+      left: "0",
+    }}
+  >
       <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl p-8 bg-opacity-100 ml-40">
         <h1 className="text-3xl font-bold text-center mb-6">Mantenedor de los transportes</h1>
 
@@ -304,7 +318,7 @@ export default function Dashboard() {
             ))}
           </ul>
         </div>
-        
+
         <div className="flex justify-center mb-6">
           {Object.keys(TABLE_CONFIGS).map((table) => (
             <button
