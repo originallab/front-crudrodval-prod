@@ -4,16 +4,15 @@ import axios from "axios";
 
 // Configuración de las tablas y sus campos
 const TABLE_CONFIGS = {
-  datos_empresa: {
+  transportes: {
     fields: [
       { name: "fecha_registro", type: "text" },
-      { name: "nombre", type: "text" },
       { name: "rfc", type: "text" },
       { name: "direccion", type: "text" },
       { name: "telefono", type: "text" },
       { name: "cuenta_bancaria", type: "text" },
       { name: "cuenta_espejo", type: "text" },
-      { name: "tipos_unidades", type: "select", reference: "tipos_unidades", displayKey: "nombre" },
+      { name: "tipo_unidades", type: "select", reference: "tipos_unidades", displayKey: "nombre" },
       { name: "operador", type: "select", reference: "operadores", displayKey: "nombre_operador" },
       { name: "destino", type: "multiselect", reference: "origen", displayKey: "origen" },
       { name: "estado", type: "select", reference: "estado", displayKey: "estado" },
@@ -56,7 +55,8 @@ export default function Dashboard() {
   const [tablas, setTablas] = useState({});
   const [formData, setFormData] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
-  const [activeTable, setActiveTable] = useState("datos_empresa");
+  // Change initial activeTable to "transportes" since "datos_empresa" doesn't exist in TABLE_CONFIGS
+  const [activeTable, setActiveTable] = useState("transportes");
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -86,8 +86,8 @@ export default function Dashboard() {
         for (const table of referenceTables) {
           await fetchTableData(table);
         }
-        // Luego cargar datos_empresa
-        await fetchTableData("datos_empresa");
+        // Luego cargar transportes en lugar de datos_empresa
+        await fetchTableData("transportes");
       } catch (err) {
         console.error("Error cargando tablas en secuencia:", err);
         setError("Error cargando tablas. Verifica la consola para más detalles.");
@@ -230,8 +230,8 @@ export default function Dashboard() {
   const handleSelectItem = (item, tableName) => {
     setSelectedItem(item);
 
-    // Para datos_empresa, manejar los destinos seleccionados
-    if (tableName === "datos_empresa" && item.destino) {
+    // Para transportes, manejar los destinos seleccionados (cambiado de datos_empresa a transportes)
+    if (tableName === "transportes" && item.destino) {
       const destinosArray = item.destino.split(",").filter((d) => d.trim() !== "");
       setSelectedDestinos(destinosArray);
     } else {
