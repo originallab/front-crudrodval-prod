@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Item } from "@radix-ui/react-dropdown-menu";
+import { MdDelete } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
 
 export default function Dashboard() {
   // URL base para todas las solicitudes a la API
@@ -472,13 +474,13 @@ export default function Dashboard() {
                           onClick={() => handleSelectItem(item, activeTable)}
                           className="px-3 py-1 bg-blue-500 text-white rounded-lg mr-2 hover:bg-blue-600"
                         >
-                          Editar
+                         <FaEdit />
                         </button>
                         <button
                           onClick={() => handleDelete(activeTable, item.id)}
                           className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
                         >
-                          Eliminar
+                        <MdDelete />
                         </button>
                       </td>
                     </tr>

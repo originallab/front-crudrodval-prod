@@ -18,7 +18,7 @@ export function LoginForm({
     <div
       className="min-h-screen flex items-center justify-center p-6"
       style={{
-        backgroundImage: "url('/imagenes/rodval.png')",
+        backgroundColor: "rgba(50, 90, 120, 255)",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",

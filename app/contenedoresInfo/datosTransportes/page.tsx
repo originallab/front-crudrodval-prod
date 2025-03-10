@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { MdDelete } from "react-icons/md";
+import { FaEdit } from "react-icons/fa";
+
 
 // Configuración de las tablas y sus campos
 const TABLE_CONFIGS = {
@@ -50,6 +53,7 @@ const TABLE_CONFIGS = {
 
 export default function Dashboard() {
   const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
+  
   const API_KEY = "lety";
 
   const [tablas, setTablas] = useState({});
@@ -268,7 +272,7 @@ export default function Dashboard() {
     <div
       className="min-h-screen flex items-center justify-center p-6"
       style={{
-        backgroundImage: "url('/imagenes/rodval.png')",
+        backgroundColor: "rgb(40, 80, 110)",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -620,13 +624,13 @@ export default function Dashboard() {
                           onClick={() => handleSelectItem(item, activeTable)}
                           className="px-3 py-1 bg-blue-500 text-white rounded-lg mr-2 hover:bg-blue-600"
                         >
-                          Editar
+                          <FaEdit />
                         </button>
                         <button
                           onClick={() => handleDelete(activeTable, item.id)}
                           className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
                         >
-                          Eliminar
+                          <MdDelete />
                         </button>
                       </td>
                     </tr>
