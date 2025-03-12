@@ -4,10 +4,10 @@ import axios from "axios";
 import { MdDelete } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 
-
 // Configuración de las tablas y sus campos
 const TABLE_CONFIGS = {
   transportes: {
+    idField: "id_transportes", // Clave primaria personalizada
     fields: [
       { name: "fecha_registro", type: "text" },
       { name: "rfc", type: "text" },
@@ -43,6 +43,12 @@ const TABLE_CONFIGS = {
       { name: "destino", type: "text" },
     ],
   },
+  items: {
+    fields: [
+      { name: "name", type: "text" },
+      { name: "description", type: "text" },
+    ],
+  },
   estado: {
     fields: [
       { name: "estado", type: "text" },
@@ -53,13 +59,12 @@ const TABLE_CONFIGS = {
 
 export default function Dashboard() {
   const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
-  
   const API_KEY = "lety";
 
   const [tablas, setTablas] = useState({});
   const [formData, setFormData] = useState({});
+  const [displayFormData, setDisplayFormData] = useState({}); // Para mostrar textos en el formulario
   const [selectedItem, setSelectedItem] = useState(null);
-  // Change initial activeTable to "transportes" since "datos_empresa" doesn't exist in TABLE_CONFIGS
   const [activeTable, setActiveTable] = useState("transportes");
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -69,16 +74,22 @@ export default function Dashboard() {
   const [loadingTables, setLoadingTables] = useState({});
   const [showMultiselectDropdown, setShowMultiselectDropdown] = useState(false);
   const [multiselectSearchTerm, setMultiselectSearchTerm] = useState("");
+  const [displayData, setDisplayData] = useState({}); // Para almacenar datos con textos para mostrar
 
   // Inicializar el formData para todas las tablas
   useEffect(() => {
     const initialFormData = {};
+    const initialDisplayFormData = {};
     Object.keys(TABLE_CONFIGS).forEach((tableName) => {
       initialFormData[tableName] = Object.fromEntries(
         TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "multiselect" ? [] : ""])
       );
+      initialDisplayFormData[tableName] = Object.fromEntries(
+        TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "multiselect" ? [] : ""])
+      );
     });
     setFormData(initialFormData);
+    setDisplayFormData(initialDisplayFormData);
   }, []);
 
   // Cargar datos de las tablas en orden
@@ -90,7 +101,7 @@ export default function Dashboard() {
         for (const table of referenceTables) {
           await fetchTableData(table);
         }
-        // Luego cargar transportes en lugar de datos_empresa
+        // Luego cargar transportes
         await fetchTableData("transportes");
       } catch (err) {
         console.error("Error cargando tablas en secuencia:", err);
@@ -116,8 +127,23 @@ export default function Dashboard() {
       console.log(`Respuesta de la API para ${tableName}:`, response.data); // Depuración
 
       if (response.data && response.data.records && Array.isArray(response.data.records)) {
-        setTablas((prev) => ({ ...prev, [tableName]: response.data.records }));
+        // Usar el idField definido en TABLE_CONFIGS o "id" por defecto
+        const idField = TABLE_CONFIGS[tableName].idField || "id";
+
+        // Guardar los datos junto con el nombre del campo ID
+        setTablas((prev) => ({
+          ...prev,
+          [tableName]: {
+            data: response.data.records,
+            idField, // Guardar el nombre del campo ID
+          },
+        }));
         setTablesLoaded((prev) => ({ ...prev, [tableName]: true }));
+
+        // Si es la tabla transportes, procesar los datos para mostrar textos en lugar de ids
+        if (tableName === "transportes") {
+          processTransportesData(response.data.records);
+        }
       } else {
         setError(`Formato inesperado para ${tableName}`);
       }
@@ -130,28 +156,102 @@ export default function Dashboard() {
     }
   };
 
-  // Manejar cambios en los inputs
-  const handleInputChange = (e, tableName) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
+  // Procesa los datos de transportes para mostrar textos descriptivos
+  const processTransportesData = (transportes) => {
+    if (!transportes || !Array.isArray(transportes)) return;
+
+    const processedData = transportes.map(transporte => {
+      const displayTransporte = { ...transporte };
+
+      // Reemplazar IDs con textos descriptivos para campos de selección
+      TABLE_CONFIGS.transportes.fields.forEach(field => {
+        if (field.type === "select" && transporte[field.name] && tablas[field.reference]?.data) {
+          const referencedItem = tablas[field.reference].data.find(
+            item => item.id === transporte[field.name]
+          );
+          if (referencedItem) {
+            displayTransporte[field.name] = referencedItem[field.displayKey];
+          }
+        } else if (field.type === "multiselect" && transporte[field.name] && tablas[field.reference]?.data) {
+          const destinoIds = transporte[field.name].split(',').filter(id => id.trim() !== '');
+          const destinoNames = destinoIds.map(id => {
+            const destino = tablas[field.reference].data.find(d => d.id === id);
+            return destino ? destino[field.displayKey] : id;
+          });
+          displayTransporte[field.name] = destinoNames.join(', ');
+        }
+      });
+
+      return displayTransporte;
+    });
+
+    setDisplayData(prev => ({
       ...prev,
-      [tableName]: { ...prev[tableName], [name]: value },
+      transportes: processedData
     }));
   };
 
+  // Actualiza la visualización de datos cuando cambian las tablas de referencia
+  useEffect(() => {
+    if (tablas.transportes?.data && tablas.tipos_unidades?.data && 
+        tablas.operadores?.data && tablas.origen?.data && tablas.estado?.data) {
+      processTransportesData(tablas.transportes.data);
+    }
+  }, [tablas.transportes?.data, tablas.tipos_unidades?.data, tablas.operadores?.data, 
+      tablas.origen?.data, tablas.estado?.data]);
+
+  // Manejar cambios en los inputs
+  const handleInputChange = (e, tableName) => {
+    const { name, value } = e.target;
+
+    // Si es un campo de tipo "select", buscar el ID correspondiente al valor seleccionado
+    if (TABLE_CONFIGS[tableName].fields.find((field) => field.name === name && field.type === "select")) {
+      const selectedField = TABLE_CONFIGS[tableName].fields.find((field) => field.name === name);
+      const selectedItem = tablas[selectedField.reference].data.find(
+        (item) => item.id === value
+      );
+
+      // Almacenar el ID en formData
+      setFormData((prev) => ({
+        ...prev,
+        [tableName]: { ...prev[tableName], [name]: value },
+      }));
+
+      // Almacenar el texto descriptivo en displayFormData
+      setDisplayFormData((prev) => ({
+        ...prev,
+        [tableName]: { 
+          ...prev[tableName], 
+          [name]: selectedItem ? selectedItem[selectedField.displayKey] : "" 
+        },
+      }));
+    } else {
+      // Para otros campos, almacenar el valor directamente
+      setFormData((prev) => ({
+        ...prev,
+        [tableName]: { ...prev[tableName], [name]: value },
+      }));
+      
+      setDisplayFormData((prev) => ({
+        ...prev,
+        [tableName]: { ...prev[tableName], [name]: value },
+      }));
+    }
+  };
+
   // Manejar cambios en los items del multiselect
-  const handleDestinoChange = (destinoValue) => {
+  const handleDestinoChange = (destinoId, destinoNombre) => {
     let newSelectedDestinos = [...selectedDestinos];
 
-    if (newSelectedDestinos.includes(destinoValue)) {
-      newSelectedDestinos = newSelectedDestinos.filter((d) => d !== destinoValue);
+    if (newSelectedDestinos.includes(destinoId)) {
+      newSelectedDestinos = newSelectedDestinos.filter((d) => d !== destinoId);
     } else {
-      newSelectedDestinos.push(destinoValue);
+      newSelectedDestinos.push(destinoId);
     }
 
     setSelectedDestinos(newSelectedDestinos);
 
-    // Actualizar formData con la cadena de destinos separados por coma
+    // Actualizar formData con la cadena de IDs de destinos separados por coma
     setFormData((prev) => ({
       ...prev,
       [activeTable]: { ...prev[activeTable], destino: newSelectedDestinos.join(",") },
@@ -159,11 +259,11 @@ export default function Dashboard() {
   };
 
   // Eliminar un destino seleccionado
-  const removeDestino = (destinoValue) => {
-    const newSelectedDestinos = selectedDestinos.filter((d) => d !== destinoValue);
+  const removeDestino = (destinoId) => {
+    const newSelectedDestinos = selectedDestinos.filter((d) => d !== destinoId);
     setSelectedDestinos(newSelectedDestinos);
 
-    // Actualizar formData con la nueva lista
+    // Actualizar formData con la nueva lista de IDs
     setFormData((prev) => ({
       ...prev,
       [activeTable]: { ...prev[activeTable], destino: newSelectedDestinos.join(",") },
@@ -173,12 +273,17 @@ export default function Dashboard() {
   // Limpiar el formulario
   const clearForm = () => {
     const initialFormData = {};
+    const initialDisplayFormData = {};
     Object.keys(TABLE_CONFIGS).forEach((tableName) => {
       initialFormData[tableName] = Object.fromEntries(
         TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "multiselect" ? [] : ""])
       );
+      initialDisplayFormData[tableName] = Object.fromEntries(
+        TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "multiselect" ? [] : ""])
+      );
     });
     setFormData(initialFormData);
+    setDisplayFormData(initialDisplayFormData);
     setSelectedDestinos([]);
     setSelectedItem(null);
   };
@@ -189,8 +294,9 @@ export default function Dashboard() {
     setError(null);
 
     try {
+      const idField = TABLE_CONFIGS[tableName].idField || "id"; // Obtener el campo ID dinámico
       const url = selectedItem
-        ? `${API_BASE_URL}/${tableName}/${selectedItem.id}`
+        ? `${API_BASE_URL}/${tableName}/${selectedItem[idField]}`
         : `${API_BASE_URL}/${tableName}`;
       const method = selectedItem ? "patch" : "post";
 
@@ -212,13 +318,14 @@ export default function Dashboard() {
   };
 
   // Eliminar un registro
-  const handleDelete = async (tableName, id) => {
+  const handleDelete = async (tableName, item) => {
     if (!window.confirm("¿Deseas eliminar este registro?")) return;
     setIsLoading(true);
     setError(null);
 
     try {
-      await axios.delete(`${API_BASE_URL}/${tableName}/${id}`, {
+      const idField = TABLE_CONFIGS[tableName].idField || "id"; // Obtener el campo ID dinámico
+      await axios.delete(`${API_BASE_URL}/${tableName}/${item[idField]}`, {
         headers: { "Content-Type": "application/json", apikey: API_KEY },
       });
       alert("Registro eliminado");
@@ -233,38 +340,63 @@ export default function Dashboard() {
   // Seleccionar un registro para editar
   const handleSelectItem = (item, tableName) => {
     setSelectedItem(item);
+    
+    // Crear una copia para no modificar el original
+    const editFormData = { ...item };
+    const editDisplayFormData = { ...item };
 
-    // Para transportes, manejar los destinos seleccionados (cambiado de datos_empresa a transportes)
-    if (tableName === "transportes" && item.destino) {
-      const destinosArray = item.destino.split(",").filter((d) => d.trim() !== "");
-      setSelectedDestinos(destinosArray);
-    } else {
-      setSelectedDestinos([]);
-    }
+    // Obtener los campos específicos de la tabla
+    const tableFields = TABLE_CONFIGS[tableName].fields;
 
-    setFormData((prev) => ({ ...prev, [tableName]: { ...item } }));
+    // Para cada campo de tipo select o multiselect, preparar los datos adecuadamente
+    tableFields.forEach(field => {
+      if (field.type === "select" && item[field.name]) {
+        // Para campos select, buscar el texto correspondiente al ID
+        const referencedItem = tablas[field.reference]?.data.find(
+          refItem => refItem.id === item[field.name]
+        );
+        // Mantener el ID en formData, pero mostrar el texto en displayFormData
+        if (referencedItem) {
+          editDisplayFormData[field.name] = referencedItem[field.displayKey];
+        }
+      } else if (field.type === "multiselect" && item[field.name]) {
+        // Para destinos (multiselect), procesar los IDs
+        const destinoIds = item[field.name].split(',').filter(id => id.trim() !== '');
+        setSelectedDestinos(destinoIds);
+      }
+    });
+
+    // Actualizar formData (con IDs) y displayFormData (con textos)
+    setFormData(prev => ({ ...prev, [tableName]: editFormData }));
+    setDisplayFormData(prev => ({ ...prev, [tableName]: editDisplayFormData }));
   };
 
   // Filtrar datos según el término de búsqueda
-  const filteredData = tablas[activeTable]?.filter((item) => {
+  const filteredData = displayData[activeTable] || tablas[activeTable]?.data?.filter((item) => {
     return Object.values(item).some((val) =>
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
   // Filtrar opciones del multiselect según el término de búsqueda
-  const filteredDestinos = tablas["origen"]?.filter((item) => {
+  const filteredDestinos = tablas["origen"]?.data?.filter((item) => {
     return item.origen.toLowerCase().includes(multiselectSearchTerm.toLowerCase());
   });
 
   // Verificar si un destino está seleccionado
-  const isDestinoSelected = (destinoValue) => {
-    return selectedDestinos.includes(destinoValue);
+  const isDestinoSelected = (destinoId) => {
+    return selectedDestinos.includes(destinoId);
   };
 
   // Recargar una tabla específica
   const reloadTable = (tableName) => {
     fetchTableData(tableName);
+  };
+
+  // Obtener el nombre del destino a partir del ID
+  const getDestinoName = (destinoId) => {
+    const destino = tablas["origen"]?.data?.find(d => d.id === destinoId);
+    return destino ? destino.origen : "Desconocido";
   };
 
   // Renderizado del componente
@@ -352,7 +484,7 @@ export default function Dashboard() {
           >
             {TABLE_CONFIGS[activeTable].fields.map((field) => {
               if (field.type === "select") {
-                const hasOptions = tablas[field.reference] && tablas[field.reference].length > 0;
+                const hasOptions = tablas[field.reference] && tablas[field.reference].data?.length > 0;
                 return (
                   <div key={field.name} className="mb-4">
                     <label className="block text-sm font-medium mb-1">
@@ -367,8 +499,8 @@ export default function Dashboard() {
                       >
                         <option value="">Selecciona la opción</option>
                         {hasOptions &&
-                          tablas[field.reference]?.map((item) => (
-                            <option key={item.id} value={item[field.displayKey]}>
+                          tablas[field.reference].data?.map((item) => (
+                            <option key={item.id} value={item.id}>
                               {item[field.displayKey]}
                             </option>
                           ))}
@@ -397,7 +529,7 @@ export default function Dashboard() {
                   </div>
                 );
               } else if (field.type === "multiselect") {
-                const hasOptions = tablas[field.reference] && tablas[field.reference].length > 0;
+                const hasOptions = tablas[field.reference] && tablas[field.reference].data?.length > 0;
                 return (
                   <div key={field.name} className="mb-4 relative" id="multiselect-dropdown">
                     <div className="flex items-center justify-between">
@@ -413,33 +545,36 @@ export default function Dashboard() {
                         🔄
                       </button>
                     </div>
-                    
+
                     {/* Campo de selección estilo multiselect moderno */}
-                    <div 
+                    <div
                       className="p-2 border rounded-lg bg-white cursor-pointer flex flex-wrap gap-1 min-h-10"
                       onClick={() => setShowMultiselectDropdown(!showMultiselectDropdown)}
                     >
                       {selectedDestinos.length > 0 ? (
-                        selectedDestinos.map((destino, idx) => (
-                          <div key={idx} className="bg-blue-500 text-white px-2 py-1 rounded-full flex items-center text-sm">
-                            {destino}
-                            <button 
-                              type="button"
-                              className="ml-1 text-white hover:text-red-200"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeDestino(destino);
-                              }}
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))
+                        selectedDestinos.map((destinoId, idx) => {
+                          const destino = tablas["origen"]?.data?.find((d) => d.id === destinoId);
+                          return (
+                            <div key={idx} className="bg-blue-500 text-white px-2 py-1 rounded-full flex items-center text-sm">
+                              {destino ? destino.origen : "Desconocido"} {/* Mostrar el nombre */}
+                              <button
+                                type="button"
+                                className="ml-1 text-white hover:text-red-200"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeDestino(destinoId);
+                                }}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          );
+                        })
                       ) : (
                         <span className="text-gray-500">Seleccione destinos</span>
                       )}
                     </div>
-                    
+
                     {/* Dropdown del multiselect */}
                     {showMultiselectDropdown && hasOptions && (
                       <div className="absolute z-10 w-full bg-white border rounded-lg mt-1 shadow-lg max-h-60 overflow-y-auto">
@@ -455,24 +590,24 @@ export default function Dashboard() {
                         </div>
                         <div>
                           {filteredDestinos?.map((item, index) => (
-                            <div 
-                              key={index} 
+                            <div
+                              key={index}
                               className={`p-2 hover:bg-gray-100 cursor-pointer ${
-                                isDestinoSelected(item[field.displayKey]) ? 'bg-blue-50' : ''
+                                isDestinoSelected(item.id) ? "bg-blue-50" : ""
                               }`}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDestinoChange(item[field.displayKey]);
+                                handleDestinoChange(item.id); // Almacenar el ID
                               }}
                             >
                               <div className="flex items-center">
                                 <input
                                   type="checkbox"
-                                  checked={isDestinoSelected(item[field.displayKey])}
+                                  checked={isDestinoSelected(item.id)}
                                   onChange={() => {}}
                                   className="mr-2"
                                 />
-                                <span>{item[field.displayKey]}</span>
+                                <span>{item.origen}</span> {/* Mostrar el nombre */}
                               </div>
                             </div>
                           ))}
@@ -484,7 +619,7 @@ export default function Dashboard() {
                         </div>
                       </div>
                     )}
-                    
+
                     {!hasOptions && (
                       <div>
                         <p className="text-red-500 text-xs mt-1">
@@ -499,12 +634,12 @@ export default function Dashboard() {
                         </button>
                       </div>
                     )}
-                    
+
                     {/* Área que muestra los destinos seleccionados como texto */}
-                    <input 
-                      type="hidden" 
-                      name={field.name} 
-                      value={selectedDestinos.join(",")} 
+                    <input
+                      type="hidden"
+                      name={field.name}
+                      value={selectedDestinos.join(",")}
                     />
                   </div>
                 );
@@ -573,7 +708,7 @@ export default function Dashboard() {
             <p className="mb-2">Cargando datos de {activeTable}...</p>
             <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mx-auto"></div>
           </div>
-        ) : !tablas[activeTable] || !tablas[activeTable].length ? (
+        ) : !tablas[activeTable]?.data || tablas[activeTable].data.length === 0 ? (
           <div className="text-center py-4 bg-yellow-50 border border-yellow-200 rounded p-4">
             <p className="mb-2">No hay datos disponibles en esta tabla</p>
             <button
@@ -588,32 +723,34 @@ export default function Dashboard() {
             <table className="w-full border rounded-xl shadow-lg overflow-hidden mt-6">
               <thead>
                 <tr className="bg-gray-300">
-                  {tablas[activeTable][0] &&
-                    Object.keys(tablas[activeTable][0]).map((key) => (
+                  {tablas[activeTable].data[0] &&
+                    Object.keys(tablas[activeTable].data[0]).map((key) => (
                       <th key={key} className="p-3 border text-left">
-                        {key.toUpperCase()}
-                      </th>
-                    ))}
-                  <th className="p-3 border text-center">ACCIONES</th>
+                      {key.toUpperCase()}
+                    </th>
+                  ))}
+                <th className="p-3 border text-center">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody>
+              {!filteredData || filteredData.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={
+                      tablas[activeTable].data[0]
+                        ? Object.keys(tablas[activeTable].data[0]).length + 1
+                        : 2
+                    }
+                    className="p-3 border text-center"
+                  >
+                    No se encontraron registros
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {!filteredData || filteredData.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={
-                        tablas[activeTable][0]
-                          ? Object.keys(tablas[activeTable][0]).length + 1
-                          : 2
-                      }
-                      className="p-3 border text-center"
-                    >
-                      No se encontraron registros
-                    </td>
-                  </tr>
-                ) : (
-                  filteredData.map((item) => (
-                    <tr key={item.id} className="bg-white hover:bg-gray-100">
+              ) : (
+                filteredData.map((item) => {
+                  const idField = TABLE_CONFIGS[activeTable].idField || "id";
+                  return (
+                    <tr key={item[idField]} className="bg-white hover:bg-gray-100">
                       {Object.entries(item).map(([key, value]) => (
                         <td key={key} className="p-3 border">
                           {value !== null && value !== undefined ? String(value) : ""}
@@ -627,20 +764,21 @@ export default function Dashboard() {
                           <FaEdit />
                         </button>
                         <button
-                          onClick={() => handleDelete(activeTable, item.id)}
+                          onClick={() => handleDelete(activeTable, item)}
                           className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
                         >
                           <MdDelete />
                         </button>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 }
