@@ -35,6 +35,7 @@ const TABLE_CONFIGS = {
       { name: "rfc", type: "text" },
       { name: "telefono", type: "text" },
       { name: "licencia", type: "text" },
+      { name: "archivo", type: "file" }, // Nuevo campo para archivos
     ],
   },
   origen: {
@@ -75,6 +76,8 @@ export default function Dashboard() {
   const [showMultiselectDropdown, setShowMultiselectDropdown] = useState(false);
   const [multiselectSearchTerm, setMultiselectSearchTerm] = useState("");
   const [displayData, setDisplayData] = useState({}); // Para almacenar datos con textos para mostrar
+  const [showModal, setShowModal] = useState(false); // Estado para controlar el modal
+  const [file, setFile] = useState(null); // Estado para manejar el archivo
 
   // Inicializar el formData para todas las tablas
   useEffect(() => {
@@ -299,7 +302,6 @@ export default function Dashboard() {
         ? `${API_BASE_URL}/${tableName}/${selectedItem[idField]}`
         : `${API_BASE_URL}/${tableName}`;
       const method = selectedItem ? "patch" : "post";
-
       const response = await axios({
         method,
         url,
@@ -397,6 +399,12 @@ export default function Dashboard() {
   const getDestinoName = (destinoId) => {
     const destino = tablas["origen"]?.data?.find(d => d.id === destinoId);
     return destino ? destino.origen : "Desconocido";
+  };
+
+  // Manejar la subida de archivos
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFile(file);
   };
 
   // Renderizado del componente
@@ -643,6 +651,20 @@ export default function Dashboard() {
                     />
                   </div>
                 );
+              } else if (field.type === "file") {
+                return (
+                  <div key={field.name} className="mb-4">
+                    <label className="block text-sm font-medium mb-1">
+                      {field.name.replace(/_/g, " ").toUpperCase()}
+                    </label>
+                    <input
+                      type="file"
+                      name={field.name}
+                      onChange={handleFileChange}
+                      className="w-full p-2 border rounded-lg"
+                    />
+                  </div>
+                );
               } else {
                 return (
                   <div key={field.name} className="mb-4">
@@ -660,6 +682,7 @@ export default function Dashboard() {
                 );
               }
             })}
+            
             <div className="flex space-x-2">
               <button
                 type="submit"
@@ -680,6 +703,54 @@ export default function Dashboard() {
             </div>
           </form>
         </div>
+
+        {/* Botón para abrir el modal */}
+        {activeTable === "operadores" && (
+          <div className="mb-6">
+            <button
+              onClick={() => setShowModal(true)}
+              className="px-5 py-3 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600"
+            >
+              Agregar Información Adicional
+            </button>
+          </div>
+        )}
+
+        {/* Modal para agregar información adicional */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl font-bold mb-4">Agregar Información Adicional</h2>
+              <form>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Información</label>
+                  <textarea
+                    className="w-full p-2 border rounded-lg"
+                    placeholder="Escribe aquí..."
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                  >
+                    Cerrar
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Aquí puedes agregar la lógica para guardar la información
+                      alert("Información adicional guardada");
+                      setShowModal(false);
+                    }}
+                    className="ml-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         <div className="mb-6">
           <input
