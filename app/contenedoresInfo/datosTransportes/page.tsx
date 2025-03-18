@@ -6,21 +6,6 @@ import { FaEdit } from "react-icons/fa";
 
 // Configuración de las tablas y sus campos
 const TABLE_CONFIGS = {
-  transportes: {
-    idField: "id_transportes", // Clave primaria personalizada
-    fields: [
-      { name: "fecha_registro", type: "text" },
-      { name: "rfc", type: "text" },
-      { name: "direccion", type: "text" },
-      { name: "telefono", type: "text" },
-      { name: "cuenta_bancaria", type: "text" },
-      { name: "cuenta_espejo", type: "text" },
-      { name: "tipo_unidades", type: "select", reference: "tipos_unidades", displayKey: "nombre" },
-      { name: "operador", type: "select", reference: "operadores", displayKey: "nombre_operador" },
-      { name: "destino", type: "multiselect", reference: "origen", displayKey: "origen" },
-      { name: "estado", type: "select", reference: "estado", displayKey: "estado" },
-    ],
-  },
   tipos_unidades: {
     fields: [
       { name: "nombre", type: "text" },
@@ -54,6 +39,21 @@ const TABLE_CONFIGS = {
     fields: [
       { name: "estado", type: "text" },
       { name: "descripcion", type: "text" },
+    ],
+  },
+  transportes: {
+    idField: "id_transportes", // Clave primaria personalizada
+    fields: [
+      { name: "fecha_registro", type: "text" },
+      { name: "rfc", type: "text" },
+      { name: "direccion", type: "text" },
+      { name: "telefono", type: "text" },
+      { name: "cuenta_bancaria", type: "text" },
+      { name: "cuenta_espejo", type: "text" },
+      { name: "tipo_unidades", type: "select", reference: "tipos_unidades", displayKey: "nombre" },
+      { name: "operador", type: "select", reference: "operadores", displayKey: "nombre_operador" },
+      { name: "destino", type: "multiselect", reference: "origen", displayKey: "origen" },
+      { name: "estado", type: "select", reference: "estado", displayKey: "estado" },
     ],
   },
 };
@@ -115,108 +115,109 @@ export default function Dashboard() {
   }, []);
 
   // Función para obtener datos de la tabla
-  // Función para obtener datos de la tabla
-const fetchTableData = async (tableName) => {
-  if (loadingTables[tableName]) return; // Evitar múltiples solicitudes simultáneas
+  const fetchTableData = async (tableName) => {
+    if (loadingTables[tableName]) return; // Evitar múltiples solicitudes simultáneas
 
-  setLoadingTables((prev) => ({ ...prev, [tableName]: true }));
-  setIsLoading(true);
-  setError(null);
+    setLoadingTables((prev) => ({ ...prev, [tableName]: true }));
+    setIsLoading(true);
+    setError(null);
 
-  try {
-    const response = await axios.get(`${API_BASE_URL}/${tableName}/all`, {
-      headers: { "Content-Type": "application/json", apikey: API_KEY },
-    });
+    try {
+      const response = await axios.get(`${API_BASE_URL}/${tableName}/all`, {
+        headers: { "Content-Type": "application/json", apikey: API_KEY },
+      });
 
-    console.log(`Respuesta de la API para ${tableName}:`, response.data); // Depuración
+      console.log(`Respuesta de la API para ${tableName}:`, response.data); // Depuración
 
-    if (response.data && response.data.records && Array.isArray(response.data.records)) {
-      // Usar el idField definido en TABLE_CONFIGS o "id" por defecto
-      const idField = TABLE_CONFIGS[tableName].idField || "id";
+      if (response.data && response.data.records && Array.isArray(response.data.records)) {
+        // Usar el idField definido en TABLE_CONFIGS o "id" por defecto
+        const idField = TABLE_CONFIGS[tableName].idField || "id";
 
-      // Guardar los datos junto con el nombre del campo ID
-      setTablas((prev) => ({
-        ...prev,
-        [tableName]: {
-          data: response.data.records,
-          idField, // Guardar el nombre del campo ID
-        },
-      }));
-      setTablesLoaded((prev) => ({ ...prev, [tableName]: true }));
+        // Guardar los datos junto con el nombre del campo ID
+        setTablas((prev) => ({
+          ...prev,
+          [tableName]: {
+            data: response.data.records,
+            idField, // Guardar el nombre del campo ID
+          },
+        }));
+        setTablesLoaded((prev) => ({ ...prev, [tableName]: true }));
 
-      // Si es la tabla transportes, procesar los datos para mostrar textos en lugar de ids
-      if (tableName === "transportes") {
-        processTransportesData(response.data.records);
-      } else if (tableName === "tipos_unidades" || tableName === "operadores" || tableName === "origen" || tableName === "estado") {
-        // Si es una tabla de referencia, asegurarse de que los datos estén disponibles para procesar transportes
-        if (tablas.transportes?.data) {
-          processTransportesData(tablas.transportes.data);
+        // Si es la tabla transportes, procesar los datos para mostrar textos en lugar de ids
+        if (tableName === "transportes") {
+          processTransportesData(response.data.records);
         }
+      } else {
+        setError(`Formato inesperado para ${tableName}`);
       }
-    } else {
-      setError(`Formato inesperado para ${tableName}`);
+    } catch (error) {
+      console.error(`Error al obtener datos de ${tableName}:`, error);
+      setError(`Error al cargar ${tableName}: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+      setLoadingTables((prev) => ({ ...prev, [tableName]: false }));
     }
-  } catch (error) {
-    console.error(`Error al obtener datos de ${tableName}:`, error);
-    setError(`Error al cargar ${tableName}: ${error.message}`);
-  } finally {
-    setIsLoading(false);
-    setLoadingTables((prev) => ({ ...prev, [tableName]: false }));
-  }
-};
+  };
+
   // Función para procesar los datos de transportes y reemplazar IDs con nombres
-// Función para procesar los datos de transportes y reemplazar IDs con nombres
-const processTransportesData = (transportes) => {
-  if (!transportes || !Array.isArray(transportes)) return;
+  const processTransportesData = (transportes) => {
+    if (!transportes || !Array.isArray(transportes)) return;
 
-  const processedData = transportes.map(transporte => {
-    const displayTransporte = { ...transporte };
+    const processedData = transportes.map((transporte) => {
+      const displayTransporte = { ...transporte };
 
-    // Reemplazar IDs con textos descriptivos para campos de selección
-    TABLE_CONFIGS.transportes.fields.forEach(field => {
-      if (field.type === "select" && transporte[field.name] && tablas[field.reference]?.data) {
-        const referencedItem = tablas[field.reference].data.find(
-          item => item.id === transporte[field.name]
-        );
-        if (referencedItem) {
-          // Mostrar el segundo campo de la tabla de referencia
-          const secondField = TABLE_CONFIGS[field.reference].fields[1]?.name;
-          if (secondField) {
-            displayTransporte[field.name] = referencedItem[secondField];
-          } else {
-            displayTransporte[field.name] = transporte[field.name]; // Si no hay segundo campo, mostrar el ID
+      // Procesar cada campo definido en la configuración de la tabla transportes
+      TABLE_CONFIGS.transportes.fields.forEach((field) => {
+        if (field.type === "select" && transporte[field.name]) {
+          // Para campos select, buscar el registro relacionado usando el ID
+          const referencedTable = tablas[field.reference];
+          if (referencedTable?.data) {
+            const referencedItem = referencedTable.data.find(
+              (item) => item.id === transporte[field.name]
+            );
+
+            if (referencedItem) {
+              // Mostrar el valor descriptivo (displayKey) en lugar del ID
+              displayTransporte[field.name] = referencedItem[field.displayKey];
+            }
           }
-        } else {
-          displayTransporte[field.name] = transporte[field.name]; // Si no se encuentra el ID, mostrar el ID original
+        } else if (field.type === "multiselect" && transporte[field.name]) {
+          // Para campos multiselect, procesar la lista de IDs separados por coma
+          const ids = transporte[field.name].split(',').filter((id) => id.trim() !== '');
+          const referencedTable = tablas[field.reference];
+
+          if (referencedTable?.data) {
+            const names = ids.map((id) => {
+              const item = referencedTable.data.find((item) => item.id === id);
+              return item ? item[field.displayKey] : id;
+            });
+
+            // Mostrar los nombres unidos por coma
+            displayTransporte[field.name] = names.join(', ');
+          }
         }
-      } else if (field.type === "multiselect" && transporte[field.name] && tablas[field.reference]?.data) {
-        const destinoIds = transporte[field.name] ? transporte[field.name].split(',').filter(id => id.trim() !== '') : [];
-        const destinoNames = destinoIds.map(id => {
-          const destino = tablas[field.reference].data.find(d => d.id === id);
-          // Mostrar el segundo campo de la tabla de referencia
-          const secondField = TABLE_CONFIGS[field.reference].fields[1]?.name;
-          return destino ? destino[secondField] : id;
-        });
-        displayTransporte[field.name] = destinoNames.join(', ');
-      }
+      });
+
+      return displayTransporte;
     });
 
-    return displayTransporte;
-  });
+    // Almacenar los datos procesados para mostrar
+    setDisplayData((prev) => ({
+      ...prev,
+      transportes: processedData,
+    }));
+  };
 
-  setDisplayData(prev => ({
-    ...prev,
-    transportes: processedData
-  }));
-};
   // Actualiza la visualización de datos cuando cambian las tablas de referencia
   useEffect(() => {
-    if (tablas.transportes?.data && tablas.tipos_unidades?.data && 
-        tablas.operadores?.data && tablas.origen?.data && tablas.estado?.data) {
+    const referenceTables = ["tipos_unidades", "operadores", "origen", "estado"];
+    // Si todas las tablas de referencia están cargadas y tenemos datos de transportes
+    const allReferenceTablesLoaded = referenceTables.every((table) => tablesLoaded[table]);
+
+    if (allReferenceTablesLoaded && tablas.transportes?.data) {
       processTransportesData(tablas.transportes.data);
     }
-  }, [tablas.transportes?.data, tablas.tipos_unidades?.data, tablas.operadores?.data, 
-      tablas.origen?.data, tablas.estado?.data]);
+  }, [tablesLoaded, tablas]);
 
   // Manejar cambios en los inputs
   const handleInputChange = (e, tableName) => {
@@ -238,9 +239,9 @@ const processTransportesData = (transportes) => {
       // Almacenar el texto descriptivo en displayFormData
       setDisplayFormData((prev) => ({
         ...prev,
-        [tableName]: { 
-          ...prev[tableName], 
-          [name]: selectedItem ? selectedItem[selectedField.displayKey] : "" 
+        [tableName]: {
+          ...prev[tableName],
+          [name]: selectedItem ? selectedItem[selectedField.displayKey] : "",
         },
       }));
     } else {
@@ -249,7 +250,7 @@ const processTransportesData = (transportes) => {
         ...prev,
         [tableName]: { ...prev[tableName], [name]: value },
       }));
-      
+
       setDisplayFormData((prev) => ({
         ...prev,
         [tableName]: { ...prev[tableName], [name]: value },
@@ -357,7 +358,7 @@ const processTransportesData = (transportes) => {
   // Seleccionar un registro para editar
   const handleSelectItem = (item, tableName) => {
     setSelectedItem(item);
-    
+
     // Crear una copia para no modificar el original
     const editFormData = { ...item };
     const editDisplayFormData = { ...item };
@@ -366,11 +367,11 @@ const processTransportesData = (transportes) => {
     const tableFields = TABLE_CONFIGS[tableName].fields;
 
     // Para cada campo de tipo select o multiselect, preparar los datos adecuadamente
-    tableFields.forEach(field => {
+    tableFields.forEach((field) => {
       if (field.type === "select" && item[field.name]) {
         // Para campos select, buscar el texto correspondiente al ID
         const referencedItem = tablas[field.reference]?.data.find(
-          refItem => refItem.id === item[field.name]
+          (refItem) => refItem.id === item[field.name]
         );
         // Mantener el ID en formData, pero mostrar el texto en displayFormData
         if (referencedItem) {
@@ -378,22 +379,28 @@ const processTransportesData = (transportes) => {
         }
       } else if (field.type === "multiselect" && item[field.name]) {
         // Para destinos (multiselect), procesar los IDs
-        const destinoIds = item[field.name].split(',').filter(id => id.trim() !== '');
+        const destinoIds = item[field.name].split(',').filter((id) => id.trim() !== '');
         setSelectedDestinos(destinoIds);
       }
     });
 
     // Actualizar formData (con IDs) y displayFormData (con textos)
-    setFormData(prev => ({ ...prev, [tableName]: editFormData }));
-    setDisplayFormData(prev => ({ ...prev, [tableName]: editDisplayFormData }));
+    setFormData((prev) => ({ ...prev, [tableName]: editFormData }));
+    setDisplayFormData((prev) => ({ ...prev, [tableName]: editDisplayFormData }));
   };
 
   // Filtrar datos según el término de búsqueda
-  const filteredData = displayData[activeTable] || tablas[activeTable]?.data?.filter((item) => {
-    return Object.values(item).some((val) =>
-      String(val).toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+  const filteredData = activeTable === "transportes" && displayData.transportes
+    ? displayData.transportes.filter((item) =>
+        Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      )
+    : tablas[activeTable]?.data?.filter((item) => {
+        return Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
 
   // Filtrar opciones del multiselect según el término de búsqueda
   const filteredDestinos = tablas["origen"]?.data?.filter((item) => {
@@ -412,7 +419,7 @@ const processTransportesData = (transportes) => {
 
   // Obtener el nombre del destino a partir del ID
   const getDestinoName = (destinoId) => {
-    const destino = tablas["origen"]?.data?.find(d => d.id === destinoId);
+    const destino = tablas["origen"]?.data?.find((d) => d.id === destinoId);
     return destino ? destino.origen : "Desconocido";
   };
 
@@ -697,7 +704,7 @@ const processTransportesData = (transportes) => {
                 );
               }
             })}
-            
+
             <div className="flex space-x-2">
               <button
                 type="submit"
@@ -789,7 +796,6 @@ const processTransportesData = (transportes) => {
           </button>
         </div>
 
-        
         {loadingTables[activeTable] ? (
           <div className="text-center py-4">
             <p className="mb-2">Cargando datos de {activeTable}...</p>
@@ -813,59 +819,59 @@ const processTransportesData = (transportes) => {
                   {tablas[activeTable].data[0] &&
                     Object.keys(tablas[activeTable].data[0]).map((key) => (
                       <th key={key} className="p-3 border text-left">
-                      {key.toUpperCase()}
-                    </th>
-                  ))}
-                <th className="p-3 border text-center">ACCIONES</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!filteredData || filteredData.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={
-                      tablas[activeTable].data[0]
-                        ? Object.keys(tablas[activeTable].data[0]).length + 1
-                        : 2
-                    }
-                    className="p-3 border text-center"
-                  >
-                    No se encontraron registros
-                  </td>
+                        {key.toUpperCase()}
+                      </th>
+                    ))}
+                  <th className="p-3 border text-center">ACCIONES</th>
                 </tr>
-              ) : (
-                filteredData.map((item) => {
-                  const idField = TABLE_CONFIGS[activeTable].idField || "id";
-                  return (
-                    <tr key={item[idField]} className="bg-white hover:bg-gray-100">
-                      {Object.entries(item).map(([key, value]) => (
-                        <td key={key} className="p-3 border">
-                          {value !== null && value !== undefined ? String(value) : ""}
+              </thead>
+              <tbody>
+                {!filteredData || filteredData.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={
+                        tablas[activeTable].data[0]
+                          ? Object.keys(tablas[activeTable].data[0]).length + 1
+                          : 2
+                      }
+                      className="p-3 border text-center"
+                    >
+                      No se encontraron registros
+                    </td>
+                  </tr>
+                ) : (
+                  filteredData.map((item) => {
+                    const idField = TABLE_CONFIGS[activeTable].idField || "id";
+                    return (
+                      <tr key={item[idField]} className="bg-white hover:bg-gray-100">
+                        {Object.entries(item).map(([key, value]) => (
+                          <td key={key} className="p-3 border">
+                            {value !== null && value !== undefined ? String(value) : ""}
+                          </td>
+                        ))}
+                        <td className="p-3 border text-center">
+                          <button
+                            onClick={() => handleSelectItem(item, activeTable)}
+                            className="px-3 py-1 bg-blue-500 text-white rounded-lg mr-2 hover:bg-blue-600"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(activeTable, item)}
+                            className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                          >
+                            <MdDelete />
+                          </button>
                         </td>
-                      ))}
-                      <td className="p-3 border text-center">
-                        <button
-                          onClick={() => handleSelectItem(item, activeTable)}
-                          className="px-3 py-1 bg-blue-500 text-white rounded-lg mr-2 hover:bg-blue-600"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(activeTable, item)}
-                          className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                        >
-                          <MdDelete />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 }
