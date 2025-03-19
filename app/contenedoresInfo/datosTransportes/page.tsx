@@ -81,22 +81,6 @@ export default function Dashboard() {
 
   // Inicializar el formData para todas las tablas
   useEffect(() => {
-    const initialFormData = {};
-    const initialDisplayFormData = {};
-    Object.keys(TABLE_CONFIGS).forEach((tableName) => {
-      initialFormData[tableName] = Object.fromEntries(
-        TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "multiselect" ? [] : ""])
-      );
-      initialDisplayFormData[tableName] = Object.fromEntries(
-        TABLE_CONFIGS[tableName].fields.map((field) => [field.name, field.type === "multiselect" ? [] : ""])
-      );
-    });
-    setFormData(initialFormData);
-    setDisplayFormData(initialDisplayFormData);
-  }, []);
-
-  // Cargar datos de las tablas en orden
-  useEffect(() => {
     const referenceTables = ["tipos_unidades", "operadores", "origen", "estado"]; // Tablas de referencia
     const loadTablesInOrder = async () => {
       try {
@@ -104,7 +88,7 @@ export default function Dashboard() {
         for (const table of referenceTables) {
           await fetchTableData(table);
         }
-        // Luego cargar transportes
+        // Luego cargar transportes con la consulta personalizada
         await fetchTableData("transportes");
       } catch (err) {
         console.error("Error cargando tablas en secuencia:", err);
@@ -117,22 +101,22 @@ export default function Dashboard() {
   // Función para obtener datos de la tabla
   const fetchTableData = async (tableName) => {
     if (loadingTables[tableName]) return; // Evitar múltiples solicitudes simultáneas
-
+  
     setLoadingTables((prev) => ({ ...prev, [tableName]: true }));
     setIsLoading(true);
     setError(null);
-
+  
     try {
       const response = await axios.get(`${API_BASE_URL}/${tableName}/all`, {
         headers: { "Content-Type": "application/json", apikey: API_KEY },
       });
-
+  
       console.log(`Respuesta de la API para ${tableName}:`, response.data); // Depuración
-
+  
       if (response.data && response.data.records && Array.isArray(response.data.records)) {
         // Usar el idField definido en TABLE_CONFIGS o "id" por defecto
         const idField = TABLE_CONFIGS[tableName].idField || "id";
-
+  
         // Guardar los datos junto con el nombre del campo ID
         setTablas((prev) => ({
           ...prev,
@@ -141,12 +125,89 @@ export default function Dashboard() {
             idField, // Guardar el nombre del campo ID
           },
         }));
-        setTablesLoaded((prev) => ({ ...prev, [tableName]: true }));
-
-        // Si es la tabla transportes, procesar los datos para mostrar textos en lugar de ids
+  
+        // Si la tabla cargada es "transportes", procesar los datos para reemplazar IDs por nombres
         if (tableName === "transportes") {
-          processTransportesData(response.data.records);
+          // Cargar las tablas auxiliares necesarias
+          const referenceTables = ["tipos_unidades", "operadores", "origen", "estado"];
+          const referenceTablesData = {};
+  
+          // Obtener los datos de las tablas auxiliares
+          for (const refTable of referenceTables) {
+            const refResponse = await axios.get(`${API_BASE_URL}/${refTable}/all`, {
+              headers: { "Content-Type": "application/json", apikey: API_KEY },
+            });
+  
+            console.log(`Respuesta de la API para ${refTable}:`, refResponse.data); // Depuración
+  
+            if (refResponse.data && refResponse.data.records && Array.isArray(refResponse.data.records)) {
+              // Extraer solo los segundos campos de las tablas auxiliares
+              referenceTablesData[refTable] = refResponse.data.records.map((item) => ({
+                id: Number(item.id), // Convertir ID a número
+                displayValue: item[TABLE_CONFIGS[refTable].fields[0].name], // Segundo campo
+              }));
+            } else {
+              console.error(`Formato inesperado para la tabla ${refTable}`);
+            }
+          }
+  
+          console.log("Datos de tablas auxiliares cargados:", referenceTablesData); // Depuración
+  
+          // Procesar los datos de transportes para reemplazar IDs por nombres
+          const processedData = response.data.records.map((transporte) => {
+            const displayTransporte = { ...transporte };
+  
+            TABLE_CONFIGS.transportes.fields.forEach((field) => {
+              if (field.type === "select" && transporte[field.name]) {
+                // Para campos select, buscar el registro relacionado usando el ID
+                const referencedTable = referenceTablesData[field.reference];
+                if (referencedTable) {
+                  const idToFind = Number(transporte[field.name]); // Convertir ID a número
+                  console.log(`Buscando ID ${idToFind} en la tabla ${field.reference}`);
+                  const referencedItem = referencedTable.find(
+                    (item) => item.id === idToFind
+                  );
+  
+                  if (referencedItem) {
+                    console.log("Referencia encontrada:", referencedItem);
+                    // Mostrar el valor descriptivo (displayValue) en lugar del ID
+                    displayTransporte[field.name] = referencedItem.displayValue;
+                  } else {
+                    console.warn(`No se encontró el ID ${idToFind} en la tabla ${field.reference}. Datos de la tabla auxiliar:`, referenceTablesData[field.reference]);
+                  }
+                }
+              } else if (field.type === "multiselect" && transporte[field.name]) {
+                // Para campos multiselect, procesar la lista de IDs separados por coma
+                const ids = transporte[field.name].split(',').filter((id) => id.trim() !== '');
+                const referencedTable = referenceTablesData[field.reference];
+  
+                if (referencedTable) {
+                  const names = ids.map((id) => {
+                    const idToFind = Number(id); // Convertir ID a número
+                    console.log(`Buscando ID ${idToFind} en la tabla ${field.reference}`);
+                    const item = referencedTable.find((item) => item.id === idToFind);
+                    return item ? item.displayValue : id;
+                  });
+  
+                  // Mostrar los nombres unidos por coma
+                  displayTransporte[field.name] = names.join(', ');
+                }
+              }
+            });
+  
+            return displayTransporte;
+          });
+  
+          console.log("Datos de transportes después de procesar:", processedData); // Depuración
+  
+          // Almacenar los datos procesados para mostrar
+          setDisplayData((prev) => ({
+            ...prev,
+            transportes: processedData,
+          }));
         }
+  
+        setTablesLoaded((prev) => ({ ...prev, [tableName]: true }));
       } else {
         setError(`Formato inesperado para ${tableName}`);
       }
@@ -158,66 +219,6 @@ export default function Dashboard() {
       setLoadingTables((prev) => ({ ...prev, [tableName]: false }));
     }
   };
-
-  // Función para procesar los datos de transportes y reemplazar IDs con nombres
-  const processTransportesData = (transportes) => {
-    if (!transportes || !Array.isArray(transportes)) return;
-
-    const processedData = transportes.map((transporte) => {
-      const displayTransporte = { ...transporte };
-
-      // Procesar cada campo definido en la configuración de la tabla transportes
-      TABLE_CONFIGS.transportes.fields.forEach((field) => {
-        if (field.type === "select" && transporte[field.name]) {
-          // Para campos select, buscar el registro relacionado usando el ID
-          const referencedTable = tablas[field.reference];
-          if (referencedTable?.data) {
-            const referencedItem = referencedTable.data.find(
-              (item) => item.id === transporte[field.name]
-            );
-
-            if (referencedItem) {
-              // Mostrar el valor descriptivo (displayKey) en lugar del ID
-              displayTransporte[field.name] = referencedItem[field.displayKey];
-            }
-          }
-        } else if (field.type === "multiselect" && transporte[field.name]) {
-          // Para campos multiselect, procesar la lista de IDs separados por coma
-          const ids = transporte[field.name].split(',').filter((id) => id.trim() !== '');
-          const referencedTable = tablas[field.reference];
-
-          if (referencedTable?.data) {
-            const names = ids.map((id) => {
-              const item = referencedTable.data.find((item) => item.id === id);
-              return item ? item[field.displayKey] : id;
-            });
-
-            // Mostrar los nombres unidos por coma
-            displayTransporte[field.name] = names.join(', ');
-          }
-        }
-      });
-
-      return displayTransporte;
-    });
-
-    // Almacenar los datos procesados para mostrar
-    setDisplayData((prev) => ({
-      ...prev,
-      transportes: processedData,
-    }));
-  };
-
-  // Actualiza la visualización de datos cuando cambian las tablas de referencia
-  useEffect(() => {
-    const referenceTables = ["tipos_unidades", "operadores", "origen", "estado"];
-    // Si todas las tablas de referencia están cargadas y tenemos datos de transportes
-    const allReferenceTablesLoaded = referenceTables.every((table) => tablesLoaded[table]);
-
-    if (allReferenceTablesLoaded && tablas.transportes?.data) {
-      processTransportesData(tablas.transportes.data);
-    }
-  }, [tablesLoaded, tablas]);
 
   // Manejar cambios en los inputs
   const handleInputChange = (e, tableName) => {
