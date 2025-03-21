@@ -107,12 +107,11 @@ export default function Dashboard() {
     setError(null);
   
     try {
-      const response = await axios.get(${API_BASE_URL}/${tableName}/all, {
+      const response = await axios.get(`${API_BASE_URL}/${tableName}/all`, {
         headers: { "Content-Type": "application/json", apikey: API_KEY },
-      };
-    }
+      });
   
-      console.log(Respuesta de la API para ${tableName}:, response.data); // Depuración
+      console.log(`Respuesta de la API para ${tableName}:`, response.data); // Depuración
   
       if (response.data && response.data.records && Array.isArray(response.data.records)) {
         // Usar el idField definido en TABLE_CONFIGS o "id" por defecto
@@ -135,20 +134,20 @@ export default function Dashboard() {
   
           // Obtener los datos de las tablas auxiliares
           for (const refTable of referenceTables) {
-            const refResponse = await axios.get(${API_BASE_URL}/${refTable}/all, {
+            const refResponse = await axios.get(`${API_BASE_URL}/${refTable}/all`, {
               headers: { "Content-Type": "application/json", apikey: API_KEY },
             });
   
-            console.log(Respuesta de la API para ${refTable}:, refResponse.data); // Depuración
+            console.log(`Respuesta de la API para ${refTable}:`, refResponse.data); // Depuración
   
             if (refResponse.data && refResponse.data.records && Array.isArray(refResponse.data.records)) {
               // Extraer solo los segundos campos de las tablas auxiliares
               referenceTablesData[refTable] = refResponse.data.records.map((item) => ({
                 id: Number(item.id), // Convertir ID a número
-                displayValue: item[TABLE_CONFIGS[refTable].fields[1].name], // Segundo campo
+                displayValue: item[TABLE_CONFIGS[refTable].fields[0].name], // Segundo campo
               }));
             } else {
-              console.error(Formato inesperado para la tabla ${refTable});
+              console.error(`Formato inesperado para la tabla ${refTable}`);
             }
           }
   
@@ -164,7 +163,7 @@ export default function Dashboard() {
                 const referencedTable = referenceTablesData[field.reference];
                 if (referencedTable) {
                   const idToFind = Number(transporte[field.name]); // Convertir ID a número
-                  console.log(Buscando ID ${idToFind} en la tabla ${field.reference});
+                  console.log(`Buscando ID ${idToFind} en la tabla ${field.reference}`);
                   const referencedItem = referencedTable.find(
                     (item) => item.id === idToFind
                   );
@@ -174,7 +173,7 @@ export default function Dashboard() {
                     // Mostrar el valor descriptivo (displayValue) en lugar del ID
                     displayTransporte[field.name] = referencedItem.displayValue;
                   } else {
-                    console.warn(No se encontró el ID ${idToFind} en la tabla ${field.reference}. Datos de la tabla auxiliar:, referenceTablesData[field.reference]);
+                    console.warn(`No se encontró el ID ${idToFind} en la tabla ${field.reference}. Datos de la tabla auxiliar:`, referenceTablesData[field.reference]);
                   }
                 }
               } else if (field.type === "multiselect" && transporte[field.name]) {
@@ -185,7 +184,7 @@ export default function Dashboard() {
                 if (referencedTable) {
                   const names = ids.map((id) => {
                     const idToFind = Number(id); // Convertir ID a número
-                    console.log(Buscando ID ${idToFind} en la tabla ${field.reference});
+                    console.log(`Buscando ID ${idToFind} en la tabla ${field.reference}`);
                     const item = referencedTable.find((item) => item.id === idToFind);
                     return item ? item.displayValue : id;
                   });
@@ -210,11 +209,11 @@ export default function Dashboard() {
   
         setTablesLoaded((prev) => ({ ...prev, [tableName]: true }));
       } else {
-        setError(Formato inesperado para ${tableName});
+        setError(`Formato inesperado para ${tableName}`);
       }
     } catch (error) {
-      console.error(Error al obtener datos de ${tableName}:, error);
-      setError(Error al cargar ${tableName}: ${error.message});
+      console.error(`Error al obtener datos de ${tableName}:`, error);
+      setError(`Error al cargar ${tableName}: ${error.message}`);
     } finally {
       setIsLoading(false);
       setLoadingTables((prev) => ({ ...prev, [tableName]: false }));
@@ -317,8 +316,8 @@ export default function Dashboard() {
     try {
       const idField = TABLE_CONFIGS[tableName].idField || "id"; // Obtener el campo ID dinámico
       const url = selectedItem
-        ? ${API_BASE_URL}/${tableName}/${selectedItem[idField]}
-        : ${API_BASE_URL}/${tableName};
+        ? `${API_BASE_URL}/${tableName}/${selectedItem[idField]}`
+        : `${API_BASE_URL}/${tableName}`;
       const method = selectedItem ? "patch" : "post";
       const response = await axios({
         method,
@@ -331,7 +330,7 @@ export default function Dashboard() {
       clearForm();
       fetchTableData(tableName);
     } catch (error) {
-      setError(Error al procesar la solicitud: ${error.message});
+      setError(`Error al procesar la solicitud: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -345,13 +344,13 @@ export default function Dashboard() {
 
     try {
       const idField = TABLE_CONFIGS[tableName].idField || "id"; // Obtener el campo ID dinámico
-      await axios.delete(${API_BASE_URL}/${tableName}/${item[idField]}, {
+      await axios.delete(`${API_BASE_URL}/${tableName}/${item[idField]}`, {
         headers: { "Content-Type": "application/json", apikey: API_KEY },
       });
       alert("Registro eliminado");
       fetchTableData(tableName);
     } catch (error) {
-      setError(Error al eliminar registro: ${error.message});
+      setError(`Error al eliminar registro: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -794,7 +793,7 @@ export default function Dashboard() {
           >
             {loadingTables[activeTable]
               ? "Cargando..."
-              : Recargar tabla ${activeTable.replace(/_/g, " ")}}
+              : `Recargar tabla ${activeTable.replace(/_/g, " ")}`}
           </button>
         </div>
 
