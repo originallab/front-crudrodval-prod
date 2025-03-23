@@ -1,0 +1,118 @@
+/* Estilos base del sidebar */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+  }
+  
+  .sidebar-overlay.active {
+    display: block;
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 250px;
+    height: 100%;
+    background-color: #007bff; /* Azul fuerte */
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease-in-out;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+  
+  .sidebar.open {
+    right: 0;
+  }
+  
+  .sidebar-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+  }
+  
+  .close-button {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #ffffff; /* Texto blanco */
+  }
+  
+  .sidebar-nav {
+    padding: 15px 0;
+  }
+  
+  .menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .menu-item {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .menu-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    color: #ffffff; /* Texto blanco */
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+    transition: background-color 0.2s;
+  }
+  
+  .menu-link:hover {
+    background-color: #0056b3; /* Azul más oscuro al hacer hover */
+  }
+  
+  .submenu-arrow {
+    font-size: 10px;
+    transition: transform 0.2s;
+  }
+  
+  .submenu-arrow.expanded {
+    transform: rotate(180deg);
+  }
+  
+  .submenu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    background-color: #0056b3; /* Azul más oscuro para el submenú */
+  }
+  
+  .submenu.expanded {
+    max-height: 500px; /* Valor suficientemente grande para mostrar todos los elementos */
+  }
+  
+  .submenu-item {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .submenu-link {
+    display: block;
+    padding: 10px 15px 10px 30px;
+    color: #ffffff; /* Texto blanco */
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+    transition: background-color 0.2s;
+  }
+  
+  .submenu-link:hover {
+    background-color: #004080; /* Azul aún más oscuro al hacer hover */
+  }
