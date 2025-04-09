@@ -1,0 +1,48 @@
+import { useState } from 'react';
+import DatosBasicosForm from './DatosBasicosForm';
+import TiposUnidades from './TiposUnidades';
+import TiposCargas from './TiposCargas';
+import './DatosBasicos.css'; // Importa los estilos
+
+export default function DatosBasicos() {
+  const [activeTab, setActiveTab] = useState('datosBasicos'); // Estado para la pestaña activa
+
+  return (
+    <div className="container">
+      <div className="card">
+        <div className="p-6">
+          <h1 className="title">Mantenedor de datos Basicos</h1>
+          
+          {/* Pestañas */}
+          <div className="tabs">
+            <button
+              className={`tab ${activeTab === 'datosBasicos' ? 'active' : ''}`}
+              onClick={() => setActiveTab('datosBasicos')}
+            >
+              Datos Básicos
+            </button>
+            <button
+              className={`tab ${activeTab === 'tiposUnidades' ? 'active' : ''}`}
+              onClick={() => setActiveTab('tiposUnidades')}
+            >
+              Tipos de Unidades
+            </button>
+            <button
+              className={`tab ${activeTab === 'tiposCargas' ? 'active' : ''}`}
+              onClick={() => setActiveTab('tiposCargas')}
+            >
+              Tipos de Cargas
+            </button>
+          </div>
+          
+          {/* Contenido del formulario */}
+          <div className="form-container">
+            {activeTab === 'datosBasicos' && <DatosBasicosForm />}
+            {activeTab === 'tiposUnidades' && <TiposUnidades />}
+            {activeTab === 'tiposCargas' && <TiposCargas />}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

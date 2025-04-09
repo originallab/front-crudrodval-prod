@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import Login from './components/login/Login';
+import iconoRodval from './imagenes/iconoRodval.svg';
+
 import './App.css';
 
 // Importa tus componentes CRUD
-// import Servicio1 from './pages/Servicio1';
-// import Servicio2 from './pages/Servicio2';
-// etc.
+import DatosBasicos from './contenedores/DatosBasicos';
+import DatosTransportes from './contenedores/datosTransportess/DatosTransportes';
+import DatosClientes from './contenedores/datosClientes/DatosClientes';
+import DocOperadores from './contenedores/filesOperadores/DocOperadores';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [currentPage, setCurrentPage] = useState('inicio');
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Estado de autenticación
   
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -29,29 +34,35 @@ function App() {
     setCurrentPage(pageId);
     closeSidebar();
   };
+
+  // Función para manejar el login exitoso
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  // Función para manejar el logout
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentPage('inicio');
+  };
   
   // Estructura del menú con submenús
   const menuItems = [
+    
     {
-      title: 'Inicio',
-      id: 'inicio',
-      subMenu: []
-    },
-    {
-      title: 'Servicios',
+      title: 'Mantenedores',
       id: 'servicios',
       subMenu: [
-        { title: 'Servicio 1', id: 'servicio1' },
-        { title: 'Servicio 2', id: 'servicio2' },
-        { title: 'Servicio 3', id: 'servicio3' },
+        { title: 'Datos Basicos', id: 'DatosBasicos' },
+        { title: 'Datos Clientes', id: 'DatosClientes' },
+        { title: 'Datos Transportes', id: 'DatosTransportes' },
       ]
     },
     {
-      title: 'Productos',
+      title: 'Documentos',
       id: 'productos',
       subMenu: [
-        { title: 'Producto 1', id: 'producto1' },
-        { title: 'Producto 2', id: 'producto2' },
+        { title: 'Documentos de operadores', id: 'DocOperadores' },
       ]
     },
     {
@@ -64,38 +75,43 @@ function App() {
   // Función para renderizar el componente actual basado en currentPage
   const renderCurrentPage = () => {
     switch(currentPage) {
-      case 'inicio':
-        return <div className="page-content"><h2>Página de Inicio</h2></div>;
-      case 'servicio1':
-        // return <Servicio1 />;
-        return <div className="page-content"><h2>Componente de Servicio 1</h2></div>;
-      case 'servicio2':
-        // return <Servicio2 />;
-        return <div className="page-content"><h2>Componente de Servicio 2</h2></div>;
-      case 'servicio3':
-        // return <Servicio3 />;
-        return <div className="page-content"><h2>Componente de Servicio 3</h2></div>;
-      case 'producto1':
-        // return <Producto1 />;
-        return <div className="page-content"><h2>Componente de Producto 1</h2></div>;
+      case 'DatosBasicos':
+        return <DatosBasicos />; 
+      case 'DatosClientes':
+        return <DatosClientes />;
+      case 'DatosTransportes':
+        return <DatosTransportes />;
+      case 'DocOperadores':
+        return <DocOperadores />;
       case 'producto2':
-        // return <Producto2 />;
         return <div className="page-content"><h2>Componente de Producto 2</h2></div>;
       case 'contacto':
-        // return <Contacto />;
         return <div className="page-content"><h2>Página de Contacto</h2></div>;
-      default:
-        return <div className="page-content"><h2>Página de Inicio</h2></div>;
+      //default:
+        //return <div className="page-content"><h2>Página de Inicio</h2></div>;
     }
   };
   
+  // Si no está autenticado, mostrar solo el login
+  if (!isAuthenticated) {
+    return (
+      <div className={`app ${darkMode ? 'dark-mode' : ''}`}>
+        <Login onLoginSuccess={handleLoginSuccess} />
+      </div>
+    );
+  }
+  
+  // Si está autenticado, mostrar la aplicación normal
   return (
     <div className={`app ${darkMode ? 'dark-mode' : ''}`}>
       <Header 
-        title="Mi Aplicación" 
+        title="" 
         toggleSidebar={toggleSidebar} 
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
+        onLogout={handleLogout}
+        logoImage="./imagenes/iconoRodval.svg"
+        
       />
       <Sidebar 
         isOpen={sidebarOpen} 

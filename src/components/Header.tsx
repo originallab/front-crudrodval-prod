@@ -1,27 +1,55 @@
-import React from 'react';
-import './Header.css';
+import React from "react";
+import "./Header.css";
+import iconoRodval from "../assets/images/iconoRodval.svg";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 interface HeaderProps {
   title: string;
   toggleSidebar: () => void;
   darkMode: boolean;
   toggleDarkMode: () => void;
+  onLogout: () => void;
+  logoImage?: string;
+  style?: React.CSSProperties;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, toggleSidebar, darkMode, toggleDarkMode }) => {
+const Header: React.FC<HeaderProps> = ({
+  title,
+  toggleSidebar,
+  darkMode,
+  toggleDarkMode,
+  onLogout,
+  logoImage,
+  style,
+}) => {
   return (
-    <header className="header">
+    <header className="app-header">
       <div className="header-content">
-        <div className="empty-space"></div>
-        <h1 className="title">{title}</h1>
-        <div className="header-buttons">
-          <button className="theme-toggle" onClick={toggleDarkMode}>
-            {darkMode ? '☀️' : '🌙'}
+        <button className="menu-button" onClick={toggleSidebar}>
+          ☰
+        </button>
+
+        <div className="header-title-container">
+          <img
+            src={iconoRodval}
+            className="header-logo-image"
+            alt="Logo RODVAL"
+          />
+          <h1 className="header-title-text">{title}</h1>
+        </div>
+        <h1 className="header-title-text">Sistema de logistica RODVAL</h1>
+        <div className="header-controls">
+          <button className="dark-mode-toggle" onClick={toggleDarkMode}>
+            {darkMode ? "☀️" : "🌙"}
           </button>
-          <button className="hamburger-button" onClick={toggleSidebar}>
-            <span className="hamburger-line"></span>
-            <span className="hamburger-line"></span>
-            <span className="hamburger-line"></span>
+
+          <button
+            className="logout-button"
+            onClick={onLogout}
+            title="Cerrar sesión"
+          >
+            
+            <LogoutIcon sx={{ fontSize: 30 }} />
           </button>
         </div>
       </div>

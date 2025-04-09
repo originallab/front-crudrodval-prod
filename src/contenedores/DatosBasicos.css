@@ -1,0 +1,351 @@
+/* Estilos generales */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #4988c8; /* Fondo azul */
+  min-height: 100vh; /* Cubre toda la altura de la pantalla */
+}
+
+/* Contenedor principal */
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Tarjeta (fondo blanco) */
+.card {
+  width: 100%;
+  max-width: 1200px; /* Ancho máximo del contenedor */
+  background-color: white; /* Fondo blanco */
+  border-radius: 12px; /* Bordes redondeados */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  overflow: hidden;
+}
+
+/* Espaciado interno */
+.p-6 {
+  padding: 1.5rem; /* Espaciado interno */
+}
+
+/* Título */
+.title {
+  font-size: 1.875rem; /* Tamaño de fuente grande */
+  font-weight: 600; /* Negrita */
+  color: #1a1a1a; /* Color de texto oscuro */
+  text-align: center;
+  margin-bottom: 1.5rem; /* Espaciado inferior */
+}
+
+/* Estilos para las pestañas */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e0e0e0; /* Línea inferior */
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6b7280; /* Color de texto gris */
+  border-radius: 8px; /* Bordes redondeados */
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  background-color: #f3f4f6; /* Fondo gris claro al pasar el mouse */
+  color: #1a1a1a; /* Color de texto oscuro */
+}
+
+.tab.active {
+  background-color: #3b82f6; /* Fondo azul */
+  color: white; /* Color de texto blanco */
+}
+
+/* Contenedor del formulario (fondo gris claro) */
+.form-container {
+  background-color: #f8f9fa; /* Fondo gris claro */
+  padding: 1.5rem;
+  border-radius: 8px; /* Bordes redondeados */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+}
+
+/* Estilos para los formularios */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #1a1a1a; /* Color de texto oscuro */
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0; /* Borde gris */
+  border-radius: 8px; /* Bordes redondeados */
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #3b82f6; /* Borde azul al enfocar */
+}
+
+/* Botones */
+.button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px; /* Bordes redondeados */
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.button-primary {
+  background-color: #3498DB; /* Fondo azul */
+  color: white; /* Color de texto blanco */
+}
+
+.button-primary:hover {
+  background-color: #3498DB; /* Fondo azul oscuro al pasar el mouse */
+}
+
+.button-secondary {
+  background-color: #e0e0e0; /* Fondo gris */
+  color: #1a1a1a; /* Color de texto oscuro */
+}
+
+.button-secondary:hover {
+  background-color: #d1d5db; /* Fondo gris oscuro al pasar el mouse */
+}
+
+/* Estilos para la tabla */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+}
+
+.table th,
+.table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0; /* Línea inferior */
+}
+
+.table th {
+  background-color: #f8f9fa; /* Fondo gris claro */
+  font-weight: 600;
+  color: #1a1a1a; /* Color de texto oscuro */
+}
+
+.table tr:hover {
+  background-color: #f3f4f6; /* Fondo gris claro al pasar el mouse */
+}
+
+/* Estilos para los estados */
+.status {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px; /* Bordes redondeados completos */
+  font-size: 0.875rem; /* Tamaño de fuente pequeño */
+  font-weight: 500;
+  text-align: center;
+}
+
+.status-active {
+  background-color: #dcfce7; /* Fondo verde claro */
+  color: #166534; /* Color de texto verde oscuro */
+}
+
+.status-inactive {
+  background-color: #fee2e2; /* Fondo rojo claro */
+  color: #991b1b; /* Color de texto rojo oscuro */
+}
+
+.status-pending {
+  background-color: #fef3c7; /* Fondo amarillo claro */
+  color: #92400e; /* Color de texto amarillo oscuro */
+}
+
+/* Estilos de los forms */
+.mb-4 {
+  margin-bottom: 1rem; /* Equivalente a mb-4 en Tailwind */
+}
+
+.block {
+  display: block;
+}
+
+.text-gray-700 {
+  color: #1a1a1a; /* Color gris oscuro */
+}
+
+.text-sm {
+  font-size: 0.875rem; /* Tamaño de texto pequeño */
+}
+
+.font-medium {
+  font-weight: 500; /* Peso de fuente medio */
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem; /* Equivalente a mb-2 en Tailwind */
+}
+
+.w-full {
+  width: 100%;
+}
+
+.max-w-lg {
+  max-width: 32rem; /* Equivalente a max-w-lg en Tailwind */
+}
+
+.p-2 {
+  padding: 0.5rem; /* Equivalente a p-2 en Tailwind */
+}
+
+.border {
+  border-width: 1px;
+}
+
+.border-gray-300 {
+  border-color: #d1d5db; /* Color gris claro para el borde */
+}
+
+.rounded-md {
+  border-radius: 0.375rem; /* Equivalente a rounded-md en Tailwind */
+}
+
+.focus\:outline-none:focus {
+  outline: none; /* Elimina el contorno al enfocar */
+}
+
+.focus\:ring-2:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* Anillo azul al enfocar */
+}
+
+.focus\:ring-blue-500:focus {
+  --tw-ring-color: rgba(59, 130, 246, 0.5); /* Color del anillo al enfocar */
+}
+
+.transition {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Tabla y paginación */
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table th, .table td {
+  padding: 10px;
+  border: 1px solid #e0e0e0; /* Borde gris */
+  text-align: left;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination-button {
+  margin: 0 10px;
+  padding: 5px 10px;
+  background-color: #3498DB; /* Fondo azul */
+  color: white; /* Color de texto blanco */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.pagination-button:disabled {
+  background-color: #ECF0F1; /* Fondo azul oscuro */
+  cursor: not-allowed;
+}
+
+.Edit-button {
+  width: 50%;
+  padding: 0.75rem;
+  background-color: #1f14ed;
+  color: white;
+  border: none;
+  border-radius: 1px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.Delete-button {
+  width: 50%;
+  padding: 0.75rem;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+/* Estilos para el paginador */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.pagination-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-button:disabled svg {
+  color: #9ca3af !important;
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  color: #4b5563;
+  min-width: 100px;
+  text-align: center;
+}
