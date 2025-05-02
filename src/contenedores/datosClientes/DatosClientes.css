@@ -1,0 +1,320 @@
+/* Estilos generales */
+.rodval-container {
+    font-family: 'Arial', sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #333;
+  }
+  
+  .rodval-header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 20px;
+  }
+  
+  .rodval-logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0056b3;
+    margin-bottom: 10px;
+  }
+  
+  .rodval-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #0056b3;
+    margin-bottom: 20px;
+  }
+  
+  /* Secciones del formulario */
+  .rodval-section {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .rodval-section-title {
+    color: #0056b3;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+  }
+  
+  /* Estilos de formulario */
+  .rodval-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+  }
+  
+  .rodval-form-row-4 > .rodval-form-group {
+    flex: 1 0 calc(25% - 20px);
+  }
+  
+  .rodval-form-row-5 > .rodval-form-group {
+    flex: 1 0 calc(20% - 20px);
+  }
+  
+  .rodval-form-group {
+    flex: 1 0 calc(50% - 20px);
+    margin: 0 10px 15px;
+    min-width: 200px;
+  }
+  
+  .rodval-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .rodval-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .rodval-input:focus {
+    border-color: #0056b3;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
+  }
+  
+  /* Checkboxes */
+  .rodval-checkbox-group {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .rodval-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .rodval-checkbox input {
+    margin-right: 8px;
+  }
+  
+  /* Tarjetas de contacto y referencia */
+  .rodval-contact-card, .rodval-reference-card {
+    background-color: white;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .rodval-contact-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0056b3;
+    margin-bottom: 15px;
+  }
+  
+  /* Documentos requeridos */
+  .rodval-documents-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+  }
+  
+  .rodval-document-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background-color: white;
+    border-radius: 4px;
+  }
+  
+  .rodval-required {
+    color: red;
+    margin-right: 8px;
+    font-weight: bold;
+  }
+  
+  /* Botones */
+  .rodval-button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  
+  .rodval-button-primary {
+    background-color: #0056b3;
+    color: white;
+  }
+  
+  .rodval-button-primary:hover {
+    background-color: #003d82;
+  }
+  
+  .rodval-button-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .rodval-button-secondary:hover {
+    background-color: #5a6268;
+  }
+  
+  .rodval-form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .rodval-icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+  
+  .rodval-edit {
+    color: #0056b3;
+  }
+  
+  .rodval-edit:hover {
+    background-color: rgba(0, 86, 179, 0.1);
+  }
+  
+  .rodval-delete {
+    color: #dc3545;
+  }
+  
+  .rodval-delete:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+  }
+  
+  /* Tabla */
+  .rodval-table-container {
+    margin-bottom: 30px;
+  }
+  
+  .rodval-table-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    gap: 15px;
+  }
+  
+  .rodval-search-input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    flex-grow: 1;
+    max-width: 400px;
+  }
+  
+  .rodval-table-wrapper {
+    overflow-x: auto;
+  }
+  
+  .rodval-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+  }
+  
+  .rodval-table th {
+    background-color: #0056b3;
+    color: white;
+    padding: 12px;
+    text-align: left;
+  }
+  
+  .rodval-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .rodval-table tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .rodval-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  /* Paginación */
+  .rodval-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .rodval-pagination-button {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .rodval-pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .rodval-pagination-button:hover:not(:disabled) {
+    background-color: #f5f5f5;
+  }
+  
+  /* Mensajes de error y carga */
+  .rodval-no-data {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+  }
+  
+  /* Botón de toggle de tabla */
+  .rodval-table-toggle {
+    margin-bottom: 20px;
+    text-align: right;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .rodval-form-row-4 > .rodval-form-group,
+    .rodval-form-row-5 > .rodval-form-group {
+      flex: 1 0 100%;
+    }
+    
+    .rodval-table-controls {
+      flex-direction: column;
+    }
+    
+    .rodval-search-input {
+      max-width: none;
+    }
+  }

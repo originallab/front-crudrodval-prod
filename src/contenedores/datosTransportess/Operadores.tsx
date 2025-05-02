@@ -12,7 +12,7 @@ export default function Operadores() {
     rfc: string;
     telefono: string;
     licencia: string;
-    archivo: string; // Puedes cambiar el tipo si es necesario
+    // Puedes cambiar el tipo si es necesario
   };
 
   // Estados
@@ -22,7 +22,7 @@ export default function Operadores() {
     rfc: '',
     telefono: '',
     licencia: '',
-    archivo: '',
+   
   });
   const [busqueda, setBusqueda] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -94,7 +94,7 @@ export default function Operadores() {
       }
 
       // Limpiar el formulario
-      setFormData({ nombre_operador: '', rfc: '', telefono: '', licencia: '', archivo: '' });
+      setFormData({ nombre_operador: '', rfc: '', telefono: '', licencia: '' });
       setIsEditing(false);
     } catch (err) {
       setError('Error al guardar los datos');
@@ -215,19 +215,7 @@ export default function Operadores() {
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-medium mb-2">
-            Archivo:
-          </label>
-          <input
-            type="text"
-            value={formData.archivo}
-            onChange={(e) => setFormData({ ...formData, archivo: e.target.value })}
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese la URL del archivo"
-          />
-        </div>
+       
 
         <div className="flex gap-2">
           <button
@@ -242,7 +230,7 @@ export default function Operadores() {
             <button
               type="button"
               onClick={() => {
-                setFormData({ nombre_operador: '', rfc: '', telefono: '', licencia: '', archivo: '' });
+                setFormData({ nombre_operador: '', rfc: '', telefono: '', licencia: '' });
                 setIsEditing(false);
               }}
               className="button button-secondary"
@@ -306,7 +294,6 @@ export default function Operadores() {
               <th>RFC</th>
               <th>Teléfono</th>
               <th>Licencia</th>
-              <th>Archivo</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -327,7 +314,6 @@ export default function Operadores() {
                   <td>{item.rfc}</td>
                   <td>{item.telefono}</td>
                   <td>{item.licencia}</td>
-                  <td>{item.archivo}</td>
                   <td>
                     <div className="flex gap-2">
                       <button

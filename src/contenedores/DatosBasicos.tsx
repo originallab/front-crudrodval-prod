@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import DatosBasicosForm from './DatosBasicosForm';
 import TiposUnidades from './TiposUnidades';
-import TiposCargas from './TiposCargas';
 import './DatosBasicos.css'; // Importa los estilos
 
 export default function DatosBasicos() {
@@ -19,7 +18,7 @@ export default function DatosBasicos() {
               className={`tab ${activeTab === 'datosBasicos' ? 'active' : ''}`}
               onClick={() => setActiveTab('datosBasicos')}
             >
-              Datos Básicos
+              Zonas de destino de los transportes
             </button>
             <button
               className={`tab ${activeTab === 'tiposUnidades' ? 'active' : ''}`}
@@ -27,19 +26,14 @@ export default function DatosBasicos() {
             >
               Tipos de Unidades
             </button>
-            <button
-              className={`tab ${activeTab === 'tiposCargas' ? 'active' : ''}`}
-              onClick={() => setActiveTab('tiposCargas')}
-            >
-              Tipos de Cargas
-            </button>
+          
           </div>
           
           {/* Contenido del formulario */}
           <div className="form-container">
             {activeTab === 'datosBasicos' && <DatosBasicosForm />}
             {activeTab === 'tiposUnidades' && <TiposUnidades />}
-            {activeTab === 'tiposCargas' && <TiposCargas />}
+         
           </div>
         </div>
       </div>

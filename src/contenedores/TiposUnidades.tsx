@@ -11,7 +11,6 @@ export default function TiposUnidades() {
   type Item = {
     id_unidad: number;
     nombre: string;
-    foto_url: string;
     capacidad: string;
     descripcion: string;
   };
@@ -20,7 +19,6 @@ export default function TiposUnidades() {
   const [items, setItems] = useState<Item[]>([]);
   const [formData, setFormData] = useState<Omit<Item, 'id_unidad'> & { id_unidad?: number }>({
     nombre: '',
-    foto_url: '',
     capacidad: '',
     descripcion: '',
   });
@@ -36,7 +34,7 @@ export default function TiposUnidades() {
   // Configuración de la API
   const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
-  const tableName = "tipos_unidades"; // Cambiar el nombre de la tabla
+  const tableName = "tipo_unidades"; // Cambiar el nombre de la tabla
 
   // Obtener los datos al cargar el componente
   useEffect(() => {
@@ -98,7 +96,7 @@ export default function TiposUnidades() {
       }
 
       // Limpiar el formulario
-      setFormData({ nombre: '', foto_url: '', capacidad: '', descripcion: '' });
+      setFormData({ nombre: '', capacidad: '', descripcion: '' });
       setIsEditing(false);
     } catch (err) {
       setError('Error al guardar los datos');
@@ -190,20 +188,6 @@ export default function TiposUnidades() {
 
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-medium mb-2">
-            URL de la foto:
-          </label>
-          <input
-            type="text"
-            value={formData.foto_url}
-            onChange={(e) => setFormData({ ...formData, foto_url: e.target.value })}
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese la URL de la foto"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-medium mb-2">
             Capacidad:
           </label>
           <input
@@ -231,25 +215,44 @@ export default function TiposUnidades() {
         </div>
 
         <div className="flex gap-2">
-          <button
+        <button
             type="submit"
-            className="button button-primary"
+            className="button"
             disabled={loading}
+            style={{
+              backgroundColor: isEditing ? '#008CBA' : '#008CBA',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '999px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+            }}
           >
             {loading ? 'Procesando...' : isEditing ? 'Actualizar' : 'Agregar'}
           </button>
 
+
           {isEditing && (
             <button
               type="button"
+              className='button'
               onClick={() => {
-                setFormData({ nombre: '', foto_url: '', capacidad: '', descripcion: '' });
+                setFormData({ nombre: '', capacidad: '', descripcion: '' });
                 setIsEditing(false);
               }}
-              className="button button-secondary"
+              style={{
+                backgroundColor: isEditing ? '#008CBA' : '#008CBA',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '999px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
             >
               Cancelar
             </button>
+            
+           
           )}
         </div>
       </form>
@@ -287,11 +290,19 @@ export default function TiposUnidades() {
 
       {/* Botón de recargar */}
       <div style={{ overflow: 'hidden' }}>
-        <button
+      <button
           onClick={fetchItems}
-          className="button button-primary"
+          className="button"
           disabled={loading}
-          style={{ float: 'right' }} // Mueve el botón a la derecha
+          style={{ 
+            backgroundColor: loading ? '#4CAF50' : '#008CBA', 
+            float: 'right',
+            borderRadius: '999px',
+            color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+           }}
         >
           {loading ? 'Recargando...' : 'Recargar Tabla'}
         </button>
@@ -304,7 +315,6 @@ export default function TiposUnidades() {
             <tr>
               <th>ID</th>
               <th>Nombre</th>
-              <th>Foto URL</th>
               <th>Capacidad</th>
               <th>Descripción</th>
               <th>Acciones</th>
@@ -324,7 +334,6 @@ export default function TiposUnidades() {
                 <tr key={item.id_unidad}>
                   <td>{item.id_unidad}</td>
                   <td>{item.nombre}</td>
-                  <td>{item.foto_url}</td>
                   <td>{item.capacidad}</td>
                   <td>{item.descripcion}</td>
                   <td>
@@ -376,25 +385,45 @@ export default function TiposUnidades() {
 
         {/* Paginación con iconos */}
         {filteredItems.length > itemsPerPage && (
-          <div className="pagination-container">
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: '20px',
+            gap: '15px'
+          }}>
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1 || loading}
-              className="pagination-button"
+              disabled={currentPage === 1}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                color: currentPage === 1 ? '#ccc' : '#3b82f6'
+              }}
             >
-              <ArrowBackIosIcon fontSize="medium" sx={{ color: '#3b82f6' }} />
+              <ArrowBackIosIcon fontSize="medium" />
             </button>
             
-            <span className="pagination-info">
+            <span style={{ margin: '0 10px' }}>
               Página {currentPage} de {totalPages}
             </span>
             
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages || loading}
-              className="pagination-button"
+              disabled={currentPage === totalPages}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                color: currentPage === totalPages ? '#ccc' : '#3b82f6'
+              }}
             >
-              <ArrowForwardIosIcon fontSize="medium" sx={{ color: '#3b82f6' }} />
+              <ArrowForwardIosIcon fontSize="medium" />
             </button>
           </div>
         )}

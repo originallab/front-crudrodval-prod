@@ -1,577 +1,1063 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import "./../DatosBasicos.css";
-import Select from "react-select";
-import Multiselect from "multiselect-react-dropdown";
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditSquareIcon from "@mui/icons-material/EditSquare";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import CloseIcon from "@mui/icons-material/Close";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import "./DatosClientes.css";
 
-export default function DatosClientesForm() {
-  // Definir el tipo Item para la nueva tabla
-  type Item = {
-    id_cliente: number;
-    fecha_registro: string;
-    constancia: string;
-    rfc: string;
-    ubicacion: string;
-    giro: string;
-    nombre: string;
-    telefono: string;
-    informacion_cobranza: string;
-    flujo_movimiento: string;
-    estado: number;
-  };
+// Definición de tipos TypeScript
+type Contacto = {
+  id_contacto?: number;
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  correo: string;
+  puesto: string;
+  [key: string]: string | number | undefined;
+};
 
-  // Estados
-  const [items, setItems] = useState<Item[]>([]);
-  const [formData, setFormData] = useState<
-    Omit<Item, "id_cliente"> & { id_cliente?: number }
-  >({
-    fecha_registro: "",
-    constancia: "",
+type DatosBancarios = {
+  id_datos_bancarios?: number;
+  beneficiario: string;
+  banco: string;
+  clave: string;
+  cuenta: string;
+};
+
+type ReferenciaComercial = {
+  id_referencia?: number;
+  empresa: string;
+  domicilio: string;
+  pais: string;
+  ciudad: string;
+  estado: string;
+  codigo_postal: string;
+  telefono: string;
+  contacto: string;
+  puesto: string;
+  relacion_comercial_desde: string;
+  [key: string]: string | number | undefined;
+};
+
+type Proveedor = {
+  id_proveedor?: number;
+  nombre_razon_social: string;
+  rfc: string;
+  direccion: string;
+  pais: string;
+  codigo_postal: string;
+  ciudad: string;
+  estado: string;
+  unidades_propias: boolean;
+  cuenta_espejo_gps: boolean;
+  created_at?: string;
+  update_at?: string;
+};
+
+export default function AltaProveedorForm() {
+  // Estados del formulario
+  const [formData, setFormData] = useState<Proveedor>({
+    nombre_razon_social: "",
     rfc: "",
-    ubicacion: "",
-    giro: "",
-    nombre: "",
-    telefono: "",
-    informacion_cobranza: "",
-    flujo_movimiento: "",
-    estado: 0,
+    direccion: "",
+    pais: "",
+    codigo_postal: "",
+    ciudad: "",
+    estado: "",
+    unidades_propias: false,
+    cuenta_espejo_gps: false,
   });
-  const [busqueda, setBusqueda] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+
+  const [contactos, setContactos] = useState<Contacto[]>([
+    { nombre: "", apellido: "", telefono: "", correo: "", puesto: "" },
+    { nombre: "", apellido: "", telefono: "", correo: "", puesto: "" },
+  ]);
+
+  const [datosBancarios, setDatosBancarios] = useState<DatosBancarios>({
+    beneficiario: "",
+    banco: "",
+    clave: "",
+    cuenta: "",
+  });
+
+  const [referencias, setReferencias] = useState<ReferenciaComercial[]>([
+    {
+      empresa: "",
+      domicilio: "",
+      pais: "",
+      ciudad: "",
+      estado: "",
+      codigo_postal: "",
+      telefono: "",
+      contacto: "",
+      puesto: "",
+      relacion_comercial_desde: "",
+    },
+    {
+      empresa: "",
+      domicilio: "",
+      pais: "",
+      ciudad: "",
+      estado: "",
+      codigo_postal: "",
+      telefono: "",
+      contacto: "",
+      puesto: "",
+      relacion_comercial_desde: "",
+    },
+  ]);
+
+  // Estados para la tabla de proveedores
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [startDate, setStartDate] = useState<Date | null>(null);
-
-  // Datos de las tablas referenciadas
-  const [estados, setEstados] = useState<any[]>([]);
-
-  // Estados para paginación
+  const [isEditing, setIsEditing] = useState(false);
+  const [showTable, setShowTable] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(5);
+  const itemsPerPage = 5;
 
   // Configuración de la API
   const API_BASE_URL =
     "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
-  const tableName = "clientess";
 
-  // Obtener los datos al cargar el componente
-  useEffect(() => {
-    fetchItems();
-    fetchReferencedData();
-  }, []);
-
-  // Función para obtener los elementos
-  const fetchItems = async () => {
+  // Obtener proveedores
+  const fetchProveedores = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/${tableName}/all`, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Cache-Control": "no-cache",
-          apikey: API_KEY,
-        },
-        timeout: 30000,
+      const response = await axios.get(`${API_BASE_URL}/proveedores/all`, {
+        headers: { apikey: API_KEY },
       });
-      setItems(response.data.records);
+      setProveedores(response.data.records);
     } catch (err) {
-      setError("Error al cargar los datos");
-      console.error("Error en fetchItems:", err);
+      setError("Error al cargar proveedores");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para obtener datos de las tablas referenciadas
-  const fetchReferencedData = async () => {
-    try {
-      const [estadosRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/estado/all`, {
-          headers: { apikey: API_KEY },
-        }),
-      ]);
-
-      setEstados(estadosRes.data.records);
-    } catch (err) {
-      console.error("Error al cargar datos referenciados:", err);
-    }
+  // Manejadores de cambios
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  // Función para manejar el envío del formulario
+  const handleContactoChange = (
+    index: number,
+    field: keyof Contacto,
+    value: string
+  ) => {
+    const updatedContactos = [...contactos];
+    updatedContactos[index][field] = value;
+    setContactos(updatedContactos);
+  };
+
+  const handleDatosBancariosChange = (
+    field: keyof DatosBancarios,
+    value: string
+  ) => {
+    setDatosBancarios((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleReferenciaChange = (
+    index: number,
+    field: keyof ReferenciaComercial,
+    value: string
+  ) => {
+    const updatedReferencias = [...referencias];
+    updatedReferencias[index][field] = value;
+    setReferencias(updatedReferencias);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      const url =
-        isEditing && formData.id_cliente
-          ? `${API_BASE_URL}/${tableName}/${formData.id_cliente}`
-          : `${API_BASE_URL}/${tableName}`;
-
-      const method = isEditing && formData.id_cliente ? "patch" : "post";
-
-      // Formatear la fecha correctamente para el envío
-      const formattedDate = startDate ? startDate.toISOString().split('T')[0] : '';
-
-      // Preparar los datos a enviar incluyendo la fecha formateada
-      const dataToSend = {
-        ...formData,
-        fecha_registro: formattedDate,
-        id_cliente: isEditing ? formData.id_cliente : undefined
-      };
-
-      const response = await axios[method](
-        url,
-        { data: dataToSend },
+      // 1. Guardar PROVEEDOR (POST)
+      const proveedorResponse = await axios.post(
+        `${API_BASE_URL}/proveedores`,
         {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "Cache-Control": "no-cache",
-            apikey: API_KEY,
-          },
-          timeout: 30000,
+          data: formData,
+        },
+        {
+          headers: { apikey: API_KEY },
         }
       );
 
-      const result = response.data;
-      if (isEditing) {
-        setItems(
-          items.map((item) =>
-            item.id_cliente === formData.id_cliente ? result : item
-          )
+      console.log("Respuesta del servidor:", proveedorResponse.data); // ¡VERIFICA ESTO!
+
+      /* 
+        Si el servidor no devuelve id_proveedor en la respuesta, hay dos opciones:
+        A) El ID viene en otro campo (revisa el console.log)
+        B) Necesitas hacer un GET para obtener el proveedor recién creado
+      */
+
+      // Opción A: Si el ID viene en otro campo (ej. 'id')
+      let proveedorId =
+        proveedorResponse.data.id_proveedor || proveedorResponse.data.id;
+
+      if (!proveedorId) {
+        // Opción B: Obtener el último proveedor creado (solución alternativa)
+        const lastProveedor = await axios.get(
+          `${API_BASE_URL}/proveedores/last`,
+          {
+            headers: { apikey: API_KEY },
+          }
         );
-      } else {
-        setItems([...items, result]);
+        proveedorId = lastProveedor.data.id_proveedor;
       }
 
-      // Recargar datos referenciados
-      fetchReferencedData();
+      if (!proveedorId)
+        throw new Error("No se pudo obtener el ID del proveedor");
 
-      // Limpiar el formulario
-      setFormData({
-        fecha_registro: "",
-        constancia: "",
-        rfc: "",
-        ubicacion: "",
-        giro: "",
-        nombre: "",
-        telefono: "",
-        informacion_cobranza: "",
-        flujo_movimiento: "",
-        estado: 0,
+      // 2. Guardar CONTACTOS
+      for (const contacto of contactos) {
+        if (contacto.nombre.trim() !== "") {
+          await axios.post(
+            `${API_BASE_URL}/contactos_proveedores`,
+            {
+              data: {
+                ...contacto,
+                id_proveedor: proveedorId,
+              },
+            },
+            {
+              headers: { apikey: API_KEY },
+            }
+          );
+        }
+      }
+
+      // 3. Guardar DATOS BANCARIOS
+      if (datosBancarios.beneficiario.trim() !== "") {
+        await axios.post(
+          `${API_BASE_URL}/datos_bancarios_proveedores`,
+          {
+            data: {
+              ...datosBancarios,
+              id_proveedor: proveedorId,
+            },
+          },
+          {
+            headers: { apikey: API_KEY },
+          }
+        );
+      }
+
+      // 4. Guardar REFERENCIAS
+      for (const referencia of referencias) {
+        if (referencia.empresa.trim() !== "") {
+          await axios.post(
+            `${API_BASE_URL}/referencias_comerciales_proveedores`,
+            {
+              data: {
+                ...referencia,
+                id_proveedor: proveedorId,
+              },
+            },
+            {
+              headers: { apikey: API_KEY },
+            }
+          );
+        }
+      }
+
+      // Actualización final
+      await fetchProveedores();
+      resetForm();
+      setShowTable(true);
+      alert("¡Registro completado con éxito!");
+    } catch (error) {
+      console.error("Error completo:", {
+        message: error.message,
+        response: error.response?.data,
       });
-      setStartDate(null);
-      setIsEditing(false);
-    } catch (err) {
-      setError("Error al guardar los datos");
-      console.error("Error en handleSubmit:", err);
+      setError(
+        `Error al guardar: ${error.response?.data?.detail || error.message}`
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para eliminar un elemento
-  const handleDelete = async (id_cliente: number) => {
-    if (window.confirm("¿Estás seguro de eliminar este elemento?")) {
-      setLoading(true);
+  // Resetear formulario
+  const resetForm = () => {
+    setFormData({
+      nombre_razon_social: "",
+      rfc: "",
+      direccion: "",
+      pais: "",
+      codigo_postal: "",
+      ciudad: "",
+      estado: "",
+      unidades_propias: false,
+      cuenta_espejo_gps: false,
+    });
+    setContactos([
+      { nombre: "", apellido: "", telefono: "", correo: "", puesto: "" },
+      { nombre: "", apellido: "", telefono: "", correo: "", puesto: "" },
+    ]);
+    setDatosBancarios({
+      beneficiario: "",
+      banco: "",
+      clave: "",
+      cuenta: "",
+    });
+    setReferencias([
+      {
+        empresa: "",
+        domicilio: "",
+        pais: "",
+        ciudad: "",
+        estado: "",
+        codigo_postal: "",
+        telefono: "",
+        contacto: "",
+        puesto: "",
+        relacion_comercial_desde: "",
+      },
+      {
+        empresa: "",
+        domicilio: "",
+        pais: "",
+        ciudad: "",
+        estado: "",
+        codigo_postal: "",
+        telefono: "",
+        contacto: "",
+        puesto: "",
+        relacion_comercial_desde: "",
+      },
+    ]);
+    setIsEditing(false);
+  };
+
+  // Editar proveedor
+  const handleEdit = async (proveedor: Proveedor) => {
+    setLoading(true);
+    try {
+      // Obtener datos relacionados
+      const [contactosRes, bancariosRes, referenciasRes] = await Promise.all([
+        axios.get(
+          `${API_BASE_URL}/contactos?proveedorId=${proveedor.id_proveedor}`,
+          {
+            headers: { apikey: API_KEY },
+          }
+        ),
+        axios.get(
+          `${API_BASE_URL}/datos-bancarios?proveedorId=${proveedor.id_proveedor}`,
+          {
+            headers: { apikey: API_KEY },
+          }
+        ),
+        axios.get(
+          `${API_BASE_URL}/referencias?proveedorId=${proveedor.id_proveedor}`,
+          {
+            headers: { apikey: API_KEY },
+          }
+        ),
+      ]);
+
+      setFormData(proveedor);
+      setContactos(contactosRes.data.records.slice(0, 2));
+      setDatosBancarios(
+        bancariosRes.data.records[0] || {
+          beneficiario: "",
+          banco: "",
+          clave: "",
+          cuenta: "",
+        }
+      );
+      setReferencias(referenciasRes.data.records.slice(0, 2));
+      setIsEditing(true);
+      setShowTable(false);
+      window.scrollTo(0, 0);
+    } catch (err) {
+      setError("Error al cargar datos del proveedor");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Eliminar proveedor
+  const handleDelete = async (id: number) => {
+    if (window.confirm("¿Estás seguro de eliminar este proveedor?")) {
       try {
-        await axios.delete(`${API_BASE_URL}/${tableName}/${id_cliente}`, {
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "Cache-Control": "no-cache",
-            apikey: API_KEY,
-          },
-          timeout: 30000,
+        await axios.delete(`${API_BASE_URL}/proveedores/${id}`, {
+          headers: { apikey: API_KEY },
         });
-        setItems(items.filter((item) => item.id_cliente !== id_cliente));
+        fetchProveedores();
       } catch (err) {
-        setError("Error al eliminar el elemento");
-        console.error("Error en handleDelete:", err);
-      } finally {
-        setLoading(false);
+        setError("Error al eliminar proveedor");
+        console.error(err);
       }
     }
   };
 
-  // Función para editar un elemento
-  const handleEdit = (item: Item) => {
-    setFormData(item);
-    // Parsear la fecha string a objeto Date
-    const fecha = item.fecha_registro ? new Date(item.fecha_registro) : null;
-    setStartDate(fecha);
-    setIsEditing(true);
-  };
-
-  // Filtrar elementos según la búsqueda
-  const filteredItems = items.filter(
+  // Paginación
+  const filteredItems = proveedores.filter(
     (item) =>
-      item.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      item.rfc.toLowerCase().includes(busqueda.toLowerCase()) ||
-      item.giro.toLowerCase().includes(busqueda.toLowerCase())
+      item.nombre_razon_social.toLowerCase().includes(busqueda.toLowerCase()) ||
+      item.rfc.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  // Cálculos para paginación
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
 
-  // Resetear a página 1 cuando cambia la búsqueda
+  // Efectos
+  useEffect(() => {
+    if (showTable) {
+      fetchProveedores();
+    }
+  }, [showTable]);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [busqueda]);
 
   return (
-    <div>
-      <h2>Clientes</h2>
-      {error && <div className="error-message">{error}</div>}
-
-      {/* Formulario */}
-      <form onSubmit={handleSubmit} className="form">
-        {isEditing && (
-          <div className="mb-4">
-            <label>ID</label>
-            <input
-              type="text"
-              value={formData.id_cliente}
-              disabled
-              className="input"
-            />
-          </div>
-        )}
-
-        <div className="mb-4">
-          <label>Fecha de Registro: </label>
-          <DatePicker
-            selected={startDate}
-            onChange={(date: Date) => setStartDate(date)}
-            dateFormat="yyyy-MM-dd"
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholderText="Seleccione la fecha de registro"
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label>Constancia: </label>
-          <input
-            type="text"
-            value={formData.constancia}
-            onChange={(e) =>
-              setFormData({ ...formData, constancia: e.target.value })
-            }
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingresar la constancia"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label>Rfc: </label>
-          <input
-            type="text"
-            value={formData.rfc}
-            onChange={(e) => setFormData({ ...formData, rfc: e.target.value })}
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese el Rfc"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label>Ubicacion: </label>
-          <input
-            type="text"
-            value={formData.ubicacion}
-            onChange={(e) =>
-              setFormData({ ...formData, ubicacion: e.target.value })
-            }
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese la ubicacion"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label>Giro: </label>
-          <input
-            type="text"
-            value={formData.giro}
-            onChange={(e) => setFormData({ ...formData, giro: e.target.value })}
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingresar el giro"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label>Nombre: </label>
-          <input
-            type="text"
-            value={formData.nombre}
-            onChange={(e) =>
-              setFormData({ ...formData, nombre: e.target.value })
-            }
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese el nombre"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label>Telefono: </label>
-          <input
-            type="text"
-            value={formData.telefono}
-            onChange={(e) =>
-              setFormData({ ...formData, telefono: e.target.value })
-            }
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese el teléfono"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label>Informacion de Cobranza: </label>
-          <input
-            type="text"
-            value={formData.informacion_cobranza}
-            onChange={(e) =>
-              setFormData({ ...formData, informacion_cobranza: e.target.value })
-            }
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese la informacion de cobranza"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label>Flujo de movimiento: </label>
-          <input
-            type="text"
-            value={formData.flujo_movimiento}
-            onChange={(e) =>
-              setFormData({ ...formData, flujo_movimiento: e.target.value })
-            }
-            required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese el flujo de movimiento"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label>Estado</label>
-          <Select
-            options={estados.map((item) => ({
-              value: item.id_estado,
-              label: item.estado,
-            }))}
-            value={estados
-              .filter((option) => option.id_estado === formData.estado)
-              .map((item) => ({
-                value: item.id_estado,
-                label: item.estado,
-              }))}
-            onChange={(selectedOption) =>
-              setFormData({ ...formData, estado: selectedOption?.value || 0 })
-            }
-            placeholder="Seleccione el estado"
-          />
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            className="button button-primary"
-            disabled={loading}
-          >
-            {loading ? "Procesando..." : isEditing ? "Actualizar" : "Agregar"}
-          </button>
-
-          {isEditing && (
-            <button
-              type="button"
-              onClick={() => {
-                setFormData({
-                  fecha_registro: "",
-                  constancia: "",
-                  rfc: "",
-                  ubicacion: "",
-                  giro: "",
-                  nombre: "",
-                  telefono: "",
-                  informacion_cobranza: "",
-                  flujo_movimiento: "",
-                  estado: 0,
-                });
-                setStartDate(null);
-                setIsEditing(false);
-              }}
-              className="button button-secondary"
-            >
-              Cancelar
-            </button>
-          )}
-        </div>
-      </form>
-
-      {/* Barra de búsqueda */}
-      <div className="search-container">
-        <label>Buscar en Clientes:</label>
-        <input
-          type="text"
-          placeholder="Buscar..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          required
-          className="search-input w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-        />
+    <div className="rodval-container">
+      {/* Encabezado */}
+      <div className="rodval-header">
+        <div className="rodval-logo">rodval LOGISTICS</div>
+        <h1 className="rodval-title">ALTA PROVEEDOR</h1>
       </div>
 
-      {/* Botón de recargar */}
-      <div style={{ overflow: "hidden" }}>
+      {/* Botón para mostrar/ocultar tabla */}
+      <div className="rodval-table-toggle">
         <button
-          onClick={fetchItems}
-          className="button button-primary"
-          disabled={loading}
-          style={{ float: "right" }}
+          onClick={() => setShowTable(!showTable)}
+          className={`rodval-button ${
+            showTable ? "rodval-button-secondary" : "rodval-button-primary"
+          }`}
         >
-          {loading ? "Recargando..." : "Recargar Tabla"}
+          {showTable ? (
+            <>
+              <CloseIcon fontSize="small" /> Ocultar Tabla
+            </>
+          ) : (
+            <>
+              <VisibilityIcon fontSize="small" /> Ver Tabla de Proveedores
+            </>
+          )}
         </button>
       </div>
 
-      {/* Tabla */}
-      <div className="overflow-x-auto">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Fecha de Registro</th>
-              <th>Nombre</th>
-              <th>RFC</th>
-              <th>Giro</th>
-              <th>Teléfono</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={8} className="text-center">
-                  Cargando...
-                </td>
-              </tr>
-            ) : currentItems.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="text-center">
-                  No hay elementos disponibles
-                </td>
-              </tr>
-            ) : (
-              currentItems.map((item) => {
-                const estado = estados.find(
-                  (es) => es.id_estado === Number(item.estado)
-                );
-
-                return (
-                  <tr key={item.id_cliente}>
-                    <td>{item.id_cliente}</td>
-                    <td>{item.fecha_registro}</td>
-                    <td>{item.nombre}</td>
-                    <td>{item.rfc}</td>
-                    <td>{item.giro}</td>
-                    <td>{item.telefono}</td>
-                    <td>{estado?.estado || "No encontrado"}</td>
-                    <td>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#0447fb",
-                            cursor: "pointer",
-                            padding: "4px",
-                          }}
-                        >
-                          <EditSquareIcon fontSize="small" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id_cliente)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#ef4444",
-                            cursor: "pointer",
-                            padding: "4px",
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-
-        {/* Paginación con iconos */}
-        {filteredItems.length > itemsPerPage && (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: '20px',
-            gap: '15px'
-          }}>
+      {/* Tabla de proveedores */}
+      {showTable && (
+        <div className="rodval-table-container">
+          {/* Búsqueda y recargar */}
+          <div className="rodval-table-controls">
+            <input
+              type="text"
+              placeholder="Buscar por nombre o RFC..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="rodval-search-input"
+            />
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1 || loading}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                color: currentPage === 1 ? '#ccc' : '#3b82f6'
-              }}
+              onClick={fetchProveedores}
+              className="rodval-button rodval-button-primary"
+              disabled={loading}
             >
-              <ArrowBackIosIcon fontSize="medium" />
-            </button>
-            
-            <span style={{ margin: '0 10px' }}>
-              Página {currentPage} de {totalPages}
-            </span>
-            
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages || loading}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                color: currentPage === totalPages ? '#ccc' : '#3b82f6'
-              }}
-            >
-              <ArrowForwardIosIcon fontSize="medium" />
+              {loading ? "Cargando..." : "Recargar"}
             </button>
           </div>
-        )}
-      </div>
+
+          {/* Tabla */}
+          <div className="rodval-table-wrapper">
+            <table className="rodval-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre/Razón Social</th>
+                  <th>RFC</th>
+                  <th>Dirección</th>
+                  <th>Pais</th>
+                  <th>Codigo postal</th>
+                  <th>Ciudad</th>
+                  <th>Estado</th>
+                  <th>Unidades Propias</th>
+                  <th>Cuenta GPS</th>
+                  <th>Creada</th>
+                  <th>Actualizada</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentItems.length > 0 ? (
+                  currentItems.map((item) => (
+                    <tr key={item.id_proveedor}>
+                      <td>{item.id_proveedor}</td>
+                      <td>{item.nombre_razon_social}</td>
+                      <td>{item.rfc}</td>
+                      <td>{item.direccion}</td>
+                      <td>{item.pais}</td>
+                      <td>{item.codigo_postal}</td>
+                      <td>{item.ciudad}</td>
+                      <td>{item.estado}</td>
+                      <td>{item.unidades_propias ? "Sí" : "No"}</td>
+                      <td>{item.cuenta_espejo_gps ? "Sí" : "No"}</td>
+                      <td>{item.created_at}</td>
+                      <td>{item.update_at}</td>
+                      <td>
+                        <div className="rodval-actions">
+                          <button
+                            onClick={() =>
+                              item.id_proveedor && handleEdit(item)
+                            }
+                            className="rodval-icon-button rodval-edit"
+                            title="Editar"
+                          >
+                            <EditIcon fontSize="small" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              item.id_proveedor &&
+                              handleDelete(item.id_proveedor)
+                            }
+                            className="rodval-icon-button rodval-delete"
+                            title="Eliminar"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="rodval-no-data">
+                      {loading
+                        ? "Cargando..."
+                        : "No se encontraron proveedores"}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Paginación */}
+          {filteredItems.length > itemsPerPage && (
+            <div className="rodval-pagination">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1 || loading}
+                className="rodval-pagination-button"
+              >
+                <ArrowBackIosIcon fontSize="small" />
+              </button>
+              <span>
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages || loading}
+                className="rodval-pagination-button"
+              >
+                <ArrowForwardIosIcon fontSize="small" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Formulario de Alta Proveedor */}
+      {!showTable && (
+        <form onSubmit={handleSubmit} className="rodval-form">
+          {/* DOCUMENTOS REQUERIDOS */}
+          <div className="rodval-section">
+            <h2 className="rodval-section-title">DOCUMENTOS REQUERIDOS</h2>
+            <div className="rodval-documents-info">
+              <p>
+                A continuación se listan los documentos necesarios para el
+                registro del proveedor:
+              </p>
+              <ul className="rodval-documents-list">
+                <li>
+                  <span className="rodval-required">*</span> COMPROBANTE DE
+                  DOMICILIO
+                </li>
+                <li>
+                  <span className="rodval-required">*</span> ID REPRESENTANTE
+                  LEGAL
+                </li>
+                <li>
+                  <span className="rodval-required">*</span> CARATURA A BANCARIA
+                </li>
+                <li>
+                  <span className="rodval-required">*</span> CONSTANCIA SITUACION
+                  FISCAL (ACTUAL)
+                </li>
+                <li>
+                  <span className="rodval-required">*</span> OPINION POSITIVA
+                  RECIENTE
+                </li>
+              </ul>
+              <p className="rodval-note">
+                Nota: Estos documentos deben ser entregados físicamente o por
+                correo electrónico.
+              </p>
+            </div>
+          </div>
+
+          {/* INFORMACIÓN GENERAL */}
+          <div className="rodval-section">
+            <h2 className="rodval-section-title">INFORMACIÓN GENERAL</h2>
+
+            <div className="rodval-form-row">
+              <div className="rodval-form-group">
+                <label className="rodval-label">NOMBRE / RAZÓN SOCIAL</label>
+                <input
+                  type="text"
+                  name="nombre_razon_social"
+                  value={formData.nombre_razon_social}
+                  onChange={handleInputChange}
+                  required
+                  className="rodval-input"
+                />
+              </div>
+              <div className="rodval-form-group">
+                <label className="rodval-label">RFC</label>
+                <input
+                  type="text"
+                  name="rfc"
+                  value={formData.rfc}
+                  onChange={handleInputChange}
+                  required
+                  className="rodval-input"
+                />
+              </div>
+            </div>
+
+            <div className="rodval-form-group">
+              <label className="rodval-label">DIRECCIÓN</label>
+              <input
+                type="text"
+                name="direccion"
+                value={formData.direccion}
+                onChange={handleInputChange}
+                required
+                className="rodval-input"
+              />
+            </div>
+
+            <div className="rodval-form-row rodval-form-row-4">
+              <div className="rodval-form-group">
+                <label className="rodval-label">PAÍS</label>
+                <input
+                  type="text"
+                  name="pais"
+                  value={formData.pais}
+                  onChange={handleInputChange}
+                  required
+                  className="rodval-input"
+                />
+              </div>
+              <div className="rodval-form-group">
+                <label className="rodval-label">CÓDIGO POSTAL</label>
+                <input
+                  type="text"
+                  name="codigo_postal"
+                  value={formData.codigo_postal}
+                  onChange={handleInputChange}
+                  required
+                  className="rodval-input"
+                />
+              </div>
+              <div className="rodval-form-group">
+                <label className="rodval-label">CIUDAD</label>
+                <input
+                  type="text"
+                  name="ciudad"
+                  value={formData.ciudad}
+                  onChange={handleInputChange}
+                  required
+                  className="rodval-input"
+                />
+              </div>
+              <div className="rodval-form-group">
+                <label className="rodval-label">ESTADO</label>
+                <input
+                  type="text"
+                  name="estado"
+                  value={formData.estado}
+                  onChange={handleInputChange}
+                  required
+                  className="rodval-input"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* UNIDADES PROPIAS Y CUENTA ESPEJO GPS */}
+          <div className="rodval-section">
+            <h2 className="rodval-section-title">CONFIGURACIÓN</h2>
+            <div className="rodval-checkbox-group">
+              <label className="rodval-checkbox">
+                <input
+                  type="checkbox"
+                  name="unidades_propias"
+                  checked={formData.unidades_propias}
+                  onChange={handleInputChange}
+                />
+                <span>
+                  UNIDADES PROPIAS: {formData.unidades_propias ? "SÍ" : "NO"}
+                </span>
+              </label>
+              <label className="rodval-checkbox">
+                <input
+                  type="checkbox"
+                  name="cuenta_espejo_gps"
+                  checked={formData.cuenta_espejo_gps}
+                  onChange={handleInputChange}
+                />
+                <span>
+                  CUENTA ESPEJO GPS: {formData.cuenta_espejo_gps ? "SÍ" : "NO"}
+                </span>
+              </label>
+            </div>
+          </div>
+
+          {/* INFORMACIÓN DE CONTACTOS */}
+          <div className="rodval-section">
+            <h2 className="rodval-section-title">INFORMACIÓN DE CONTACTOS (2)</h2>
+
+            {contactos.map((contacto, index) => (
+              <div key={index} className="rodval-contact-card">
+                <h3 className="rodval-contact-title">Contacto {index + 1}</h3>
+
+                <div className="rodval-form-row rodval-form-row-5">
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">NOMBRE(S)</label>
+                    <input
+                      type="text"
+                      value={contacto.nombre}
+                      onChange={(e) =>
+                        handleContactoChange(index, "nombre", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">APELLIDO</label>
+                    <input
+                      type="text"
+                      value={contacto.apellido}
+                      onChange={(e) =>
+                        handleContactoChange(index, "apellido", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">TELÉFONO</label>
+                    <input
+                      type="text"
+                      value={contacto.telefono}
+                      onChange={(e) =>
+                        handleContactoChange(index, "telefono", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">CORREO</label>
+                    <input
+                      type="email"
+                      value={contacto.correo}
+                      onChange={(e) =>
+                        handleContactoChange(index, "correo", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">PUESTO</label>
+                    <input
+                      type="text"
+                      value={contacto.puesto}
+                      onChange={(e) =>
+                        handleContactoChange(index, "puesto", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* DATOS BANCARIOS */}
+          <div className="rodval-section">
+            <h2 className="rodval-section-title">DATOS BANCARIOS</h2>
+
+            <div className="rodval-form-row">
+              <div className="rodval-form-group">
+                <label className="rodval-label">BENEFICIARIO</label>
+                <input
+                  type="text"
+                  value={datosBancarios.beneficiario}
+                  onChange={(e) =>
+                    handleDatosBancariosChange("beneficiario", e.target.value)
+                  }
+                  required
+                  className="rodval-input"
+                />
+              </div>
+              <div className="rodval-form-group">
+                <label className="rodval-label">BANCO</label>
+                <input
+                  type="text"
+                  value={datosBancarios.banco}
+                  onChange={(e) =>
+                    handleDatosBancariosChange("banco", e.target.value)
+                  }
+                  required
+                  className="rodval-input"
+                />
+              </div>
+            </div>
+
+            <div className="rodval-form-row">
+              <div className="rodval-form-group">
+                <label className="rodval-label">CLAVE</label>
+                <input
+                  type="text"
+                  value={datosBancarios.clave}
+                  onChange={(e) =>
+                    handleDatosBancariosChange("clave", e.target.value)
+                  }
+                  required
+                  className="rodval-input"
+                />
+              </div>
+              <div className="rodval-form-group">
+                <label className="rodval-label">CUENTA</label>
+                <input
+                  type="text"
+                  value={datosBancarios.cuenta}
+                  onChange={(e) =>
+                    handleDatosBancariosChange("cuenta", e.target.value)
+                  }
+                  required
+                  className="rodval-input"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* REFERENCIAS COMERCIALES */}
+          {referencias.map((referencia, index) => (
+            <div key={index} className="rodval-section">
+              <h2 className="rodval-section-title">
+                REFERENCIA COMERCIAL {index + 1}
+              </h2>
+
+              <div className="rodval-reference-card">
+                <div className="rodval-form-row">
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">EMPRESA</label>
+                    <input
+                      type="text"
+                      value={referencia.empresa}
+                      onChange={(e) =>
+                        handleReferenciaChange(index, "empresa", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">DOMICILIO</label>
+                    <input
+                      type="text"
+                      value={referencia.domicilio}
+                      onChange={(e) =>
+                        handleReferenciaChange(
+                          index,
+                          "domicilio",
+                          e.target.value
+                        )
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="rodval-form-row rodval-form-row-5">
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">PAÍS</label>
+                    <input
+                      type="text"
+                      value={referencia.pais}
+                      onChange={(e) =>
+                        handleReferenciaChange(index, "pais", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">CIUDAD</label>
+                    <input
+                      type="text"
+                      value={referencia.ciudad}
+                      onChange={(e) =>
+                        handleReferenciaChange(index, "ciudad", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">ESTADO</label>
+                    <input
+                      type="text"
+                      value={referencia.estado}
+                      onChange={(e) =>
+                        handleReferenciaChange(index, "estado", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">CÓDIGO POSTAL</label>
+                    <input
+                      type="text"
+                      value={referencia.codigo_postal}
+                      onChange={(e) =>
+                        handleReferenciaChange(
+                          index,
+                          "codigo_postal",
+                          e.target.value
+                        )
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">TELÉFONO</label>
+                    <input
+                      type="text"
+                      value={referencia.telefono}
+                      onChange={(e) =>
+                        handleReferenciaChange(
+                          index,
+                          "telefono",
+                          e.target.value
+                        )
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="rodval-form-row">
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">CONTACTO</label>
+                    <input
+                      type="text"
+                      value={referencia.contacto}
+                      onChange={(e) =>
+                        handleReferenciaChange(
+                          index,
+                          "contacto",
+                          e.target.value
+                        )
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">PUESTO</label>
+                    <input
+                      type="text"
+                      value={referencia.puesto}
+                      onChange={(e) =>
+                        handleReferenciaChange(index, "puesto", e.target.value)
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                  <div className="rodval-form-group">
+                    <label className="rodval-label">
+                      RELACIÓN COMERCIAL DESDE
+                    </label>
+                    <input
+                      type="date"
+                      value={referencia.relacion_comercial_desde}
+                      onChange={(e) =>
+                        handleReferenciaChange(
+                          index,
+                          "relacion_comercial_desde",
+                          e.target.value
+                        )
+                      }
+                      required
+                      className="rodval-input"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Botones del formulario */}
+          <div className="rodval-form-actions">
+            <button
+              type="submit"
+              className="rodval-button rodval-button-primary"
+              disabled={loading}
+            >
+              {loading
+                ? "Procesando..."
+                : isEditing
+                ? "Actualizar Proveedor"
+                : "Agregar Proveedor"}
+            </button>
+
+            {isEditing && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="rodval-button rodval-button-secondary"
+              >
+                Cancelar
+              </button>
+            )}
+          </div>
+        </form>
+      )}
     </div>
   );
 }

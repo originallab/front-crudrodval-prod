@@ -1,23 +1,22 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './DatosBasicos.css';
-import { FaEdit } from 'react-icons/fa';
-import { MdDelete } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditSquareIcon from "@mui/icons-material/EditSquare";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
-
 export default function DatosBasicosForm() {
+  // Definir el nombre Item para la nueva tabla
   type Item = {
-    id_zonasdestino: number;
+    id_zonasDestino: number;
     nombre: string;
     descripcion: string;
   };
 
+  // Estados
   const [items, setItems] = useState<Item[]>([]);
-  const [formData, setFormData] = useState<Omit<Item, 'id_zonasdestino'> & { id_zonasdestino?: number }>({
+  const [formData, setFormData] = useState<Omit<Item, 'id_zonasDestino'> & { id_zonasDestino?: number }>({
     nombre: '',
     descripcion: '',
   });
@@ -25,19 +24,22 @@ export default function DatosBasicosForm() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
+  // Configuración de la API
   const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
-  const tableName = "zonas_destinos";
+  const tableName = "zona_destinos";
 
+  // Obtener los datos al cargar el componente
   useEffect(() => {
     fetchItems();
   }, []);
 
+  // Función para obtener los elementos
   const fetchItems = async () => {
     setLoading(true);
     try {
@@ -59,15 +61,16 @@ export default function DatosBasicosForm() {
     }
   };
 
+  // Función para manejar el envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = isEditing && formData.id_zonasdestino
-        ? `${API_BASE_URL}/${tableName}/${formData.id_zonasdestino}`
+      const url = isEditing && formData.id_zonasDestino
+        ? `${API_BASE_URL}/${tableName}/${formData.id_zonasDestino}`
         : `${API_BASE_URL}/${tableName}`;
 
-      const method = isEditing && formData.id_zonasdestino ? 'patch' : 'post';
+      const method = isEditing && formData.id_zonasDestino ? 'patch' : 'post';
 
       const response = await axios[method](
         url,
@@ -85,7 +88,7 @@ export default function DatosBasicosForm() {
 
       const result = response.data;
       if (isEditing) {
-        setItems(items.map(item => (item.id_zonasdestino === formData.id_zonasdestino ? result : item)));
+        setItems(items.map(item => (item.id_zonasDestino === formData.id_zonasDestino ? result : item)));
       } else {
         setItems([...items, result]);
       }
@@ -100,11 +103,12 @@ export default function DatosBasicosForm() {
     }
   };
 
-  const handleDelete = async (id_zonasdestino: number) => {
+  // Función para eliminar un elemento
+  const handleDelete = async (id_zonasDestino: number) => {
     if (window.confirm('¿Estás seguro de eliminar este elemento?')) {
       setLoading(true);
       try {
-        await axios.delete(`${API_BASE_URL}/${tableName}/${id_zonasdestino}`, {
+        await axios.delete(`${API_BASE_URL}/${tableName}/${id_zonasDestino}`, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -113,7 +117,7 @@ export default function DatosBasicosForm() {
           },
           timeout: 30000,
         });
-        setItems(items.filter(item => item.id_zonasdestino !== id_zonasdestino));
+        setItems(items.filter(item => item.id_zonasDestino !== id_zonasDestino));
       } catch (err) {
         setError('Error al eliminar el elemento');
         console.error('Error en handleDelete:', err);
@@ -123,11 +127,13 @@ export default function DatosBasicosForm() {
     }
   };
 
+  // Función para editar un elemento
   const handleEdit = (item: Item) => {
     setFormData(item);
     setIsEditing(true);
   };
 
+  // Filtrar elementos según la búsqueda
   const filteredItems = items.filter(item =>
     item.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
     item.descripcion.toLowerCase().includes(busqueda.toLowerCase())
@@ -146,16 +152,17 @@ export default function DatosBasicosForm() {
 
   return (
     <div>
-      <h2>Zonas de Destino</h2>
+      <h2>Zonas de los transportes</h2>
       {error && <div className="error-message">{error}</div>}
 
+      {/* Formulario */}
       <form onSubmit={handleSubmit} className="form">
         {isEditing && (
           <div className="mb-4">
             <label>ID</label>
             <input
               type="text"
-              value={formData.id_zonasdestino}
+              value={formData.id_zonasDestino}
               disabled
               className="input"
             />
@@ -172,13 +179,13 @@ export default function DatosBasicosForm() {
             onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese el nombre"
+            placeholder="Ingrese el nombre de la zona"
           />
         </div>
 
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-medium mb-2">
-            Descripcion de la zona:
+            Descripción:
           </label>
           <input
             type="text"
@@ -186,15 +193,23 @@ export default function DatosBasicosForm() {
             onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese la descripcion"
+            placeholder="Ingrese la descripción"
           />
         </div>
 
         <div className="flex gap-2">
           <button
             type="submit"
-            className="button button-primary"
+            className="button"
             disabled={loading}
+            style={{
+              backgroundColor: isEditing ? '#008CBA' : '#008CBA',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '999px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+            }}
           >
             {loading ? 'Procesando...' : isEditing ? 'Actualizar' : 'Agregar'}
           </button>
@@ -202,11 +217,19 @@ export default function DatosBasicosForm() {
           {isEditing && (
             <button
               type="button"
+              className="button"
               onClick={() => {
                 setFormData({ nombre: '', descripcion: '' });
                 setIsEditing(false);
               }}
-              className="button button-secondary"
+              style={{
+                backgroundColor: isEditing ? '#008CBA' : '#008CBA',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '999px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
             >
               Cancelar
             </button>
@@ -214,9 +237,10 @@ export default function DatosBasicosForm() {
         </div>
       </form>
 
+      {/* Barra de búsqueda */}
       <div className="search-container">
         <label className="block text-gray-700 text-sm font-medium mb-2">
-          Buscar en zonas de destino
+          Buscar las zonas:
         </label>
         <input
           type="text"
@@ -226,40 +250,34 @@ export default function DatosBasicosForm() {
           required
           className="search-input w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
-        <span className="search-icon">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-        </span>
       </div>
 
-      <div style={{ overflow: 'hidden' }}>
-        <button
+   {/* Botón de recargar */}
+   <div style={{ overflow: 'hidden' }}>
+      <button
           onClick={fetchItems}
-          className="button button-primary"
+          className="button"
           disabled={loading}
-          style={{ float: 'right' }}
+          style={{ 
+            backgroundColor: loading ? '#4CAF50' : '#008CBA', 
+            float: 'right',
+            borderRadius: '999px',
+            color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+           }}
         >
           {loading ? 'Recargando...' : 'Recargar Tabla'}
         </button>
       </div>
 
+      {/* Tabla */}
       <div className="overflow-x-auto">
         <table className="table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>ID: </th>
               <th>Nombre</th>
               <th>Descripción</th>
               <th>Acciones</th>
@@ -276,8 +294,8 @@ export default function DatosBasicosForm() {
               </tr>
             ) : (
               currentItems.map(item => (
-                <tr key={item.id_zonasdestino}>
-                  <td>{item.id_zonasdestino}</td>
+                <tr key={item.id_zonasDestino}>
+                  <td>{item.id_zonasDestino}</td>
                   <td>{item.nombre}</td>
                   <td>{item.descripcion}</td>
                   <td>
@@ -291,17 +309,11 @@ export default function DatosBasicosForm() {
                           cursor: "pointer",
                           padding: "4px",
                         }}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.color = "#0447fb")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.color = "#0447fb")
-                        }
                       >
                         <EditSquareIcon fontSize="small" />
                       </button>
                       <button
-                        onClick={() => handleDelete(item.id_zonasdestino)}
+                        onClick={() => handleDelete(item.id_zonasDestino)}
                         style={{
                           background: "none",
                           border: "none",
@@ -309,12 +321,6 @@ export default function DatosBasicosForm() {
                           cursor: "pointer",
                           padding: "4px",
                         }}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.color = "#dc2626")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.color = "#ef4444")
-                        }
                       >
                         <DeleteIcon fontSize="small" />
                       </button>
@@ -326,30 +332,50 @@ export default function DatosBasicosForm() {
           </tbody>
         </table>
 
-        {/* Paginación con iconos */}
+        {/* Paginación mejorada */}
         {filteredItems.length > itemsPerPage && (
-  <div className="pagination-container">
-    <button
-      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-      disabled={currentPage === 1 || loading}
-      className="pagination-button"
-    >
-      <ArrowBackIosIcon fontSize="medium" sx={{ color: '#3b82f6' }} />
-    </button>
-    
-    <span className="pagination-info">
-      Página {currentPage} de {totalPages}
-    </span>
-    
-    <button
-      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-      disabled={currentPage === totalPages || loading}
-      className="pagination-button"
-    >
-      <ArrowForwardIosIcon fontSize="medium" sx={{ color: '#3b82f6' }} />
-    </button>
-  </div>
-)}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: '20px',
+            gap: '15px'
+          }}>
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                color: currentPage === 1 ? '#ccc' : '#3b82f6'
+              }}
+            >
+              <ArrowBackIosIcon fontSize="medium" />
+            </button>
+            
+            <span style={{ margin: '0 10px' }}>
+              Página {currentPage} de {totalPages}
+            </span>
+            
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                color: currentPage === totalPages ? '#ccc' : '#3b82f6'
+              }}
+            >
+              <ArrowForwardIosIcon fontSize="medium" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

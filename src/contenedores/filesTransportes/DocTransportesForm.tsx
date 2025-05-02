@@ -16,36 +16,35 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ImageIcon from "@mui/icons-material/Image";
 import CloseIcon from "@mui/icons-material/Close";
-import Stack from "@mui/material";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import CircularProgress from "@mui/material/CircularProgress";
-import Grid from "@mui/material/Grid"; // Importación directa
+import { Grid } from '@mui/material'; // Importación directa
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton'; // Importación directa
+import CircularProgress from '@mui/material/CircularProgress';
 
-//datos de la tabla de transportes
 type Item = {
-  id_documentoOperador: number;
-  id_operador: string;
+  id_documentoTransportes: number;
   fecha_registro: string;
-  licencia: string;
-  identificacionO: string;
+  id_unidad: number;
+  registroMercantil: string;
+  seguro: string;
+  tarjetaCirculacion: string;
 };
 
-type Operador = {
-  id_operador: string;
-  nombre_operador?: string;
-  [key: string]: any;
+type Unidad = {
+  id_unidad: number;
+  nombre: string;
 };
 
-export default function DocOperadoresForm() {
+export default function DocTransportesForm() {
   const [items, setItems] = useState<Item[]>([]);
   const [formData, setFormData] = useState<
-    Omit<Item, "id_documentoOperador"> & { id_documentoOperador?: number }
+    Omit<Item, "id_documentoTransportes"> & { id_documentoTransportes?: number }
   >({
-    id_operador: "",
+    id_unidad: 0,
     fecha_registro: "",
-    licencia: "",
-    identificacionO: "",
+    registroMercantil: "",
+    seguro: "",
+    tarjetaCirculacion: "",
   });
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [busqueda, setBusqueda] = useState<string>("");
@@ -53,20 +52,24 @@ export default function DocOperadoresForm() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string>("");
-  const [operadores, setOperadores] = useState<Operador[]>([]);
-  const [fileGetAWS, setFileGetAWS] = useState<File | null>(null);
-  const [filePostAWS, setFilePostAWS] = useState<File | null>(null);
+  const [unidades, setUnidades] = useState<Unidad[]>([]);
+  const [fileRegistroMercantil, setFileRegistroMercantil] =
+    useState<File | null>(null);
+  const [fileSeguro, setFileSeguro] = useState<File | null>(null);
+  const [fileTarjetaCirculacion, setFileTarjetaCirculacion] =
+    useState<File | null>(null);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [fileUrls, setFileUrls] = useState({
-    licencia: "",
-    identificacionO: "",
+    registroMercantil: "",
+    seguro: "",
+    tarjetaCirculacion: "",
   });
   const [loadingUrls, setLoadingUrls] = useState<boolean>(false);
   const [currentItem, setCurrentItem] = useState<Item | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
   const [currentFileView, setCurrentFileView] = useState<{
-    type: "licencia" | "identificacionO" | null;
+    type: "registroMercantil" | "seguro" | "tarjetaCirculacion" | null;
     url: string;
     fileName: string;
   }>({ type: null, url: "", fileName: "" });
@@ -74,19 +77,20 @@ export default function DocOperadoresForm() {
   const API_BASE_URL =
     "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
-  const tableName = "doc_operadores";
-  const operadoresTableName = "operadores";
+  const tableName = "docs_Transportes";
+  const unidadesTableName = "tipos_unidades";
   const CORS_ANYWHERE_URL = "https://cors-anywhere.herokuapp.com/";
 
   const filteredItems = items.filter(
     (item) =>
-      item.licencia?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      item.identificacionO?.toLowerCase().includes(busqueda.toLowerCase()) ||
-      operadores
-        .find((operador) => operador.id_operador === item.id_operador)
-        ?.nombre_operador?.toLowerCase()
+      item.registroMercantil?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      item.seguro?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      item.tarjetaCirculacion?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      unidades
+        .find((unidad) => unidad.id_unidad === item.id_unidad)
+        ?.nombre?.toLowerCase()
         .includes(busqueda.toLowerCase()) ||
-      item.id_operador.toLowerCase().includes(busqueda.toLowerCase())
+      String(item.id_unidad).toLowerCase().includes(busqueda.toLowerCase())
   );
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -117,15 +121,17 @@ export default function DocOperadoresForm() {
     setOpenModal(true);
     setLoadingUrls(true);
     setError(null);
-    setFileUrls({ licencia: "", identificacionO: "" });
+    setFileUrls({ registroMercantil: "", seguro: "", tarjetaCirculacion: "" });
     setCurrentFileView({ type: null, url: "", fileName: "" });
 
     try {
-      if (item.licencia) {
-        const getAWSRequestBody = { fileName: item.licencia };
+      if (item.registroMercantil) {
+        const registroMercantilRequestBody = {
+          fileName: item.registroMercantil,
+        };
         const getResponse = await axios.post<{ url?: string }>(
           `${CORS_ANYWHERE_URL}https://kneib5mp53.execute-api.us-west-2.amazonaws.com/dev/getObject`,
-          getAWSRequestBody,
+          registroMercantilRequestBody,
           {
             headers: {
               "Content-Type": "application/json",
@@ -138,16 +144,16 @@ export default function DocOperadoresForm() {
         if (getResponse.data?.url) {
           setFileUrls((prev) => ({
             ...prev,
-            licencia: getResponse.data.url || "",
+            registroMercantil: getResponse.data.url || "",
           }));
         }
       }
 
-      if (item.identificacionO) {
-        const postAWSRequestBody = { fileName: item.identificacionO };
+      if (item.seguro) {
+        const seguroRequestBody = { fileName: item.seguro };
         const postResponse = await axios.post<{ url?: string }>(
           `${CORS_ANYWHERE_URL}https://kneib5mp53.execute-api.us-west-2.amazonaws.com/dev/getObject`,
-          postAWSRequestBody,
+          seguroRequestBody,
           {
             headers: {
               "Content-Type": "application/json",
@@ -160,7 +166,31 @@ export default function DocOperadoresForm() {
         if (postResponse.data?.url) {
           setFileUrls((prev) => ({
             ...prev,
-            identificacionO: postResponse.data.url || "",
+            seguro: postResponse.data.url || "",
+          }));
+        }
+      }
+
+      if (item.tarjetaCirculacion) {
+        const tarjetaCirculacionRequestBody = {
+          fileName: item.tarjetaCirculacion,
+        };
+        const tarjetaCirculacionResponse = await axios.post<{ url?: string }>(
+          `${CORS_ANYWHERE_URL}https://kneib5mp53.execute-api.us-west-2.amazonaws.com/dev/getObject`,
+          tarjetaCirculacionRequestBody,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            timeout: 10000,
+          }
+        );
+
+        if (tarjetaCirculacionResponse.data?.url) {
+          setFileUrls((prev) => ({
+            ...prev,
+            tarjetaCirculacion: tarjetaCirculacionResponse.data.url || "",
           }));
         }
       }
@@ -186,7 +216,7 @@ export default function DocOperadoresForm() {
   };
 
   const handleViewFile = (
-    type: "licencia" | "identificacionO",
+    type: "registroMercantil" | "seguro" | "tarjetaCirculacion",
     url: string,
     fileName: string
   ) => {
@@ -199,7 +229,7 @@ export default function DocOperadoresForm() {
 
   const uploadFile = async (
     file: File,
-    fileNameKey: "licencia" | "identificacionO"
+    fileNameKey: "registroMercantil" | "seguro" | "tarjetaCirculacion"
   ): Promise<{ success: boolean }> => {
     const filename = file.name;
 
@@ -224,26 +254,28 @@ export default function DocOperadoresForm() {
     }
   };
 
-  const getNombreOperador = (idOperador: string): string => {
-    const operador = operadores.find((o) => o.id_operador === idOperador);
-    return operador?.nombre_operador || `ID: ${idOperador}`;
+  const getNombreUnidad = (idUnidad: number): string => {
+    const unidad = unidades.find((u) => u.id_unidad === idUnidad);
+    return unidad?.nombre || `ID: ${idUnidad}`;
   };
 
   useEffect(() => {
     fetchItems();
-    fetchOperadores();
+    fetchUnidades();
   }, []);
 
   const resetForm = () => {
     setFormData({
-      id_operador: "",
+      id_unidad: 0,
       fecha_registro: "",
-      licencia: "",
-      identificacionO: "",
+      registroMercantil: "",
+      seguro: "",
+      tarjetaCirculacion: "",
     });
     setSelectedDate(null);
-    setFileGetAWS(null);
-    setFilePostAWS(null);
+    setFileRegistroMercantil(null);
+    setFileSeguro(null);
+    setFileTarjetaCirculacion(null);
     setIsEditing(false);
     setError(null);
   };
@@ -251,7 +283,7 @@ export default function DocOperadoresForm() {
   const fetchItems = async (): Promise<void> => {
     setLoading(true);
     try {
-      await fetchOperadores();
+      await fetchUnidades();
 
       const response = await axios.get<{ records: Item[] }>(
         `${API_BASE_URL}/${tableName}/all`,
@@ -265,25 +297,26 @@ export default function DocOperadoresForm() {
       );
 
       const itemsWithId = response.data.records.map((item) => ({
-        id_documentoOperador: item.id_documentoOperador || 0,
-        id_operador: item.id_operador || "",
+        id_documentoTransportes: item.id_documentoTransportes || 0,
+        id_unidad: item.id_unidad || 0,
         fecha_registro: item.fecha_registro || "",
-        licencia: item.licencia || "",
-        identificacionO: item.identificacionO || "",
+        registroMercantil: item.registroMercantil || "",
+        seguro: item.seguro || "",
+        tarjetaCirculacion: item.tarjetaCirculacion || "",
       }));
 
       setItems(itemsWithId);
     } catch (err: unknown) {
-      setError("Error al cargar los datos de documentos de operadores");
+      setError("Error al cargar los datos de documentos de transporte");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchOperadores = async (): Promise<void> => {
+  const fetchUnidades = async (): Promise<void> => {
     try {
-      const response = await axios.get<{ records: Operador[] }>(
-        `${API_BASE_URL}/${operadoresTableName}/all`,
+      const response = await axios.get<{ records: Unidad[] }>(
+        `${API_BASE_URL}/${unidadesTableName}/all`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -293,10 +326,10 @@ export default function DocOperadoresForm() {
         }
       );
 
-      setOperadores(response.data.records);
+      setUnidades(response.data.records);
     } catch (err: unknown) {
-      console.error("Error al cargar operadores:", err);
-      setOperadores([]);
+      console.error("Error al cargar unidades:", err);
+      setUnidades([]);
     }
   };
 
@@ -309,48 +342,29 @@ export default function DocOperadoresForm() {
 
       const updatedFormData = { ...formData, fecha_registro: fechaFormateada };
 
-      if (fileGetAWS) {
-        const uploadResult = await uploadFile(fileGetAWS, "licencia").catch(
-          (error: unknown) => {
-            throw new Error(
-              `Fallo subida archivo GET AWS: ${
-                error instanceof Error ? error.message : "Error desconocido"
-              }`
-            );
-          }
-        );
-        if (uploadResult.success) {
-          updatedFormData.licencia = fileGetAWS.name;
-        }
-      } else {
-        if (formData.licencia !== undefined) {
-          updatedFormData.licencia = formData.licencia;
-        }
-      }
-
-      if (filePostAWS) {
+      if (fileRegistroMercantil) {
         const uploadResult = await uploadFile(
-          filePostAWS,
-          "identificacionO"
+          fileRegistroMercantil,
+          "registroMercantil"
         ).catch((error: unknown) => {
           throw new Error(
-            `Fallo subida archivo POST AWS: ${
+            `Fallo subida Registro Mercantil: ${
               error instanceof Error ? error.message : "Error desconocido"
             }`
           );
         });
         if (uploadResult.success) {
-          updatedFormData.identificacionO = filePostAWS.name;
+          updatedFormData.registroMercantil = fileRegistroMercantil.name;
         }
       } else {
-        if (formData.identificacionO !== undefined) {
-          updatedFormData.identificacionO = formData.identificacionO;
+        if (formData.registroMercantil !== undefined) {
+          updatedFormData.registroMercantil = formData.registroMercantil;
         }
       }
 
       const url =
-        isEditing && formData.id_documentoOperador
-          ? `${API_BASE_URL}/${tableName}/${formData.id_documentoOperador}`
+        isEditing && formData.id_documentoTransportes
+          ? `${API_BASE_URL}/${tableName}/${formData.id_documentoTransportes}`
           : `${API_BASE_URL}/${tableName}`;
 
       const method = isEditing ? "patch" : "post";
@@ -371,7 +385,7 @@ export default function DocOperadoresForm() {
       if (isEditing) {
         setItems(
           items.map((item) =>
-            item.id_documentoOperador === formData.id_documentoOperador
+            item.id_documentoTransportes === formData.id_documentoTransportes
               ? result
               : item
           )
@@ -382,63 +396,84 @@ export default function DocOperadoresForm() {
 
       resetForm();
       setSuccess(
-        `Registro de operador ${
+        `Registro de transporte ${
           isEditing ? "actualizado" : "agregado"
         } correctamente`
       );
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message || "Error al guardar los datos del operador");
+        setError(err.message || "Error al guardar los datos del transporte");
       } else {
-        setError("Error desconocido al guardar los datos del operador");
+        setError("Error desconocido al guardar los datos del transporte");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFileGetAWSChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileRegistroMercantilChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      setFileGetAWS(selectedFile);
+      setFileRegistroMercantil(selectedFile);
       setFormData({
         ...formData,
-        licencia: selectedFile.name,
+        registroMercantil: selectedFile.name,
       });
     } else {
-      setFileGetAWS(null);
+      setFileRegistroMercantil(null);
       setFormData({
         ...formData,
-        licencia: "",
+        registroMercantil: "",
       });
     }
   };
 
-  const handleFilePostAWSChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSeguroChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      setFilePostAWS(selectedFile);
+      setFileSeguro(selectedFile);
       setFormData({
         ...formData,
-        identificacionO: selectedFile.name,
+        seguro: selectedFile.name,
       });
     } else {
-      setFilePostAWS(null);
+      setFileSeguro(null);
       setFormData({
         ...formData,
-        identificacionO: "",
+        seguro: "",
       });
     }
   };
 
-  const handleDelete = async (id_documentoOperador: number) => {
+  const handleFileTarjetaCirculacionChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      setFileTarjetaCirculacion(selectedFile);
+      setFormData({
+        ...formData,
+        tarjetaCirculacion: selectedFile.name,
+      });
+    } else {
+      setFileTarjetaCirculacion(null);
+      setFormData({
+        ...formData,
+        tarjetaCirculacion: "",
+      });
+    }
+  };
+
+  const handleDelete = async (id_documentoTransportes: number) => {
     if (
-      window.confirm("¿Estás seguro de eliminar este documento de operador?")
+      window.confirm("¿Estás seguro de eliminar este documento de transporte?")
     ) {
       setLoading(true);
       try {
         await axios.delete(
-          `${API_BASE_URL}/${tableName}/${id_documentoOperador}`,
+          `${API_BASE_URL}/${tableName}/${id_documentoTransportes}`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -451,12 +486,12 @@ export default function DocOperadoresForm() {
         );
         setItems(
           items.filter(
-            (item) => item.id_documentoOperador !== id_documentoOperador
+            (item) => item.id_documentoTransportes !== id_documentoTransportes
           )
         );
-        setSuccess("Registro de operador eliminado correctamente");
+        setSuccess("Registro de transporte eliminado correctamente");
       } catch (err) {
-        setError("Error al eliminar el documento de operador");
+        setError("Error al eliminar el documento de transporte");
       } finally {
         setLoading(false);
       }
@@ -473,7 +508,7 @@ export default function DocOperadoresForm() {
 
   const handleCloseModal = () => {
     setOpenModal(false);
-    setFileUrls({ licencia: "", identificacionO: "" });
+    setFileUrls({ registroMercantil: "", seguro: "", tarjetaCirculacion: "" });
     setCurrentItem(null);
     setCurrentFileView({ type: null, url: "", fileName: "" });
   };
@@ -544,275 +579,263 @@ export default function DocOperadoresForm() {
 
   return (
     <div>
-      <h2>Documentos de Operadores</h2>
+      <h2>Documentos de Transportes</h2>
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
-
       <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
+  open={openModal}
+  onClose={handleCloseModal}
+  aria-labelledby="modal-modal-title"
+  aria-describedby="modal-modal-description"
+>
+  <Box
+    sx={{
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: { xs: "90%", sm: "70%", md: "60%" }, // Responsive width
+      maxWidth: "800px",
+      maxHeight: "90vh",
+      bgcolor: "background.paper",
+      border: "2px solid",
+      borderColor: "primary.main",
+      borderRadius: "12px",
+      boxShadow: 24,
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
+    }}
+  >
+    {/* Header del Modal */}
+    <Box
+      sx={{
+        padding: "16px 24px",
+        background: "linear-gradient(135deg, #0709ab 0%, #2196f3 100%)",
+        color: "white",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
+      }}
+    >
+      <Typography
+        id="modal-modal-title"
+        variant="h6"
+        component="h2"
+        sx={{
+          fontSize: "1.5rem",
+          fontWeight: "600",
+          letterSpacing: "0.5px",
+        }}
       >
+        Documentos de Transporte
+      </Typography>
+      <IconButton
+        onClick={handleCloseModal}
+        sx={{
+          color: "white",
+          '&:hover': {
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+          },
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+    </Box>
+
+    {/* Contenido del Modal */}
+    <Box
+      sx={{
+        p: 4,
+        overflowY: "auto",
+        background: "linear-gradient(145deg, #f9f9ff, #ffffff)",
+        flex: 1,
+      }}
+    >
+      {currentItem && (
         <Box
           sx={{
-            position: "absolute" as const,
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "80%",
-            maxWidth: "800px",
-            maxHeight: "90vh",
-            bgcolor: "background.paper",
-            border: "2px solid",
-            borderColor: "primary.main",
-            borderRadius: "12px",
-            boxShadow: 24,
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
+            mb: 4,
+            p: 3,
+            borderRadius: '8px',
+            background: 'rgba(25, 118, 210, 0.05)',
+            border: '1px solid rgba(25, 118, 210, 0.2)',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
           }}
         >
-          <Box
-            sx={{
-              padding: "16px 24px",
-              background: "linear-gradient(135deg, #0709ab 0%, #2196f3 100%)",
-              color: "white",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
-            }}
-          >
-            <Typography
-              id="modal-modal-title"
-              variant="h6"
-              component="h2"
-              sx={{
-                fontSize: "1.5rem",
-                fontWeight: "600",
-                letterSpacing: "0.5px",
-              }}
-            >
-              Documentos de Operador
-            </Typography>
-            <IconButton
-              onClick={handleCloseModal}
-              sx={{
-                color: "white",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                },
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
+          <Typography variant="h6" sx={{ color: '#1976d2', textAlign: 'center', mb: 2 }}>
+            Detalles del registro de transportes
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid >
+              <Typography><strong>ID Documento:</strong> {currentItem.id_documentoTransportes}</Typography>
+            </Grid>
+            <Grid >
+              <Typography><strong>Unidad:</strong> {getNombreUnidad(currentItem.id_unidad)}</Typography>
+            </Grid>
+            <Grid>
+              <Typography><strong>Fecha Registro:</strong> {currentItem.fecha_registro}</Typography>
+            </Grid>
+          </Grid>
+        </Box>
+      )}
 
-          <Box
-            sx={{
-              p: 4,
-              overflowY: "auto",
-              background: "linear-gradient(145deg, #f9f9ff, #ffffff)",
-              flex: 1,
-            }}
-          >
-            {currentItem && (
-              <Box
-                sx={{
-                  mb: 4,
+      {loadingUrls ? (
+        <Box sx={{ textAlign: 'center', py: 4, color: '#1976d2' }}>
+          <CircularProgress color="inherit" />
+          <Typography variant="body1" sx={{ mt: 2 }}>Cargando documentos...</Typography>
+        </Box>
+      ) : (
+        <Box>
+          {currentFileView.type ? (
+            renderFilePreview()
+          ) : (
+            <Grid container spacing={3}>
+              {/* Tarjeta Registro Mercantil */}
+              <Grid >
+                <Box sx={{
+                  height: '100%',
                   p: 3,
-                  borderRadius: "8px",
-                  background: "rgba(25, 118, 210, 0.05)",
-                  border: "1px solid rgba(25, 118, 210, 0.2)",
-                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{ color: "#1976d2", textAlign: "center", mb: 2 }}
-                >
-                  Detalles del registro de operador
-                </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <Box
-                    sx={{
-                      width: "100%",
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 2,
-                    }}
-                  >
-                    <Box sx={{ width: { xs: "100%", md: "calc(50% - 16px)" } }}>
-                      <Typography>
-                        <strong>ID Documento:</strong>{" "}
-                        {currentItem.id_documentoOperador}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ width: { xs: "100%", md: "calc(50% - 16px)" } }}>
-                      <Typography>
-                        <strong>Operador:</strong>{" "}
-                        {getNombreOperador(currentItem.id_operador)}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Box sx={{ width: { xs: "100%", md: "calc(50% - 16px)" } }}>
-                    <Typography>
-                      <strong>Fecha Registro:</strong>{" "}
-                      {currentItem.fecha_registro}
+                  border: '1px solid rgba(25, 118, 210, 0.3)',
+                  borderRadius: '8px',
+                  backgroundColor: 'white',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                  },
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <InsertDriveFileIcon sx={{ color: '#1976d2', mr: 1 }} />
+                    <Typography variant="subtitle1" sx={{ color: '#1976d2', fontWeight: 'medium' }}>
+                      Registro Mercantil
                     </Typography>
                   </Box>
+                  {fileUrls.registroMercantil && currentItem?.registroMercantil ? (
+                    <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
+                      <Button
+                        variant="contained"
+                        onClick={() => handleViewFile("registroMercantil", fileUrls.registroMercantil, currentItem.registroMercantil)}
+                        sx={{
+                          background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
+                          color: 'white',
+                          fontWeight: '600',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
+                          }
+                        }}
+                        fullWidth
+                      >
+                        Ver Archivo
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: 'text.disabled', mt: 'auto' }}>No disponible</Typography>
+                  )}
                 </Box>
-              </Box>
-            )}
+              </Grid>
 
-            {loadingUrls ? (
-              <Box sx={{ textAlign: "center", py: 4, color: "#1976d2" }}>
-                <CircularProgress color="inherit" />
-                <Typography variant="body1" sx={{ mt: 2 }}>
-                  Cargando documentos...
-                </Typography>
-              </Box>
-            ) : (
-              <Box>
-                {currentFileView.type ? (
-                  renderFilePreview()
-                ) : (
-                  <>
-                    {/* Tarjeta GET AWS */}
-                    <Box
-                      sx={{
-                        mb: 3,
-                        p: 3,
-                        border: "1px solid rgba(25, 118, 210, 0.3)",
-                        borderRadius: "8px",
-                        backgroundColor: "white",
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", mb: 2 }}
+              {/* Tarjeta Seguro */}
+              <Grid >
+                <Box sx={{
+                  height: '100%',
+                  p: 3,
+                  border: '1px solid rgba(25, 118, 210, 0.3)',
+                  borderRadius: '8px',
+                  backgroundColor: 'white',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                  },
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <InsertDriveFileIcon sx={{ color: '#1976d2', mr: 1 }} />
+                    <Typography variant="subtitle1" sx={{ color: '#1976d2', fontWeight: 'medium' }}>
+                      Seguro
+                    </Typography>
+                  </Box>
+                  {fileUrls.seguro && currentItem?.seguro ? (
+                    <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
+                      <Button
+                        variant="contained"
+                        onClick={() => handleViewFile("seguro", fileUrls.seguro, currentItem.seguro)}
+                        sx={{
+                          background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
+                          color: 'white',
+                          fontWeight: '600',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
+                          }
+                        }}
+                        fullWidth
                       >
-                        <InsertDriveFileIcon sx={{ color: "#1976d2", mr: 1 }} />
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ color: "#1976d2", fontWeight: "medium" }}
-                        >
-                          Documento GET AWS
-                        </Typography>
-                      </Box>
-                      {fileUrls.licencia && currentItem?.licencia ? (
-                        <Box
-                          sx={{ display: "flex", justifyContent: "flex-end" }}
-                        >
-                          <Button
-                            variant="contained"
-                            onClick={() =>
-                              handleViewFile(
-                                "licencia",
-                                fileUrls.licencia,
-                                currentItem.licencia
-                              )
-                            }
-                            sx={{
-                              background:
-                                "linear-gradient(45deg, #1976d2 30%, #2196f3 90%)",
-                              color: "white",
-                              fontWeight: "600",
-                              "&:hover": {
-                                background:
-                                  "linear-gradient(45deg, #1565c0 30%, #1976d2 90%)",
-                              },
-                            }}
-                          >
-                            Ver Archivo
-                          </Button>
-                        </Box>
-                      ) : (
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "text.disabled" }}
-                        >
-                          No disponible
-                        </Typography>
-                      )}
+                        Ver Archivo
+                      </Button>
                     </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: 'text.disabled', mt: 'auto' }}>No disponible</Typography>
+                  )}
+                </Box>
+              </Grid>
 
-                    {/* Tarjeta POST AWS */}
-                    <Box
-                      sx={{
-                        mb: 3,
-                        p: 3,
-                        border: "1px solid rgba(25, 118, 210, 0.3)",
-                        borderRadius: "8px",
-                        backgroundColor: "white",
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          transform: "translateY(-2px)",
-                          boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-                        },
-                      }}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", mb: 2 }}
+              {/* Tarjeta Circulación */}
+              <Grid >
+                <Box sx={{
+                  height: '100%',
+                  p: 3,
+                  border: '1px solid rgba(25, 118, 210, 0.3)',
+                  borderRadius: '8px',
+                  backgroundColor: 'white',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                  },
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <InsertDriveFileIcon sx={{ color: '#1976d2', mr: 1 }} />
+                    <Typography variant="subtitle1" sx={{ color: '#1976d2', fontWeight: 'medium' }}>
+                      Tarjeta de Circulación
+                    </Typography>
+                  </Box>
+                  {fileUrls.tarjetaCirculacion && currentItem?.tarjetaCirculacion ? (
+                    <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
+                      <Button
+                        variant="contained"
+                        onClick={() => handleViewFile("tarjetaCirculacion", fileUrls.tarjetaCirculacion, currentItem.tarjetaCirculacion)}
+                        sx={{
+                          background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
+                          color: 'white',
+                          fontWeight: '600',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
+                          }
+                        }}
+                        fullWidth
                       >
-                        <InsertDriveFileIcon sx={{ color: "#1976d2", mr: 1 }} />
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ color: "#1976d2", fontWeight: "medium" }}
-                        >
-                          Documento POST AWS
-                        </Typography>
-                      </Box>
-                      {fileUrls.identificacionO &&
-                      currentItem?.identificacionO ? (
-                        <Box
-                          sx={{ display: "flex", justifyContent: "flex-end" }}
-                        >
-                          <Button
-                            variant="contained"
-                            onClick={() =>
-                              handleViewFile(
-                                "identificacionO",
-                                fileUrls.identificacionO,
-                                currentItem.identificacionO
-                              )
-                            }
-                            sx={{
-                              background:
-                                "linear-gradient(45deg, #1976d2 30%, #2196f3 90%)",
-                              color: "white",
-                              fontWeight: "600",
-                              "&:hover": {
-                                background:
-                                  "linear-gradient(45deg, #1565c0 30%, #1976d2 90%)",
-                              },
-                            }}
-                          >
-                            Ver Archivo
-                          </Button>
-                        </Box>
-                      ) : (
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "text.disabled" }}
-                        >
-                          No disponible
-                        </Typography>
-                      )}
+                        Ver Archivo
+                      </Button>
                     </Box>
-                  </>
-                )}
-              </Box>
-            )}
-          </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: 'text.disabled', mt: 'auto' }}>No disponible</Typography>
+                  )}
+                </Box>
+              </Grid>
+            </Grid>
+          )}
         </Box>
-      </Modal>
-
+      )}
+    </Box>
+  </Box>
+</Modal>
       <form onSubmit={handleSubmit} className="form">
         {isEditing && (
           <div className="mb-4">
@@ -821,7 +844,7 @@ export default function DocOperadoresForm() {
             </label>
             <input
               type="text"
-              value={formData.id_documentoOperador || ""}
+              value={formData.id_documentoTransportes || ""}
               disabled
               className="w-full max-w-lg p-2 border border-gray-300 rounded-md bg-gray-100"
             />
@@ -830,29 +853,28 @@ export default function DocOperadoresForm() {
 
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-medium mb-2">
-            Operador:
+            Unidad:
           </label>
           <Select
-            options={operadores.map((operador) => ({
-              value: operador.id_operador,
-              label:
-                operador.nombre_operador || `Operador ${operador.id_operador}`,
+            options={unidades.map((unidad) => ({
+              value: unidad.id_unidad,
+              label: unidad.nombre || `Unidad ${unidad.id_unidad}`,
             }))}
             value={
-              formData.id_operador
+              formData.id_unidad
                 ? {
-                    value: formData.id_operador,
-                    label: getNombreOperador(formData.id_operador),
+                    value: formData.id_unidad,
+                    label: getNombreUnidad(formData.id_unidad),
                   }
                 : null
             }
             onChange={(selectedOption) =>
               setFormData({
                 ...formData,
-                id_operador: selectedOption?.value || "",
+                id_unidad: selectedOption?.value || 0,
               })
             }
-            placeholder="Seleccione un operador"
+            placeholder="Seleccione una unidad"
             className="w-full max-w-lg"
             isDisabled={loading}
           />
@@ -874,48 +896,75 @@ export default function DocOperadoresForm() {
 
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-medium mb-2">
-            Licencia:
+            Archivo Registro Mercantil:
           </label>
           <input
             type="file"
-            onChange={handleFileGetAWSChange}
+            onChange={handleFileRegistroMercantilChange}
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             disabled={loading}
-            required={!isEditing || (isEditing && !formData.licencia)}
+            required={!isEditing || (isEditing && !formData.registroMercantil)}
           />
-          {fileGetAWS && (
+          {fileRegistroMercantil && (
             <p className="mt-2 text-sm text-gray-600">
-              Archivo seleccionado: {fileGetAWS.name}
+              Archivo seleccionado: {fileRegistroMercantil.name}
             </p>
           )}
-          {isEditing && !fileGetAWS && formData.licencia && (
+          {isEditing &&
+            !fileRegistroMercantil &&
+            formData.registroMercantil && (
+              <p className="mt-2 text-sm text-gray-600">
+                Archivo actual: {formData.registroMercantil}
+              </p>
+            )}
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Archivo Seguro:
+          </label>
+          <input
+            type="file"
+            onChange={handleFileSeguroChange}
+            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            disabled={loading}
+            required={!isEditing || (isEditing && !formData.seguro)}
+          />
+          {fileSeguro && (
             <p className="mt-2 text-sm text-gray-600">
-              Archivo actual: {formData.licencia}
+              Archivo seleccionado: {fileSeguro.name}
+            </p>
+          )}
+          {isEditing && !fileSeguro && formData.seguro && (
+            <p className="mt-2 text-sm text-gray-600">
+              Archivo actual: {formData.seguro}
             </p>
           )}
         </div>
 
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-medium mb-2">
-            Credencial de elector:
+            Archivo Tarjeta de Circulación:
           </label>
           <input
             type="file"
-            onChange={handleFilePostAWSChange}
+            onChange={handleFileTarjetaCirculacionChange}
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             disabled={loading}
-            required={!isEditing || (isEditing && !formData.identificacionO)}
+            required={!isEditing || (isEditing && !formData.tarjetaCirculacion)}
           />
-          {filePostAWS && (
+          {fileTarjetaCirculacion && (
             <p className="mt-2 text-sm text-gray-600">
-              Archivo seleccionado: {filePostAWS.name}
+              Archivo seleccionado: {fileTarjetaCirculacion.name}
             </p>
           )}
-          {isEditing && !filePostAWS && formData.identificacionO && (
-            <p className="mt-2 text-sm text-gray-600">
-              Archivo actual: {formData.identificacionO}
-            </p>
-          )}
+          {isEditing &&
+            !fileTarjetaCirculacion &&
+            formData.tarjetaCirculacion && (
+              <p className="mt-2 text-sm text-gray-600">
+                Archivo actual: {formData.tarjetaCirculacion}
+              </p>
+            )}
         </div>
 
         <div className="flex gap-2">
@@ -923,9 +972,12 @@ export default function DocOperadoresForm() {
             type="submit"
             className="button button-primary"
             disabled={loading}
+            
           >
+            
             {loading ? "Procesando..." : isEditing ? "Actualizar" : "Agregar"}
           </button>
+          
 
           {isEditing && (
             <button
@@ -958,7 +1010,7 @@ export default function DocOperadoresForm() {
         <button
           onClick={() => {
             fetchItems();
-            fetchOperadores();
+            fetchUnidades();
           }}
           className="button button-primary"
           disabled={loading}
@@ -973,34 +1025,36 @@ export default function DocOperadoresForm() {
           <thead>
             <tr>
               <th>ID Documento</th>
-              <th>Operador</th>
+              <th>Unidad</th>
               <th>Fecha Registro</th>
-              <th>GET AWS</th>
-              <th>POST AWS</th>
+              <th>Registro Mercantil</th>
+              <th>Seguro</th>
+              <th>Tarjeta Circulación</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {loading && !currentItems.length ? (
               <tr>
-                <td colSpan={6} className="text-center">
+                <td colSpan={7} className="text-center">
                   Cargando...
                 </td>
               </tr>
             ) : currentItems.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center">
+                <td colSpan={7} className="text-center">
                   No hay documentos disponibles
                 </td>
               </tr>
             ) : (
               currentItems.map((item) => (
-                <tr key={item.id_documentoOperador}>
-                  <td>{item.id_documentoOperador}</td>
-                  <td>{getNombreOperador(item.id_operador)}</td>
+                <tr key={item.id_documentoTransportes}>
+                  <td>{item.id_documentoTransportes}</td>
+                  <td>{getNombreUnidad(item.id_unidad)}</td>
                   <td>{item.fecha_registro}</td>
-                  <td>{item.licencia || "No disponible"}</td>
-                  <td>{item.identificacionO || "No disponible"}</td>
+                  <td>{item.registroMercantil || "No disponible"}</td>
+                  <td>{item.seguro || "No disponible"}</td>
+                  <td>{item.tarjetaCirculacion || "No disponible"}</td>
                   <td>
                     <div className="flex gap-2">
                       <button
@@ -1044,7 +1098,9 @@ export default function DocOperadoresForm() {
                       </button>
 
                       <button
-                        onClick={() => handleDelete(item.id_documentoOperador)}
+                        onClick={() =>
+                          handleDelete(item.id_documentoTransportes)
+                        }
                         style={{
                           background: "none",
                           border: "none",

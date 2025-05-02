@@ -1,13 +1,38 @@
+/* Sidebar - debe estar encima de todo */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 250px;
+  height: 100vh;
+  background-color: #0709ab;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  transition: left 0.3s ease-in-out;
+  z-index: 300; /* Mayor z-index que el header */
+  overflow-y: auto;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
 /* Header - debe estar debajo del sidebar cuando está abierto */
 .app-header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100px; /* Añadí altura fija */
+  height: 100px;
   background: #ffffff;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 200; /* Reducí el z-index */
+  z-index: 200; /* Menor que el sidebar */
+  transition: left 0.3s ease-in-out;
+}
+
+/* Cuando el sidebar está abierto, mover el header a la derecha */
+.sidebar.open + .app-header {
+  left: 250px;
+  width: calc(100% - 150px);
 }
 
 /* Overlay - debe estar entre header y sidebar */
@@ -18,7 +43,7 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 210; /* Mayor que header */
+  z-index: 250; /* Entre header (200) y sidebar (300) */
   display: none;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -27,24 +52,6 @@
 .sidebar-overlay.active {
   display: block;
   opacity: 1;
-}
-
-/* Sidebar - versión corregida */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: -300px; /* Cambié a left para consistencia */
-  width: 250px;
-  height: 100vh; /* Usé viewport height para cubrir toda la altura */
-  background-color: #057bf1;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Ajusté sombra */
-  transition: left 0.3s ease-in-out; /* Cambié a left */
-  z-index: 220; /* Mayor que overlay */
-  overflow-y: auto;
-}
-
-.sidebar.open {
-  left: 0; /* Corregido para usar left */
 }
 
 /* Resto de estilos (se mantienen igual) */

@@ -1,90 +1,149 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import "./../DatosBasicos.css";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import './../DatosBasicos.css';
+import Select from 'react-select';
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditSquareIcon from "@mui/icons-material/EditSquare";
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
-export default function Origen() {
-  // Definir el tipo Item para la nueva tabla
+export default function OrigenForm() {
+  // Definir tipos de datos
   type Item = {
     id_origen: number;
     origen: string;
-    destino: string;
+    id_zonasDestino: number;
+  };
+
+  type ZonaDestino = {
+    id_zonasDestino: number;
+    nombre: string;
   };
 
   // Estados
   const [items, setItems] = useState<Item[]>([]);
-  const [formData, setFormData] = useState<
-    Omit<Item, "id_origen"> & { id_origen?: number }
-  >({
-    origen: "",
-    destino: "",
+  const [zonasDestino, setZonasDestino] = useState<ZonaDestino[]>([]);
+  const [formData, setFormData] = useState<Omit<Item, 'id_origen'> & { id_origen?: number }>({
+    origen: '',
+    id_zonasDestino: 0,
   });
-  const [busqueda, setBusqueda] = useState("");
+  const [busqueda, setBusqueda] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
+  const [dataLoaded, setDataLoaded] = useState(false);
 
-  // Estados para paginación
+  // Paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
   // Configuración de la API
-  const API_BASE_URL =
-    "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
+  const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
-  const tableName = "origen"; // Cambiar el nombre de la tabla
+  const tableName = "origen";
+  const zonasTableName = "zona_destinos";
 
   // Obtener los datos al cargar el componente
   useEffect(() => {
-    fetchItems();
+    const loadData = async () => {
+      try {
+        await fetchZonasDestino();
+        await fetchItems();
+        setDataLoaded(true);
+      } catch (err) {
+        setError('Error al cargar los datos iniciales');
+      }
+    };
+    loadData();
   }, []);
 
-  // Función para obtener los elementos
+  // Función para obtener los orígenes
   const fetchItems = async () => {
     setLoading(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/${tableName}/all`, {
         headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Cache-Control": "no-cache",
-          apikey: API_KEY,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'apikey': API_KEY,
         },
         timeout: 30000,
       });
-      setItems(response.data.records); // Asegúrate de que response.data.records sea un array
+      setItems(response.data.records);
     } catch (err) {
-      setError("Error al cargar los datos");
-      console.error("Error en fetchItems:", err);
+      setError('Error al cargar los orígenes');
+      console.error('Error en fetchItems:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para manejar el envío del formulario (crear o actualizar)
+  // Función para obtener las zonas destino
+  const fetchZonasDestino = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/${zonasTableName}/all`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'apikey': API_KEY,
+        },
+        timeout: 30000,
+      });
+      setZonasDestino(response.data.records);
+    } catch (err) {
+      setError('Error al cargar las zonas destino');
+      console.error('Error en fetchZonasDestino:', err);
+    }
+  };
+
+  // Función para recargar todos los datos
+  const reloadData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await fetchZonasDestino();
+      await fetchItems();
+    } catch (err) {
+      setError('Error al recargar datos');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para manejar cambios en el formulario
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Función para manejar el envío del formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const url =
-        isEditing && formData.id_origen
-          ? `${API_BASE_URL}/${tableName}/${formData.id_origen}`
-          : `${API_BASE_URL}/${tableName}`;
+    setError('');
 
-      const method = isEditing && formData.id_origen ? "patch" : "post";
+    try {
+      const url = isEditing && formData.id_origen
+        ? `${API_BASE_URL}/${tableName}/${formData.id_origen}`
+        : `${API_BASE_URL}/${tableName}`;
+
+      const method = isEditing && formData.id_origen ? 'patch' : 'post';
 
       const response = await axios[method](
         url,
         { data: formData },
         {
           headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "Cache-Control": "no-cache",
-            apikey: API_KEY,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache',
+            'apikey': API_KEY,
           },
           timeout: 30000,
         }
@@ -92,61 +151,62 @@ export default function Origen() {
 
       const result = response.data;
       if (isEditing) {
-        setItems(
-          items.map((item) =>
-            item.id_origen === formData.id_origen ? result : item
-          )
-        );
+        setItems(items.map(item => (item.id_origen === formData.id_origen ? result : item)));
       } else {
         setItems([...items, result]);
       }
 
       // Limpiar el formulario
-      setFormData({ origen: "", destino: "" });
+      setFormData({ origen: '', id_zonasDestino: 0 });
       setIsEditing(false);
     } catch (err) {
-      setError("Error al guardar los datos");
-      console.error("Error en handleSubmit:", err);
+      setError('Error al guardar los datos');
+      console.error('Error en handleSubmit:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Función para eliminar un elemento
+  // Función para eliminar un origen
   const handleDelete = async (id_origen: number) => {
-    if (window.confirm("¿Estás seguro de eliminar este elemento?")) {
+    if (window.confirm('¿Estás seguro de eliminar este origen?')) {
       setLoading(true);
       try {
         await axios.delete(`${API_BASE_URL}/${tableName}/${id_origen}`, {
           headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "Cache-Control": "no-cache",
-            apikey: API_KEY,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache',
+            'apikey': API_KEY,
           },
           timeout: 30000,
         });
-        setItems(items.filter((item) => item.id_origen !== id_origen));
+        setItems(items.filter(item => item.id_origen !== id_origen));
       } catch (err) {
-        setError("Error al eliminar el elemento");
-        console.error("Error en handleDelete:", err);
+        setError('Error al eliminar el origen');
+        console.error('Error en handleDelete:', err);
       } finally {
         setLoading(false);
       }
     }
   };
 
-  // Función para editar un elemento
+  // Función para editar un origen
   const handleEdit = (item: Item) => {
     setFormData(item);
     setIsEditing(true);
   };
 
+  // Obtener nombre de zona destino
+  const getNombreZonaDestino = (id: number): string => {
+    const zona = zonasDestino.find(z => z.id_zonasDestino === id);
+    return zona ? zona.nombre : 'No encontrado';
+  };
+
   // Filtrar elementos según la búsqueda
-  const filteredItems = items.filter(
-    (item) =>
-      item.origen.toLowerCase().includes(busqueda.toLowerCase()) ||
-      item.destino.toLowerCase().includes(busqueda.toLowerCase())
+  const filteredItems = items.filter(item =>
+    item.origen.toLowerCase().includes(busqueda.toLowerCase()) ||
+    getNombreZonaDestino(item.id_zonasDestino).toLowerCase().includes(busqueda.toLowerCase())
   );
 
   // Cálculos para paginación
@@ -162,7 +222,7 @@ export default function Origen() {
 
   return (
     <div>
-      <h2>Origen y Destino</h2>
+      <h2>Orígenes</h2>
       {error && <div className="error-message">{error}</div>}
 
       {/* Formulario */}
@@ -180,15 +240,12 @@ export default function Origen() {
         )}
 
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-medium mb-2">
-            Origen:
-          </label>
+          <label>Origen:</label>
           <input
             type="text"
+            name="origen"
             value={formData.origen}
-            onChange={(e) =>
-              setFormData({ ...formData, origen: e.target.value })
-            }
+            onChange={handleChange}
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Ingrese el origen"
@@ -196,18 +253,27 @@ export default function Origen() {
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-medium mb-2">
-            Destino:
-          </label>
-          <input
-            type="text"
-            value={formData.destino}
-            onChange={(e) =>
-              setFormData({ ...formData, destino: e.target.value })
+          <label>Zona Destino:</label>
+          <Select
+            options={zonasDestino.map(zona => ({
+              value: zona.id_zonasDestino,
+              label: zona.nombre
+            }))}
+            value={zonasDestino
+              .filter(zona => zona.id_zonasDestino === formData.id_zonasDestino)
+              .map(zona => ({ value: zona.id_zonasDestino, label: zona.nombre }))}
+            onChange={(selectedOption) => 
+              setFormData({
+                ...formData,
+                id_zonasDestino: selectedOption?.value || 0
+              })
             }
+            placeholder="Seleccione una zona destino"
+            className="basic-single"
+            classNamePrefix="select"
+            isClearable={false}
+            isSearchable={true}
             required
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese el destino"
           />
         </div>
 
@@ -217,14 +283,14 @@ export default function Origen() {
             className="button button-primary"
             disabled={loading}
           >
-            {loading ? "Procesando..." : isEditing ? "Actualizar" : "Agregar"}
+            {loading ? 'Procesando...' : isEditing ? 'Actualizar' : 'Agregar'}
           </button>
 
           {isEditing && (
             <button
               type="button"
               onClick={() => {
-                setFormData({ origen: "", destino: "" });
+                setFormData({ origen: '', id_zonasDestino: 0 });
                 setIsEditing(false);
               }}
               className="button button-secondary"
@@ -237,44 +303,25 @@ export default function Origen() {
 
       {/* Barra de búsqueda */}
       <div className="search-container">
-        <label className="block text-gray-700 text-sm font-medium mb-2">
-          Buscar en origen y destino:
-        </label>
+        <label>Buscar en orígenes:</label>
         <input
           type="text"
-          placeholder="Buscar..."
+          placeholder="Buscar por origen o zona destino..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          required
           className="search-input w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
-        <span className="search-icon">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-        </span>
       </div>
 
       {/* Botón de recargar */}
-      <div style={{ overflow: "hidden" }}>
+      <div style={{ overflow: 'hidden' }}>
         <button
-          onClick={fetchItems}
+          onClick={reloadData}
           className="button button-primary"
           disabled={loading}
-          style={{ float: "right" }} // Mueve el botón a la derecha
+          style={{ float: 'right' }}
         >
-          {loading ? "Recargando..." : "Recargar Tabla"}
+          {loading ? 'Recargando...' : 'Recargar Tabla'}
         </button>
       </div>
 
@@ -285,49 +332,40 @@ export default function Origen() {
             <tr>
               <th>ID</th>
               <th>Origen</th>
-              <th>Destino</th>
+              <th>Zona Destino</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={4} className="text-center">
-                  Cargando...
-                </td>
+                <td colSpan={4} className="text-center">Cargando...</td>
               </tr>
             ) : currentItems.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center">
-                  No hay elementos disponibles
-                </td>
+                <td colSpan={4} className="text-center">No hay orígenes disponibles</td>
               </tr>
             ) : (
-              currentItems.map((item) => (
+              currentItems.map(item => (
                 <tr key={item.id_origen}>
                   <td>{item.id_origen}</td>
                   <td>{item.origen}</td>
-                  <td>{item.destino}</td>
+                  <td>{getNombreZonaDestino(item.id_zonasDestino)}</td>
                   <td>
                     <div className="flex gap-2">
-                    <button
-                          onClick={() => handleEdit(item)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#0447fb",
-                            cursor: "pointer",
-                            padding: "4px",
-                          }}
-                          onMouseOver={(e) =>
-                            (e.currentTarget.style.color = "#0447fb")
-                          }
-                          onMouseOut={(e) =>
-                            (e.currentTarget.style.color = "#0447fb")
-                          }
-                        >
-                          <EditSquareIcon fontSize="small" />
-                        </button>
+                      <button
+                        onClick={() => handleEdit(item)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#0447fb",
+                          cursor: "pointer",
+                          padding: "4px",
+                        }}
+                      >
+                        <EditSquareIcon fontSize="small" />
+                      </button>
+                     
                       <button
                         onClick={() => handleDelete(item.id_origen)}
                         style={{
@@ -337,12 +375,6 @@ export default function Origen() {
                           cursor: "pointer",
                           padding: "4px",
                         }}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.color = "#dc2626")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.color = "#ef4444")
-                        }
                       >
                         <DeleteIcon fontSize="small" />
                       </button>
