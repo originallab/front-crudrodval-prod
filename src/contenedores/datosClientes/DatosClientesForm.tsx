@@ -53,8 +53,8 @@ type Proveedor = {
   estado: string;
   unidades_propias: boolean;
   cuenta_espejo_gps: boolean;
-  created_at?: string;
-  update_at?: string;
+  fecha_creacion?: string;
+  fecha_actualizacion?: string;
 };
 
 export default function AltaProveedorForm() {
@@ -131,14 +131,18 @@ export default function AltaProveedorForm() {
     try {
       const response = await axios.get(`${API_BASE_URL}/proveedores/all`, {
         headers: { apikey: API_KEY },
+        
       });
+       // Inspeccionar datos
       setProveedores(response.data.records);
+      console.log("Datos recibidos:", response.data.records);
     } catch (err) {
       setError("Error al cargar proveedores");
       console.error(err);
     } finally {
       setLoading(false);
     }
+
   };
 
   // Manejadores de cambios
@@ -434,8 +438,9 @@ export default function AltaProveedorForm() {
     <div className="rodval-container">
       {/* Encabezado */}
       <div className="rodval-header">
-        <div className="rodval-logo">rodval LOGISTICS</div>
-        <h1 className="rodval-title">ALTA PROVEEDOR</h1>
+      <img 
+        src="https://www.camionesybuses.com.ar/wp-content/uploads/2018/04/portada-vw-camiones-520x245.jpg"  // Reemplaza con la ruta correcta
+       />
       </div>
 
       {/* Botón para mostrar/ocultar tabla */}
@@ -445,6 +450,14 @@ export default function AltaProveedorForm() {
           className={`rodval-button ${
             showTable ? "rodval-button-secondary" : "rodval-button-primary"
           }`}
+          style={{
+            backgroundColor: isEditing ? '#008CBA' : '#008CBA',
+            color: 'white',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '999px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+          }}
         >
           {showTable ? (
             <>
@@ -474,6 +487,14 @@ export default function AltaProveedorForm() {
               onClick={fetchProveedores}
               className="rodval-button rodval-button-primary"
               disabled={loading}
+              style={{
+                backgroundColor: isEditing ? '#008CBA' : '#008CBA',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '999px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
             >
               {loading ? "Cargando..." : "Recargar"}
             </button>
@@ -513,8 +534,8 @@ export default function AltaProveedorForm() {
                       <td>{item.estado}</td>
                       <td>{item.unidades_propias ? "Sí" : "No"}</td>
                       <td>{item.cuenta_espejo_gps ? "Sí" : "No"}</td>
-                      <td>{item.created_at}</td>
-                      <td>{item.update_at}</td>
+                      <td>{item.fecha_creacion}</td>
+                      <td>{item.fecha_actualizacion}</td>
                       <td>
                         <div className="rodval-actions">
                           <button
@@ -555,26 +576,46 @@ export default function AltaProveedorForm() {
 
           {/* Paginación */}
           {filteredItems.length > itemsPerPage && (
-            <div className="rodval-pagination">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1 || loading}
-                className="rodval-pagination-button"
-              >
-                <ArrowBackIosIcon fontSize="small" />
-              </button>
-              <span>
-                Página {currentPage} de {totalPages}
-              </span>
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages || loading}
-                className="rodval-pagination-button"
-              >
-                <ArrowForwardIosIcon fontSize="small" />
-              </button>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: '20px',
+            gap: '15px'
+          }}>
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                color: currentPage === 1 ? '#ccc' : '#3b82f6'
+              }}
+            >
+              <ArrowBackIosIcon fontSize="medium" />
+            </button>
+            
+            <span style={{ margin: '0 10px' }}>
+              Página {currentPage} de {totalPages}
+            </span>
+            
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                color: currentPage === totalPages ? '#ccc' : '#3b82f6'
+              }}
+            >
+              <ArrowForwardIosIcon fontSize="medium" />
+            </button>
             </div>
           )}
         </div>
@@ -1035,9 +1076,17 @@ export default function AltaProveedorForm() {
           {/* Botones del formulario */}
           <div className="rodval-form-actions">
             <button
-              type="submit"
+              type="button"
               className="rodval-button rodval-button-primary"
               disabled={loading}
+              style={{
+                backgroundColor: isEditing ? '#008CBA' : '#008CBA',
+                color: 'white',
+                padding: '10px 20px',
+                border: 'none',
+                borderRadius: '999px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
             >
               {loading
                 ? "Procesando..."

@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import './../DatosBasicos.css';
-import Select from 'react-select';
-import Multiselect from 'multiselect-react-dropdown';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import "./../DatosBasicos.css";
+import Select from "react-select";
+import Multiselect from "multiselect-react-dropdown";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditSquareIcon from "@mui/icons-material/EditSquare";
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -22,43 +22,46 @@ export default function DatosBasicosForm() {
     cuenta_espejo: string;
     tipo_unidades: number;
     operador: number;
-    destino: string;
-    estado: number;
+    tarjeta_circulacion: string;
+    poliza: string;
   };
 
-  // Estados
+  // polizas
   const [items, setItems] = useState<Item[]>([]);
-  const [formData, setFormData] = useState<Omit<Item, 'id_transportes'> & { id_transportes?: number }>({
-    fecha_registro: '',
-    rfc: '',
-    direccion: '',
-    telefono: '',
-    cuenta_bancaria: '',
-    cuenta_espejo: '',
+  const [formData, setFormData] = useState<
+    Omit<Item, "id_transportes"> & { id_transportes?: number }
+  >({
+    fecha_registro: "",
+    rfc: "",
+    direccion: "",
+    telefono: "",
+    cuenta_bancaria: "",
+    cuenta_espejo: "",
     tipo_unidades: 0,
     operador: 0,
-    destino: '',
-    estado: 0,
+    tarjeta_circulacion: "",
+    poliza: "",
   });
-  const [busqueda, setBusqueda] = useState('');
+  const [busqueda, setBusqueda] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [startDate, setStartDate] = useState<Date | null>(null);
 
   // Datos de las tablas referenciadas
   const [tiposUnidades, setTiposUnidades] = useState<any[]>([]);
   const [operadores, setOperadores] = useState<any[]>([]);
   const [origenes, setOrigenes] = useState<any[]>([]);
-  const [estados, setEstados] = useState<any[]>([]);
-  const formattedDate = startDate ? startDate.toISOString().split('T')[0] : '';
+  const [polizas, setpolizas] = useState<any[]>([]);
+  const formattedDate = startDate ? startDate.toISOString().split("T")[0] : "";
 
   // Paginación mejorada
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
 
   // Configuración de la API
-  const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
+  const API_BASE_URL =
+    "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
   const tableName = "transportes";
 
@@ -74,17 +77,17 @@ export default function DatosBasicosForm() {
     try {
       const response = await axios.get(`${API_BASE_URL}/${tableName}/all`, {
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-          'apikey': API_KEY,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "Cache-Control": "no-cache",
+          apikey: API_KEY,
         },
         timeout: 30000,
       });
       setItems(response.data.records);
     } catch (err) {
-      setError('Error al cargar los datos');
-      console.error('Error en fetchItems:', err);
+      setError("Error al cargar los datos");
+      console.error("Error en fetchItems:", err);
     } finally {
       setLoading(false);
     }
@@ -93,19 +96,24 @@ export default function DatosBasicosForm() {
   // Función para obtener datos de las tablas referenciadas
   const fetchReferencedData = async () => {
     try {
-      const [tiposUnidadesRes, operadoresRes, origenesRes, estadosRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/tipos_unidades/all`, { headers: { 'apikey': API_KEY } }),
-        axios.get(`${API_BASE_URL}/operadores/all`, { headers: { 'apikey': API_KEY } }),
-        axios.get(`${API_BASE_URL}/origen/all`, { headers: { 'apikey': API_KEY } }),
-        axios.get(`${API_BASE_URL}/estado/all`, { headers: { 'apikey': API_KEY } }),
-      ]);
+      const [tiposUnidadesRes, operadoresRes, origenesRes, ] =
+        await Promise.all([
+          axios.get(`${API_BASE_URL}/tipo_unidades/all`, {
+            headers: { apikey: API_KEY },
+          }),
+          axios.get(`${API_BASE_URL}/operadores/all`, {
+            headers: { apikey: API_KEY },
+          }),
+         
+          
+        ]);
 
       setTiposUnidades(tiposUnidadesRes.data.records);
       setOperadores(operadoresRes.data.records);
-      setOrigenes(origenesRes.data.records);
-      setEstados(estadosRes.data.records);
+    
+
     } catch (err) {
-      console.error('Error al cargar datos referenciados:', err);
+      console.error("Error al cargar datos referenciados:", err);
     }
   };
 
@@ -114,20 +122,23 @@ export default function DatosBasicosForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = isEditing && formData.id_transportes
-        ? `${API_BASE_URL}/${tableName}/${formData.id_transportes}`
-        : `${API_BASE_URL}/${tableName}`;
+      const url =
+        isEditing && formData.id_transportes
+          ? `${API_BASE_URL}/${tableName}/${formData.id_transportes}`
+          : `${API_BASE_URL}/${tableName}`;
 
-      const method = isEditing && formData.id_transportes ? 'patch' : 'post';
+      const method = isEditing && formData.id_transportes ? "patch" : "post";
 
       // Formatear la fecha correctamente para el envío
-      const formattedDate = startDate ? startDate.toISOString().split('T')[0] : '';
+      const formattedDate = startDate
+        ? startDate.toISOString().split("T")[0]
+        : "";
 
       // Preparar los datos a enviar incluyendo la fecha formateada
       const dataToSend = {
         ...formData,
         fecha_registro: formattedDate,
-        id_transportes: isEditing ? formData.id_transportes : undefined
+        id_transportes: isEditing ? formData.id_transportes : undefined,
       };
 
       const response = await axios[method](
@@ -135,10 +146,10 @@ export default function DatosBasicosForm() {
         { data: dataToSend },
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache',
-            'apikey': API_KEY,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+            apikey: API_KEY,
           },
           timeout: 30000,
         }
@@ -146,7 +157,11 @@ export default function DatosBasicosForm() {
 
       const result = response.data;
       if (isEditing) {
-        setItems(items.map(item => (item.id_transportes === formData.id_transportes ? result : item)));
+        setItems(
+          items.map((item) =>
+            item.id_transportes === formData.id_transportes ? result : item
+          )
+        );
       } else {
         setItems([...items, result]);
       }
@@ -156,22 +171,22 @@ export default function DatosBasicosForm() {
 
       // Limpiar el formulario
       setFormData({
-        fecha_registro: '',
-        rfc: '',
-        direccion: '',
-        telefono: '',
-        cuenta_bancaria: '',
-        cuenta_espejo: '',
+        fecha_registro: "",
+        rfc: "",
+        direccion: "",
+        telefono: "",
+        cuenta_bancaria: "",
+        cuenta_espejo: "",
         tipo_unidades: 0,
         operador: 0,
-        destino: '',
-        estado: 0,
+        tarjeta_circulacion: "",
+        poliza: "",
       });
       setStartDate(null);
       setIsEditing(false);
     } catch (err) {
-      setError('Error al guardar los datos');
-      console.error('Error en handleSubmit:', err);
+      setError("Error al guardar los datos");
+      console.error("Error en handleSubmit:", err);
     } finally {
       setLoading(false);
     }
@@ -179,22 +194,24 @@ export default function DatosBasicosForm() {
 
   // Función para eliminar un elemento
   const handleDelete = async (id_transportes: number) => {
-    if (window.confirm('¿Estás seguro de eliminar este elemento?')) {
+    if (window.confirm("¿Estás seguro de eliminar este elemento?")) {
       setLoading(true);
       try {
         await axios.delete(`${API_BASE_URL}/${tableName}/${id_transportes}`, {
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache',
-            'apikey': API_KEY,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+            apikey: API_KEY,
           },
           timeout: 30000,
         });
-        setItems(items.filter(item => item.id_transportes !== id_transportes));
+        setItems(
+          items.filter((item) => item.id_transportes !== id_transportes)
+        );
       } catch (err) {
-        setError('Error al eliminar el elemento');
-        console.error('Error en handleDelete:', err);
+        setError("Error al eliminar el elemento");
+        console.error("Error en handleDelete:", err);
       } finally {
         setLoading(false);
       }
@@ -208,19 +225,13 @@ export default function DatosBasicosForm() {
     setIsEditing(true);
   };
 
-  // Función para obtener nombres de los IDs en el multiselect
-  const getDestinoNames = (destinoIds: string) => {
-    const ids = destinoIds.split(',').map(Number);
-    return origenes
-      .filter((origen) => ids.includes(origen.id_origen))
-      .map((origen) => origen.origen)
-      .join(', ');
-  };
+
 
   // Filtrar elementos según la búsqueda
-  const filteredItems = items.filter(item =>
-    item.rfc.toLowerCase().includes(busqueda.toLowerCase()) ||
-    item.direccion.toLowerCase().includes(busqueda.toLowerCase())
+  const filteredItems = items.filter(
+    (item) =>
+      item.rfc.toLowerCase().includes(busqueda.toLowerCase()) ||
+      item.direccion.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   // Cálculos para paginación mejorada
@@ -282,7 +293,9 @@ export default function DatosBasicosForm() {
           <input
             type="text"
             value={formData.direccion}
-            onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, direccion: e.target.value })
+            }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Ingrese la direccion"
@@ -294,7 +307,9 @@ export default function DatosBasicosForm() {
           <input
             type="text"
             value={formData.telefono}
-            onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, telefono: e.target.value })
+            }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Ingrese el telefono"
@@ -306,7 +321,9 @@ export default function DatosBasicosForm() {
           <input
             type="text"
             value={formData.cuenta_bancaria}
-            onChange={(e) => setFormData({ ...formData, cuenta_bancaria: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, cuenta_bancaria: e.target.value })
+            }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Ingrese el telefono"
@@ -318,7 +335,9 @@ export default function DatosBasicosForm() {
           <input
             type="text"
             value={formData.cuenta_espejo}
-            onChange={(e) => setFormData({ ...formData, cuenta_espejo: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, cuenta_espejo: e.target.value })
+            }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Ingrese la cuenta espejo"
@@ -328,9 +347,15 @@ export default function DatosBasicosForm() {
         <div className="mb-4">
           <label>Tipo de Unidad</label>
           <Select
-            options={tiposUnidades.map((item) => ({ value: item.id_unidad, label: item.nombre }))}
+            options={tiposUnidades.map((item) => ({
+              value: item.id_unidad,
+              label: item.nombre,
+            }))}
             onChange={(selectedOption) =>
-              setFormData({ ...formData, tipo_unidades: selectedOption?.value || 0 })
+              setFormData({
+                ...formData,
+                tipo_unidades: selectedOption?.value || 0,
+              })
             }
             placeholder="Seleccione el tipo de unidad"
           />
@@ -339,7 +364,10 @@ export default function DatosBasicosForm() {
         <div className="mb-4">
           <label>Operador</label>
           <Select
-            options={operadores.map((item) => ({ value: item.id_operador, label: item.nombre_operador }))}
+            options={operadores.map((item) => ({
+              value: item.id_operador,
+              label: item.nombre_operador,
+            }))}
             onChange={(selectedOption) =>
               setFormData({ ...formData, operador: selectedOption?.value || 0 })
             }
@@ -348,35 +376,30 @@ export default function DatosBasicosForm() {
         </div>
 
         <div className="mb-4">
-          <label>Destino</label>
-          <Multiselect
-            options={origenes.map((item) => ({ value: item.id_origen, label: item.origen }))}
-            selectedValues={formData.destino
-              .split(',')
-              .map((id) => origenes.find((origen) => origen.id_origen === Number(id)))
-              .filter(Boolean)
-              .map((origen) => ({ value: origen.id_origen, label: origen.origen }))}
-            onSelect={(selectedList) =>
-              setFormData({ ...formData, destino: selectedList.map((item: {value: string}) => item.value).join(',') })
+          <label>tarjeta_circulacion</label>
+          <input
+            type="text"
+            value={formData.tarjeta_circulacion}
+            onChange={(e) =>
+              setFormData({ ...formData, tarjeta_circulacion: e.target.value })
             }
-            onRemove={(selectedList) =>
-              setFormData({ ...formData, destino: selectedList.map((item: {value: string}) => item.value).join(',') })
-            }
-            displayValue="label"
-            placeholder="Seleccione los destinos"
-            showCheckbox
-            closeIcon="circle"
+            required
+            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            placeholder="Ingrese el numero de la tarjeta de circulacion"
           />
         </div>
 
         <div className="mb-4">
-          <label>Estado</label>
-          <Select
-            options={estados.map((item) => ({ value: item.id_estado, label: item.estado }))}
-            onChange={(selectedOption) =>
-              setFormData({ ...formData, estado: selectedOption?.value || 0 })
+          <label>poliza</label>
+          <input
+            type="text"
+            value={formData.poliza}
+            onChange={(e) =>
+              setFormData({ ...formData, poliza: e.target.value })
             }
-            placeholder="Seleccione el estado"
+            required
+            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            placeholder="Ingrese el numero de la poliza"
           />
         </div>
 
@@ -385,8 +408,17 @@ export default function DatosBasicosForm() {
             type="submit"
             className="button button-primary"
             disabled={loading}
+            style={{
+              backgroundColor: isEditing ? "#008CBA" : "#008CBA",
+              float: "left",
+              color: "white",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "999px",
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
           >
-            {loading ? 'Procesando...' : isEditing ? 'Actualizar' : 'Agregar'}
+            {loading ? "Procesando..." : isEditing ? "Actualizar" : "Agregar"}
           </button>
 
           {isEditing && (
@@ -394,16 +426,16 @@ export default function DatosBasicosForm() {
               type="button"
               onClick={() => {
                 setFormData({
-                  fecha_registro: '',
-                  rfc: '',
-                  direccion: '',
-                  telefono: '',
-                  cuenta_bancaria: '',
-                  cuenta_espejo: '',
+                  fecha_registro: "",
+                  rfc: "",
+                  direccion: "",
+                  telefono: "",
+                  cuenta_bancaria: "",
+                  cuenta_espejo: "",
                   tipo_unidades: 0,
                   operador: 0,
-                  destino: '',
-                  estado: 0,
+                  tarjeta_circulacion: "",
+                  poliza: 0,
                 });
                 setStartDate(null);
                 setIsEditing(false);
@@ -430,14 +462,22 @@ export default function DatosBasicosForm() {
       </div>
 
       {/* Botón de recargar */}
-      <div style={{ overflow: 'hidden' }}>
+      <div style={{ overflow: "hidden" }}>
         <button
           onClick={fetchItems}
           className="button button-primary"
           disabled={loading}
-          style={{ float: 'right' }}
+          style={{
+            backgroundColor: isEditing ? "#008CBA" : "#008CBA",
+            float: "right",
+            color: "white",
+            padding: "10px 20px",
+            border: "none",
+            borderRadius: "999px",
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
         >
-          {loading ? 'Recargando...' : 'Recargar Tabla'}
+          {loading ? "Recargando..." : "Recargar Tabla"}
         </button>
       </div>
 
@@ -455,25 +495,35 @@ export default function DatosBasicosForm() {
               <th>Cuenta Espejo</th>
               <th>Tipo de Unidad</th>
               <th>Operador</th>
-              <th>Destino</th>
-              <th>Estado</th>
+              <th>tarjeta_circulacion</th>
+              <th>poliza</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={12} className="text-center">Cargando...</td>
+                <td colSpan={12} className="text-center">
+                  Cargando...
+                </td>
               </tr>
             ) : currentItems.length === 0 ? (
               <tr>
-                <td colSpan={12} className="text-center">No hay elementos disponibles</td>
+                <td colSpan={12} className="text-center">
+                  No hay elementos disponibles
+                </td>
               </tr>
             ) : (
               currentItems.map((item) => {
-                const tipoUnidad = tiposUnidades.find((tu) => tu.id_unidad === Number(item.tipo_unidades));
-                const operador = operadores.find((op) => op.id_operador === Number(item.operador));
-                const estado = estados.find((es) => es.id_estado === Number(item.estado));
+                const tipoUnidad = tiposUnidades.find(
+                  (tu) => tu.id_unidad === Number(item.tipo_unidades)
+                );
+                const operador = operadores.find(
+                  (op) => op.id_operador === Number(item.operador)
+                );
+                const poliza = polizas.find(
+                  (es) => es.id_poliza === Number(item.poliza)
+                );
 
                 return (
                   <tr key={item.id_transportes}>
@@ -484,10 +534,10 @@ export default function DatosBasicosForm() {
                     <td>{item.telefono}</td>
                     <td>{item.cuenta_bancaria}</td>
                     <td>{item.cuenta_espejo}</td>
-                    <td>{tipoUnidad?.nombre || 'No encontrado'}</td>
-                    <td>{operador?.nombre_operador || 'No encontrado'}</td>
-                    <td>{getDestinoNames(item.destino)}</td>
-                    <td>{estado?.estado || 'No encontrado'}</td>
+                    <td>{tipoUnidad?.nombre || "No encontrado"}</td>
+                    <td>{operador?.nombre_operador || "No encontrado"}</td>
+                    <td>{item.tarjeta_circulacion}</td>
+                    <td>{item.poliza}</td>
                     <td>
                       <div className="flex gap-2">
                         <button
@@ -539,23 +589,28 @@ export default function DatosBasicosForm() {
         {filteredItems.length > itemsPerPage && (
           <div className="pagination-container">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1 || loading}
               className="pagination-button"
             >
-              <ArrowBackIosIcon fontSize="medium" sx={{ color: '#3b82f6' }} />
+              <ArrowBackIosIcon fontSize="medium" sx={{ color: "#3b82f6" }} />
             </button>
-            
+
             <span className="pagination-info">
               Página {currentPage} de {totalPages}
             </span>
-            
+
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages || loading}
               className="pagination-button"
             >
-              <ArrowForwardIosIcon fontSize="medium" sx={{ color: '#3b82f6' }} />
+              <ArrowForwardIosIcon
+                fontSize="medium"
+                sx={{ color: "#3b82f6" }}
+              />
             </button>
           </div>
         )}

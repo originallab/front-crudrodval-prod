@@ -222,6 +222,14 @@ export default function Operadores() {
             type="submit"
             className="button button-primary"
             disabled={loading}
+            style={{
+              backgroundColor: isEditing ? '#008CBA' : '#008CBA',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '999px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+            }}
           >
             {loading ? 'Procesando...' : isEditing ? 'Actualizar' : 'Agregar'}
           </button>
@@ -278,7 +286,16 @@ export default function Operadores() {
           onClick={fetchItems}
           className="button button-primary"
           disabled={loading}
-          style={{ float: 'right' }} // Mueve el botón a la derecha
+       // Mueve el botón a la derecha
+          style={{
+            backgroundColor: isEditing ? '#008CBA' : '#008CBA',
+           float: 'right' ,
+            color: 'white',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '999px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+          }}
         >
           {loading ? 'Recargando...' : 'Recargar Tabla'}
         </button>
