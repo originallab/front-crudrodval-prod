@@ -52,7 +52,6 @@ export default function DatosBasicosForm() {
   const [tiposUnidades, setTiposUnidades] = useState<any[]>([]);
   const [operadores, setOperadores] = useState<any[]>([]);
   const [origenes, setOrigenes] = useState<any[]>([]);
-  const [polizas, setpolizas] = useState<any[]>([]);
   const formattedDate = startDate ? startDate.toISOString().split("T")[0] : "";
 
   // Paginación mejorada
@@ -63,7 +62,7 @@ export default function DatosBasicosForm() {
   const API_BASE_URL =
     "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
-  const tableName = "transportes";
+  const tableName = "transportess";
 
   // Obtener los datos al cargar el componente
   useEffect(() => {
@@ -96,22 +95,17 @@ export default function DatosBasicosForm() {
   // Función para obtener datos de las tablas referenciadas
   const fetchReferencedData = async () => {
     try {
-      const [tiposUnidadesRes, operadoresRes, origenesRes, ] =
-        await Promise.all([
-          axios.get(`${API_BASE_URL}/tipo_unidades/all`, {
-            headers: { apikey: API_KEY },
-          }),
-          axios.get(`${API_BASE_URL}/operadores/all`, {
-            headers: { apikey: API_KEY },
-          }),
-         
-          
-        ]);
+      const [tiposUnidadesRes, operadoresRes, origenesRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/tipo_unidades/all`, {
+          headers: { apikey: API_KEY },
+        }),
+        axios.get(`${API_BASE_URL}/operadores/all`, {
+          headers: { apikey: API_KEY },
+        }),
+      ]);
 
       setTiposUnidades(tiposUnidadesRes.data.records);
       setOperadores(operadoresRes.data.records);
-    
-
     } catch (err) {
       console.error("Error al cargar datos referenciados:", err);
     }
@@ -225,8 +219,6 @@ export default function DatosBasicosForm() {
     setIsEditing(true);
   };
 
-
-
   // Filtrar elementos según la búsqueda
   const filteredItems = items.filter(
     (item) =>
@@ -265,7 +257,7 @@ export default function DatosBasicosForm() {
         )}
 
         <div className="mb-4">
-          <label>Fecha de Registro: </label>
+          <label>Fecha de Registro:</label>
           <DatePicker
             selected={startDate}
             onChange={(date: Date) => setStartDate(date)}
@@ -277,7 +269,9 @@ export default function DatosBasicosForm() {
         </div>
 
         <div className="mb-4">
-          <label>RFC: </label>
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            RFC:
+          </label>
           <input
             type="text"
             value={formData.rfc}
@@ -289,21 +283,25 @@ export default function DatosBasicosForm() {
         </div>
 
         <div className="mb-4">
-          <label>Dirección: </label>
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Direccion:
+          </label>
           <input
             type="text"
-            value={formData.direccion}
+            value={formData.telefono}
             onChange={(e) =>
               setFormData({ ...formData, direccion: e.target.value })
             }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese la direccion"
+            placeholder="Ingresa la direccion"
           />
         </div>
 
         <div className="mb-4">
-          <label>Teléfono: </label>
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Telefono:
+          </label>
           <input
             type="text"
             value={formData.telefono}
@@ -312,12 +310,14 @@ export default function DatosBasicosForm() {
             }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese el telefono"
+            placeholder="Ingresa el telefono"
           />
         </div>
 
         <div className="mb-4">
-          <label>Cuenta Bancaria: </label>
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Cuenta Bancaria:
+          </label>
           <input
             type="text"
             value={formData.cuenta_bancaria}
@@ -326,12 +326,14 @@ export default function DatosBasicosForm() {
             }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholder="Ingrese el telefono"
+            placeholder="Ingrese la cuenta bancaria"
           />
         </div>
 
         <div className="mb-4">
-          <label>Cuenta Espejo: </label>
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Cuenta Espejo:
+          </label>
           <input
             type="text"
             value={formData.cuenta_espejo}
@@ -345,12 +347,17 @@ export default function DatosBasicosForm() {
         </div>
 
         <div className="mb-4">
-          <label>Tipo de Unidad</label>
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Tipo de Unidad:
+          </label>
           <Select
             options={tiposUnidades.map((item) => ({
               value: item.id_unidad,
               label: item.nombre,
             }))}
+            value={tiposUnidades
+              .filter((item) => item.id_unidad === formData.tipo_unidades)
+              .map((item) => ({ value: item.id_unidad, label: item.nombre }))}
             onChange={(selectedOption) =>
               setFormData({
                 ...formData,
@@ -358,25 +365,43 @@ export default function DatosBasicosForm() {
               })
             }
             placeholder="Seleccione el tipo de unidad"
+            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            classNamePrefix="select"
+            isClearable={false}
+            isSearchable={true}
+            required
           />
         </div>
 
         <div className="mb-4">
-          <label>Operador</label>
+          <label>Operador:</label>
           <Select
             options={operadores.map((item) => ({
               value: item.id_operador,
               label: item.nombre_operador,
             }))}
+            value={operadores
+              .filter((item) => item.id_operador === formData.operador)
+              .map((item) => ({
+                value: item.id_operador,
+                label: item.nombre_operador,
+              }))}
             onChange={(selectedOption) =>
               setFormData({ ...formData, operador: selectedOption?.value || 0 })
             }
             placeholder="Seleccione el operador"
+            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            classNamePrefix="select"
+            isClearable={false}
+            isSearchable={true}
+            required
           />
         </div>
 
         <div className="mb-4">
-          <label>tarjeta_circulacion</label>
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Tarjeta de circulación:
+          </label>
           <input
             type="text"
             value={formData.tarjeta_circulacion}
@@ -390,7 +415,9 @@ export default function DatosBasicosForm() {
         </div>
 
         <div className="mb-4">
-          <label>poliza</label>
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Póliza:
+          </label>
           <input
             type="text"
             value={formData.poliza}
@@ -409,7 +436,7 @@ export default function DatosBasicosForm() {
             className="button button-primary"
             disabled={loading}
             style={{
-              backgroundColor: isEditing ? "#008CBA" : "#008CBA",
+              backgroundColor: isEditing ? "#0A2D5A " : "#0A2D5A ",
               float: "left",
               color: "white",
               padding: "10px 20px",
@@ -435,7 +462,7 @@ export default function DatosBasicosForm() {
                   tipo_unidades: 0,
                   operador: 0,
                   tarjeta_circulacion: "",
-                  poliza: 0,
+                  poliza: "",
                 });
                 setStartDate(null);
                 setIsEditing(false);
@@ -450,7 +477,9 @@ export default function DatosBasicosForm() {
 
       {/* Barra de búsqueda */}
       <div className="search-container">
-        <label>Buscar en transportes:</label>
+        <label className="block text-gray-700 text-sm font-medium mb-2">
+          Buscar en operadores:
+        </label>
         <input
           type="text"
           placeholder="Buscar..."
@@ -459,6 +488,22 @@ export default function DatosBasicosForm() {
           required
           className="search-input w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
         />
+        <span className="search-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
       </div>
 
       {/* Botón de recargar */}
@@ -468,7 +513,7 @@ export default function DatosBasicosForm() {
           className="button button-primary"
           disabled={loading}
           style={{
-            backgroundColor: isEditing ? "#008CBA" : "#008CBA",
+            backgroundColor: isEditing ? "#0A2D5A " : "#0A2D5A ",
             float: "right",
             color: "white",
             padding: "10px 20px",
@@ -482,108 +527,105 @@ export default function DatosBasicosForm() {
       </div>
 
       {/* Tabla */}
-      <div className="overflow-x-auto">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Fecha de Registro</th>
-              <th>RFC</th>
-              <th>Dirección</th>
-              <th>Teléfono</th>
-              <th>Cuenta Bancaria</th>
-              <th>Cuenta Espejo</th>
-              <th>Tipo de Unidad</th>
-              <th>Operador</th>
-              <th>tarjeta_circulacion</th>
-              <th>poliza</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={12} className="text-center">
-                  Cargando...
-                </td>
-              </tr>
-            ) : currentItems.length === 0 ? (
-              <tr>
-                <td colSpan={12} className="text-center">
-                  No hay elementos disponibles
-                </td>
-              </tr>
-            ) : (
-              currentItems.map((item) => {
-                const tipoUnidad = tiposUnidades.find(
-                  (tu) => tu.id_unidad === Number(item.tipo_unidades)
-                );
-                const operador = operadores.find(
-                  (op) => op.id_operador === Number(item.operador)
-                );
-                const poliza = polizas.find(
-                  (es) => es.id_poliza === Number(item.poliza)
-                );
+  <div className="rodval-table-wrapper">
+  <table className="rodval-table">
+    <thead>
+      <tr>
+        <th>ID Transporte</th>
+        <th>Fecha Registro</th>
+        <th>RFC</th>
+        <th>Dirección</th>
+        <th>Teléfono</th>
+        <th>Cuenta Bancaria</th>
+        <th>Cuenta Espejo</th>
+        <th>Tipo de Unidad</th>
+        <th>Operador</th>
+        <th>Tarjeta Circulación</th>
+        <th>Póliza</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {loading && !currentItems.length ? (
+        <tr>
+          <td colSpan={12} className="rodval-no-data">
+            <div className="rodval-loading-spinner"></div>
+            Cargando transportes...
+          </td>
+        </tr>
+      ) : currentItems.length === 0 ? (
+        <tr>
+          <td colSpan={12} className="rodval-no-data">
+            No hay transportes registrados
+          </td>
+        </tr>
+      ) : (
+        currentItems.map((item) => {
+          const tipoUnidad = tiposUnidades.find(
+            (tu) => tu.id_unidad === Number(item.tipo_unidades)
+          );
+          const operador = operadores.find(
+            (op) => op.id_operador === Number(item.operador)
+          );
 
-                return (
-                  <tr key={item.id_transportes}>
-                    <td>{item.id_transportes}</td>
-                    <td>{item.fecha_registro}</td>
-                    <td>{item.rfc}</td>
-                    <td>{item.direccion}</td>
-                    <td>{item.telefono}</td>
-                    <td>{item.cuenta_bancaria}</td>
-                    <td>{item.cuenta_espejo}</td>
-                    <td>{tipoUnidad?.nombre || "No encontrado"}</td>
-                    <td>{operador?.nombre_operador || "No encontrado"}</td>
-                    <td>{item.tarjeta_circulacion}</td>
-                    <td>{item.poliza}</td>
-                    <td>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#0447fb",
-                            cursor: "pointer",
-                            padding: "4px",
-                          }}
-                          onMouseOver={(e) =>
-                            (e.currentTarget.style.color = "#0447fb")
-                          }
-                          onMouseOut={(e) =>
-                            (e.currentTarget.style.color = "#0447fb")
-                          }
-                        >
-                          <EditSquareIcon fontSize="small" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id_transportes)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#ef4444",
-                            cursor: "pointer",
-                            padding: "4px",
-                          }}
-                          onMouseOver={(e) =>
-                            (e.currentTarget.style.color = "#dc2626")
-                          }
-                          onMouseOut={(e) =>
-                            (e.currentTarget.style.color = "#ef4444")
-                          }
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+          return (
+            <tr key={item.id_transportes}>
+              <td>{item.id_transportes}</td>
+              <td>{item.fecha_registro || <span className="rodval-empty">Sin fecha</span>}</td>
+              <td className="rodval-truncate" title={item.rfc}>
+                {item.rfc || <span className="rodval-empty">Sin RFC</span>}
+              </td>
+              <td className="rodval-truncate" title={item.direccion}>
+                {item.direccion || <span className="rodval-empty">Sin dirección</span>}
+              </td>
+              <td className="rodval-truncate" title={item.telefono}>
+                {item.telefono || <span className="rodval-empty">Sin teléfono</span>}
+              </td>
+              <td className="rodval-truncate" title={item.cuenta_bancaria}>
+                {item.cuenta_bancaria || <span className="rodval-empty">Sin cuenta</span>}
+              </td>
+              <td className="rodval-truncate" title={item.cuenta_espejo}>
+                {item.cuenta_espejo || <span className="rodval-empty">Sin cuenta espejo</span>}
+              </td>
+              <td className="rodval-truncate" title={tipoUnidad?.nombre}>
+                {tipoUnidad?.nombre || <span className="rodval-warning">No asignado</span>}
+              </td>
+              <td className="rodval-truncate" title={operador?.nombre_operador}>
+                {operador?.nombre_operador || <span className="rodval-warning">No asignado</span>}
+              </td>
+              <td className="rodval-truncate" title={item.tarjeta_circulacion}>
+                {item.tarjeta_circulacion || <span className="rodval-warning">No registrada</span>}
+              </td>
+              <td className="rodval-truncate" title={item.poliza}>
+                {item.poliza || <span className="rodval-warning">No registrada</span>}
+              </td>
+              <td>
+                <div className="rodval-actions">
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="rodval-icon-button rodval-edit"
+                    title="Editar transporte"
+                    disabled={loading}
+                  >
+                    <EditSquareIcon fontSize="small" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id_transportes)}
+                    className="rodval-icon-button rodval-delete"
+                    title="Eliminar transporte"
+                    disabled={loading}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          );
+        })
+      )}
+    </tbody>
+  </table>
+
 
         {/* Paginación con iconos */}
         {filteredItems.length > itemsPerPage && (
@@ -593,7 +635,7 @@ export default function DatosBasicosForm() {
               disabled={currentPage === 1 || loading}
               className="pagination-button"
             >
-              <ArrowBackIosIcon fontSize="medium" sx={{ color: "#3b82f6" }} />
+              <ArrowBackIosIcon fontSize="medium" sx={{ color: " #0A2D5A" }} />
             </button>
 
             <span className="pagination-info">
@@ -609,7 +651,7 @@ export default function DatosBasicosForm() {
             >
               <ArrowForwardIosIcon
                 fontSize="medium"
-                sx={{ color: "#3b82f6" }}
+                sx={{ color: " #0A2D5A" }}
               />
             </button>
           </div>

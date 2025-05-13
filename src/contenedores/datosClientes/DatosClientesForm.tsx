@@ -7,41 +7,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import "./DatosClientes.css";
+import banner from '../../assets/images/BannerRodval.png';
 
-// Definición de tipos TypeScript
-type Contacto = {
-  id_contacto?: number;
-  nombre: string;
-  apellido: string;
-  telefono: string;
-  correo: string;
-  puesto: string;
-  [key: string]: string | number | undefined;
-};
-
-type DatosBancarios = {
-  id_datos_bancarios?: number;
-  beneficiario: string;
-  banco: string;
-  clave: string;
-  cuenta: string;
-};
-
-type ReferenciaComercial = {
-  id_referencia?: number;
-  empresa: string;
-  domicilio: string;
-  pais: string;
-  ciudad: string;
-  estado: string;
-  codigo_postal: string;
-  telefono: string;
-  contacto: string;
-  puesto: string;
-  relacion_comercial_desde: string;
-  [key: string]: string | number | undefined;
-};
-
+// Definición del tipo Proveedor con todos los campos en una sola tabla
 type Proveedor = {
   id_proveedor?: number;
   nombre_razon_social: string;
@@ -53,12 +21,57 @@ type Proveedor = {
   estado: string;
   unidades_propias: boolean;
   cuenta_espejo_gps: boolean;
+  
+  // Contacto 1
+  contacto1_nombre: string;
+  contacto1_apellido: string;
+  contacto1_telefono: string;
+  contacto1_correo: string;
+  contacto1_puesto: string;
+  
+  // Contacto 2
+  contacto2_nombre: string;
+  contacto2_apellido: string;
+  contacto2_telefono: string;
+  contacto2_correo: string;
+  contacto2_puesto: string;
+  
+  // Datos bancarios
+  beneficiario: string;
+  banco: string;
+  clave_bancaria: string;
+  cuenta_bancaria: string;
+  
+  // Referencia comercial 1
+  ref1_empresa: string;
+  ref1_domicilio: string;
+  ref1_pais: string;
+  ref1_ciudad: string;
+  ref1_estado: string;
+  ref1_codigo_postal: string;
+  ref1_telefono: string;
+  ref1_contacto: string;
+  ref1_puesto: string;
+  ref1_relacion_comercial_desde: string;
+  
+  // Referencia comercial 2
+  ref2_empresa: string;
+  ref2_domicilio: string;
+  ref2_pais: string;
+  ref2_ciudad: string;
+  ref2_estado: string;
+  ref2_codigo_postal: string;
+  ref2_telefono: string;
+  ref2_contacto: string;
+  ref2_puesto: string;
+  ref2_relacion_comercial_desde: string;
+  
   fecha_creacion?: string;
   fecha_actualizacion?: string;
 };
 
-export default function AltaProveedorForm() {
-  // Estados del formulario
+export default function DatosClientesForm() {
+  // Estado del formulario con todos los campos
   const [formData, setFormData] = useState<Proveedor>({
     nombre_razon_social: "",
     rfc: "",
@@ -69,49 +82,52 @@ export default function AltaProveedorForm() {
     estado: "",
     unidades_propias: false,
     cuenta_espejo_gps: false,
-  });
-
-  const [contactos, setContactos] = useState<Contacto[]>([
-    { nombre: "", apellido: "", telefono: "", correo: "", puesto: "" },
-    { nombre: "", apellido: "", telefono: "", correo: "", puesto: "" },
-  ]);
-
-  const [datosBancarios, setDatosBancarios] = useState<DatosBancarios>({
+    
+    // Contactos
+    contacto1_nombre: "",
+    contacto1_apellido: "",
+    contacto1_telefono: "",
+    contacto1_correo: "",
+    contacto1_puesto: "",
+    
+    contacto2_nombre: "",
+    contacto2_apellido: "",
+    contacto2_telefono: "",
+    contacto2_correo: "",
+    contacto2_puesto: "",
+    
+    // Datos bancarios
     beneficiario: "",
     banco: "",
-    clave: "",
-    cuenta: "",
+    clave_bancaria: "",
+    cuenta_bancaria: "",
+    
+    // Referencias
+    ref1_empresa: "",
+    ref1_domicilio: "",
+    ref1_pais: "",
+    ref1_ciudad: "",
+    ref1_estado: "",
+    ref1_codigo_postal: "",
+    ref1_telefono: "",
+    ref1_contacto: "",
+    ref1_puesto: "",
+    ref1_relacion_comercial_desde: "",
+    
+    ref2_empresa: "",
+    ref2_domicilio: "",
+    ref2_pais: "",
+    ref2_ciudad: "",
+    ref2_estado: "",
+    ref2_codigo_postal: "",
+    ref2_telefono: "",
+    ref2_contacto: "",
+    ref2_puesto: "",
+    ref2_relacion_comercial_desde: ""
   });
 
-  const [referencias, setReferencias] = useState<ReferenciaComercial[]>([
-    {
-      empresa: "",
-      domicilio: "",
-      pais: "",
-      ciudad: "",
-      estado: "",
-      codigo_postal: "",
-      telefono: "",
-      contacto: "",
-      puesto: "",
-      relacion_comercial_desde: "",
-    },
-    {
-      empresa: "",
-      domicilio: "",
-      pais: "",
-      ciudad: "",
-      estado: "",
-      codigo_postal: "",
-      telefono: "",
-      contacto: "",
-      puesto: "",
-      relacion_comercial_desde: "",
-    },
-  ]);
-
-  // Estados para la tabla de proveedores
-  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+  // Estados para la tabla de proveedores1
+  const [proveedores1, setproveedores1] = useState<Proveedor[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -121,31 +137,27 @@ export default function AltaProveedorForm() {
   const itemsPerPage = 5;
 
   // Configuración de la API
-  const API_BASE_URL =
-    "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
+  const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
 
-  // Obtener proveedores
-  const fetchProveedores = async () => {
+  // Obtener proveedores1
+  const fetchproveedores1 = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/proveedores/all`, {
+      const response = await axios.get(`${API_BASE_URL}/proveedores1/all`, {
         headers: { apikey: API_KEY },
-        
       });
-       // Inspeccionar datos
-      setProveedores(response.data.records);
+      setproveedores1(response.data.records);
       console.log("Datos recibidos:", response.data.records);
     } catch (err) {
-      setError("Error al cargar proveedores");
+      setError("Error al cargar proveedores1");
       console.error(err);
     } finally {
       setLoading(false);
     }
-
   };
 
-  // Manejadores de cambios
+  // Manejador de cambios para todos los campos
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -154,143 +166,44 @@ export default function AltaProveedorForm() {
     }));
   };
 
-  const handleContactoChange = (
-    index: number,
-    field: keyof Contacto,
-    value: string
-  ) => {
-    const updatedContactos = [...contactos];
-    updatedContactos[index][field] = value;
-    setContactos(updatedContactos);
-  };
-
-  const handleDatosBancariosChange = (
-    field: keyof DatosBancarios,
-    value: string
-  ) => {
-    setDatosBancarios((prev) => ({
+  // Manejador de cambios para campos de fecha
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [name]: value,
     }));
   };
 
-  const handleReferenciaChange = (
-    index: number,
-    field: keyof ReferenciaComercial,
-    value: string
-  ) => {
-    const updatedReferencias = [...referencias];
-    updatedReferencias[index][field] = value;
-    setReferencias(updatedReferencias);
-  };
-
+  // Enviar formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // 1. Guardar PROVEEDOR (POST)
-      const proveedorResponse = await axios.post(
-        `${API_BASE_URL}/proveedores`,
-        {
-          data: formData,
-        },
-        {
-          headers: { apikey: API_KEY },
-        }
-      );
-
-      console.log("Respuesta del servidor:", proveedorResponse.data); // ¡VERIFICA ESTO!
-
-      /* 
-        Si el servidor no devuelve id_proveedor en la respuesta, hay dos opciones:
-        A) El ID viene en otro campo (revisa el console.log)
-        B) Necesitas hacer un GET para obtener el proveedor recién creado
-      */
-
-      // Opción A: Si el ID viene en otro campo (ej. 'id')
-      let proveedorId =
-        proveedorResponse.data.id_proveedor || proveedorResponse.data.id;
-
-      if (!proveedorId) {
-        // Opción B: Obtener el último proveedor creado (solución alternativa)
-        const lastProveedor = await axios.get(
-          `${API_BASE_URL}/proveedores/last`,
-          {
-            headers: { apikey: API_KEY },
-          }
+      if (isEditing && formData.id_proveedor) {
+        // Actualizar proveedor existente
+        await axios.put(
+          `${API_BASE_URL}/proveedores1/${formData.id_proveedor}`,
+          { data: formData },
+          { headers: { apikey: API_KEY } }
         );
-        proveedorId = lastProveedor.data.id_proveedor;
-      }
-
-      if (!proveedorId)
-        throw new Error("No se pudo obtener el ID del proveedor");
-
-      // 2. Guardar CONTACTOS
-      for (const contacto of contactos) {
-        if (contacto.nombre.trim() !== "") {
-          await axios.post(
-            `${API_BASE_URL}/contactos_proveedores`,
-            {
-              data: {
-                ...contacto,
-                id_proveedor: proveedorId,
-              },
-            },
-            {
-              headers: { apikey: API_KEY },
-            }
-          );
-        }
-      }
-
-      // 3. Guardar DATOS BANCARIOS
-      if (datosBancarios.beneficiario.trim() !== "") {
+      } else {
+        // Crear nuevo proveedor
         await axios.post(
-          `${API_BASE_URL}/datos_bancarios_proveedores`,
-          {
-            data: {
-              ...datosBancarios,
-              id_proveedor: proveedorId,
-            },
-          },
-          {
-            headers: { apikey: API_KEY },
-          }
+          `${API_BASE_URL}/proveedores1`,
+          { data: formData },
+          { headers: { apikey: API_KEY } }
         );
       }
 
-      // 4. Guardar REFERENCIAS
-      for (const referencia of referencias) {
-        if (referencia.empresa.trim() !== "") {
-          await axios.post(
-            `${API_BASE_URL}/referencias_comerciales_proveedores`,
-            {
-              data: {
-                ...referencia,
-                id_proveedor: proveedorId,
-              },
-            },
-            {
-              headers: { apikey: API_KEY },
-            }
-          );
-        }
-      }
-
-      // Actualización final
-      await fetchProveedores();
+      await fetchproveedores1();
       resetForm();
       setShowTable(true);
-      alert("¡Registro completado con éxito!");
+      alert(`Proveedor ${isEditing ? 'actualizado' : 'creado'} con éxito!`);
     } catch (error) {
-      console.error("Error completo:", {
-        message: error.message,
-        response: error.response?.data,
-      });
-      setError(
-        `Error al guardar: ${error.response?.data?.detail || error.message}`
-      );
+      console.error("Error:", error);
+      setError(`Error al guardar: ${error.response?.data?.detail || error.message}`);
     } finally {
       setLoading(false);
     }
@@ -308,102 +221,68 @@ export default function AltaProveedorForm() {
       estado: "",
       unidades_propias: false,
       cuenta_espejo_gps: false,
-    });
-    setContactos([
-      { nombre: "", apellido: "", telefono: "", correo: "", puesto: "" },
-      { nombre: "", apellido: "", telefono: "", correo: "", puesto: "" },
-    ]);
-    setDatosBancarios({
+      
+      // Contactos
+      contacto1_nombre: "",
+      contacto1_apellido: "",
+      contacto1_telefono: "",
+      contacto1_correo: "",
+      contacto1_puesto: "",
+      
+      contacto2_nombre: "",
+      contacto2_apellido: "",
+      contacto2_telefono: "",
+      contacto2_correo: "",
+      contacto2_puesto: "",
+      
+      // Datos bancarios
       beneficiario: "",
       banco: "",
-      clave: "",
-      cuenta: "",
+      clave_bancaria: "",
+      cuenta_bancaria: "",
+      
+      // Referencias
+      ref1_empresa: "",
+      ref1_domicilio: "",
+      ref1_pais: "",
+      ref1_ciudad: "",
+      ref1_estado: "",
+      ref1_codigo_postal: "",
+      ref1_telefono: "",
+      ref1_contacto: "",
+      ref1_puesto: "",
+      ref1_relacion_comercial_desde: "",
+      
+      ref2_empresa: "",
+      ref2_domicilio: "",
+      ref2_pais: "",
+      ref2_ciudad: "",
+      ref2_estado: "",
+      ref2_codigo_postal: "",
+      ref2_telefono: "",
+      ref2_contacto: "",
+      ref2_puesto: "",
+      ref2_relacion_comercial_desde: ""
     });
-    setReferencias([
-      {
-        empresa: "",
-        domicilio: "",
-        pais: "",
-        ciudad: "",
-        estado: "",
-        codigo_postal: "",
-        telefono: "",
-        contacto: "",
-        puesto: "",
-        relacion_comercial_desde: "",
-      },
-      {
-        empresa: "",
-        domicilio: "",
-        pais: "",
-        ciudad: "",
-        estado: "",
-        codigo_postal: "",
-        telefono: "",
-        contacto: "",
-        puesto: "",
-        relacion_comercial_desde: "",
-      },
-    ]);
     setIsEditing(false);
   };
 
   // Editar proveedor
-  const handleEdit = async (proveedor: Proveedor) => {
-    setLoading(true);
-    try {
-      // Obtener datos relacionados
-      const [contactosRes, bancariosRes, referenciasRes] = await Promise.all([
-        axios.get(
-          `${API_BASE_URL}/contactos?proveedorId=${proveedor.id_proveedor}`,
-          {
-            headers: { apikey: API_KEY },
-          }
-        ),
-        axios.get(
-          `${API_BASE_URL}/datos-bancarios?proveedorId=${proveedor.id_proveedor}`,
-          {
-            headers: { apikey: API_KEY },
-          }
-        ),
-        axios.get(
-          `${API_BASE_URL}/referencias?proveedorId=${proveedor.id_proveedor}`,
-          {
-            headers: { apikey: API_KEY },
-          }
-        ),
-      ]);
-
-      setFormData(proveedor);
-      setContactos(contactosRes.data.records.slice(0, 2));
-      setDatosBancarios(
-        bancariosRes.data.records[0] || {
-          beneficiario: "",
-          banco: "",
-          clave: "",
-          cuenta: "",
-        }
-      );
-      setReferencias(referenciasRes.data.records.slice(0, 2));
-      setIsEditing(true);
-      setShowTable(false);
-      window.scrollTo(0, 0);
-    } catch (err) {
-      setError("Error al cargar datos del proveedor");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const handleEdit = (proveedor: Proveedor) => {
+    setFormData(proveedor);
+    setIsEditing(true);
+    setShowTable(false);
+    window.scrollTo(0, 0);
   };
 
   // Eliminar proveedor
   const handleDelete = async (id: number) => {
     if (window.confirm("¿Estás seguro de eliminar este proveedor?")) {
       try {
-        await axios.delete(`${API_BASE_URL}/proveedores/${id}`, {
+        await axios.delete(`${API_BASE_URL}/proveedores1/${id}`, {
           headers: { apikey: API_KEY },
         });
-        fetchProveedores();
+        fetchproveedores1();
       } catch (err) {
         setError("Error al eliminar proveedor");
         console.error(err);
@@ -412,7 +291,7 @@ export default function AltaProveedorForm() {
   };
 
   // Paginación
-  const filteredItems = proveedores.filter(
+  const filteredItems = proveedores1.filter(
     (item) =>
       item.nombre_razon_social.toLowerCase().includes(busqueda.toLowerCase()) ||
       item.rfc.toLowerCase().includes(busqueda.toLowerCase())
@@ -426,7 +305,7 @@ export default function AltaProveedorForm() {
   // Efectos
   useEffect(() => {
     if (showTable) {
-      fetchProveedores();
+      fetchproveedores1();
     }
   }, [showTable]);
 
@@ -438,9 +317,15 @@ export default function AltaProveedorForm() {
     <div className="rodval-container">
       {/* Encabezado */}
       <div className="rodval-header">
-      <img 
-        src="https://www.camionesybuses.com.ar/wp-content/uploads/2018/04/portada-vw-camiones-520x245.jpg"  // Reemplaza con la ruta correcta
-       />
+        <img 
+          src={banner} 
+          alt="Banner Rodval"
+          style={{ 
+            width: '100%',
+            maxHeight: '200px',
+            objectFit: 'contain'
+          }}
+        />
       </div>
 
       {/* Botón para mostrar/ocultar tabla */}
@@ -451,12 +336,12 @@ export default function AltaProveedorForm() {
             showTable ? "rodval-button-secondary" : "rodval-button-primary"
           }`}
           style={{
-            backgroundColor: isEditing ? '#008CBA' : '#008CBA',
-            color: 'white',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '999px',
-            cursor: loading ? 'not-allowed' : 'pointer',
+            backgroundColor: isEditing ? "#0A2D5A" : "#0A2D5A",
+            color: "white",
+            padding: "10px 20px",
+            border: "none",
+            borderRadius: "999px",
+            cursor: loading ? "not-allowed" : "pointer",
           }}
         >
           {showTable ? (
@@ -465,13 +350,13 @@ export default function AltaProveedorForm() {
             </>
           ) : (
             <>
-              <VisibilityIcon fontSize="small" /> Ver Tabla de Proveedores
+              <VisibilityIcon fontSize="small" /> Ver Tabla de proveedores1
             </>
           )}
         </button>
       </div>
 
-      {/* Tabla de proveedores */}
+      {/* Tabla de proveedores1 */}
       {showTable && (
         <div className="rodval-table-container">
           {/* Búsqueda y recargar */}
@@ -484,16 +369,16 @@ export default function AltaProveedorForm() {
               className="rodval-search-input"
             />
             <button
-              onClick={fetchProveedores}
+              onClick={fetchproveedores1}
               className="rodval-button rodval-button-primary"
               disabled={loading}
               style={{
-                backgroundColor: isEditing ? '#008CBA' : '#008CBA',
-                color: 'white',
-                padding: '10px 20px',
-                border: 'none',
-                borderRadius: '999px',
-                cursor: loading ? 'not-allowed' : 'pointer',
+                backgroundColor: isEditing ? "#0A2D5A" : "#0A2D5A",
+                color: "white",
+                padding: "10px 20px",
+                border: "none",
+                borderRadius: "999px",
+                cursor: loading ? "not-allowed" : "pointer",
               }}
             >
               {loading ? "Cargando..." : "Recargar"}
@@ -509,14 +394,10 @@ export default function AltaProveedorForm() {
                   <th>Nombre/Razón Social</th>
                   <th>RFC</th>
                   <th>Dirección</th>
-                  <th>Pais</th>
-                  <th>Codigo postal</th>
-                  <th>Ciudad</th>
-                  <th>Estado</th>
-                  <th>Unidades Propias</th>
-                  <th>Cuenta GPS</th>
-                  <th>Creada</th>
-                  <th>Actualizada</th>
+                  <th>Contacto 1</th>
+                  <th>Teléfono</th>
+                  <th>Banco</th>
+                  <th>Cuenta</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -528,20 +409,14 @@ export default function AltaProveedorForm() {
                       <td>{item.nombre_razon_social}</td>
                       <td>{item.rfc}</td>
                       <td>{item.direccion}</td>
-                      <td>{item.pais}</td>
-                      <td>{item.codigo_postal}</td>
-                      <td>{item.ciudad}</td>
-                      <td>{item.estado}</td>
-                      <td>{item.unidades_propias ? "Sí" : "No"}</td>
-                      <td>{item.cuenta_espejo_gps ? "Sí" : "No"}</td>
-                      <td>{item.fecha_creacion}</td>
-                      <td>{item.fecha_actualizacion}</td>
+                      <td>{item.contacto1_nombre} {item.contacto1_apellido}</td>
+                      <td>{item.contacto1_telefono}</td>
+                      <td>{item.banco}</td>
+                      <td>{item.cuenta_bancaria}</td>
                       <td>
                         <div className="rodval-actions">
                           <button
-                            onClick={() =>
-                              item.id_proveedor && handleEdit(item)
-                            }
+                            onClick={() => handleEdit(item)}
                             className="rodval-icon-button rodval-edit"
                             title="Editar"
                           >
@@ -549,8 +424,7 @@ export default function AltaProveedorForm() {
                           </button>
                           <button
                             onClick={() =>
-                              item.id_proveedor &&
-                              handleDelete(item.id_proveedor)
+                              item.id_proveedor && handleDelete(item.id_proveedor)
                             }
                             className="rodval-icon-button rodval-delete"
                             title="Eliminar"
@@ -563,10 +437,10 @@ export default function AltaProveedorForm() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="rodval-no-data">
+                    <td colSpan={9} className="rodval-no-data">
                       {loading
                         ? "Cargando..."
-                        : "No se encontraron proveedores"}
+                        : "No se encontraron proveedores1"}
                     </td>
                   </tr>
                 )}
@@ -576,46 +450,50 @@ export default function AltaProveedorForm() {
 
           {/* Paginación */}
           {filteredItems.length > itemsPerPage && (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: '20px',
-            gap: '15px'
-          }}>
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
+            <div
               style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                color: currentPage === 1 ? '#ccc' : '#3b82f6'
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: "20px",
+                gap: "15px",
               }}
             >
-              <ArrowBackIosIcon fontSize="medium" />
-            </button>
-            
-            <span style={{ margin: '0 10px' }}>
-              Página {currentPage} de {totalPages}
-            </span>
-            
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                color: currentPage === totalPages ? '#ccc' : '#3b82f6'
-              }}
-            >
-              <ArrowForwardIosIcon fontSize="medium" />
-            </button>
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  color: currentPage === 1 ? "#ccc" : "#0A2D5A",
+                }}
+              >
+                <ArrowBackIosIcon fontSize="medium" />
+              </button>
+
+              <span style={{ margin: "0 10px" }}>
+                Página {currentPage} de {totalPages}
+              </span>
+
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  color: currentPage === totalPages ? "#ccc" : "#0A2D5A",
+                }}
+              >
+                <ArrowForwardIosIcon fontSize="medium" />
+              </button>
             </div>
           )}
         </div>
@@ -645,8 +523,8 @@ export default function AltaProveedorForm() {
                   <span className="rodval-required">*</span> CARATURA A BANCARIA
                 </li>
                 <li>
-                  <span className="rodval-required">*</span> CONSTANCIA SITUACION
-                  FISCAL (ACTUAL)
+                  <span className="rodval-required">*</span> CONSTANCIA
+                  SITUACION FISCAL (ACTUAL)
                 </li>
                 <li>
                   <span className="rodval-required">*</span> OPINION POSITIVA
@@ -780,76 +658,130 @@ export default function AltaProveedorForm() {
 
           {/* INFORMACIÓN DE CONTACTOS */}
           <div className="rodval-section">
-            <h2 className="rodval-section-title">INFORMACIÓN DE CONTACTOS (2)</h2>
+            <h2 className="rodval-section-title">
+              INFORMACIÓN DE CONTACTOS (2)
+            </h2>
 
-            {contactos.map((contacto, index) => (
-              <div key={index} className="rodval-contact-card">
-                <h3 className="rodval-contact-title">Contacto {index + 1}</h3>
+            {/* Contacto 1 */}
+            <div className="rodval-contact-card">
+              <h3 className="rodval-contact-title">Contacto 1</h3>
 
-                <div className="rodval-form-row rodval-form-row-5">
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">NOMBRE(S)</label>
-                    <input
-                      type="text"
-                      value={contacto.nombre}
-                      onChange={(e) =>
-                        handleContactoChange(index, "nombre", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">APELLIDO</label>
-                    <input
-                      type="text"
-                      value={contacto.apellido}
-                      onChange={(e) =>
-                        handleContactoChange(index, "apellido", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">TELÉFONO</label>
-                    <input
-                      type="text"
-                      value={contacto.telefono}
-                      onChange={(e) =>
-                        handleContactoChange(index, "telefono", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">CORREO</label>
-                    <input
-                      type="email"
-                      value={contacto.correo}
-                      onChange={(e) =>
-                        handleContactoChange(index, "correo", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">PUESTO</label>
-                    <input
-                      type="text"
-                      value={contacto.puesto}
-                      onChange={(e) =>
-                        handleContactoChange(index, "puesto", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
+              <div className="rodval-form-row rodval-form-row-5">
+                <div className="rodval-form-group">
+                  <label className="rodval-label">NOMBRE(S)</label>
+                  <input
+                    type="text"
+                    name="contacto1_nombre"
+                    value={formData.contacto1_nombre}
+                    onChange={handleInputChange}
+                    required
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">APELLIDO</label>
+                  <input
+                    type="text"
+                    name="contacto1_apellido"
+                    value={formData.contacto1_apellido}
+                    onChange={handleInputChange}
+                    required
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">TELÉFONO</label>
+                  <input
+                    type="text"
+                    name="contacto1_telefono"
+                    value={formData.contacto1_telefono}
+                    onChange={handleInputChange}
+                    required
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">CORREO</label>
+                  <input
+                    type="email"
+                    name="contacto1_correo"
+                    value={formData.contacto1_correo}
+                    onChange={handleInputChange}
+                    required
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">PUESTO</label>
+                  <input
+                    type="text"
+                    name="contacto1_puesto"
+                    value={formData.contacto1_puesto}
+                    onChange={handleInputChange}
+                    required
+                    className="rodval-input"
+                  />
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Contacto 2 */}
+            <div className="rodval-contact-card">
+              <h3 className="rodval-contact-title">Contacto 2</h3>
+
+              <div className="rodval-form-row rodval-form-row-5">
+                <div className="rodval-form-group">
+                  <label className="rodval-label">NOMBRE(S)</label>
+                  <input
+                    type="text"
+                    name="contacto2_nombre"
+                    value={formData.contacto2_nombre}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">APELLIDO</label>
+                  <input
+                    type="text"
+                    name="contacto2_apellido"
+                    value={formData.contacto2_apellido}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">TELÉFONO</label>
+                  <input
+                    type="text"
+                    name="contacto2_telefono"
+                    value={formData.contacto2_telefono}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">CORREO</label>
+                  <input
+                    type="email"
+                    name="contacto2_correo"
+                    value={formData.contacto2_correo}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">PUESTO</label>
+                  <input
+                    type="text"
+                    name="contacto2_puesto"
+                    value={formData.contacto2_puesto}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* DATOS BANCARIOS */}
@@ -861,10 +793,9 @@ export default function AltaProveedorForm() {
                 <label className="rodval-label">BENEFICIARIO</label>
                 <input
                   type="text"
-                  value={datosBancarios.beneficiario}
-                  onChange={(e) =>
-                    handleDatosBancariosChange("beneficiario", e.target.value)
-                  }
+                  name="beneficiario"
+                  value={formData.beneficiario}
+                  onChange={handleInputChange}
                   required
                   className="rodval-input"
                 />
@@ -873,10 +804,9 @@ export default function AltaProveedorForm() {
                 <label className="rodval-label">BANCO</label>
                 <input
                   type="text"
-                  value={datosBancarios.banco}
-                  onChange={(e) =>
-                    handleDatosBancariosChange("banco", e.target.value)
-                  }
+                  name="banco"
+                  value={formData.banco}
+                  onChange={handleInputChange}
                   required
                   className="rodval-input"
                 />
@@ -888,10 +818,9 @@ export default function AltaProveedorForm() {
                 <label className="rodval-label">CLAVE</label>
                 <input
                   type="text"
-                  value={datosBancarios.clave}
-                  onChange={(e) =>
-                    handleDatosBancariosChange("clave", e.target.value)
-                  }
+                  name="clave_bancaria"
+                  value={formData.clave_bancaria}
+                  onChange={handleInputChange}
                   required
                   className="rodval-input"
                 />
@@ -900,10 +829,9 @@ export default function AltaProveedorForm() {
                 <label className="rodval-label">CUENTA</label>
                 <input
                   type="text"
-                  value={datosBancarios.cuenta}
-                  onChange={(e) =>
-                    handleDatosBancariosChange("cuenta", e.target.value)
-                  }
+                  name="cuenta_bancaria"
+                  value={formData.cuenta_bancaria}
+                  onChange={handleInputChange}
                   required
                   className="rodval-input"
                 />
@@ -912,181 +840,253 @@ export default function AltaProveedorForm() {
           </div>
 
           {/* REFERENCIAS COMERCIALES */}
-          {referencias.map((referencia, index) => (
-            <div key={index} className="rodval-section">
-              <h2 className="rodval-section-title">
-                REFERENCIA COMERCIAL {index + 1}
-              </h2>
+          
+          {/* Referencia Comercial 1 */}
+          <div className="rodval-section">
+            <h2 className="rodval-section-title">
+              REFERENCIA COMERCIAL 1
+            </h2>
 
-              <div className="rodval-reference-card">
-                <div className="rodval-form-row">
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">EMPRESA</label>
-                    <input
-                      type="text"
-                      value={referencia.empresa}
-                      onChange={(e) =>
-                        handleReferenciaChange(index, "empresa", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">DOMICILIO</label>
-                    <input
-                      type="text"
-                      value={referencia.domicilio}
-                      onChange={(e) =>
-                        handleReferenciaChange(
-                          index,
-                          "domicilio",
-                          e.target.value
-                        )
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
+            <div className="rodval-reference-card">
+              <div className="rodval-form-row">
+                <div className="rodval-form-group">
+                  <label className="rodval-label">EMPRESA</label>
+                  <input
+                    type="text"
+                    name="ref1_empresa"
+                    value={formData.ref1_empresa}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
                 </div>
-
-                <div className="rodval-form-row rodval-form-row-5">
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">PAÍS</label>
-                    <input
-                      type="text"
-                      value={referencia.pais}
-                      onChange={(e) =>
-                        handleReferenciaChange(index, "pais", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">CIUDAD</label>
-                    <input
-                      type="text"
-                      value={referencia.ciudad}
-                      onChange={(e) =>
-                        handleReferenciaChange(index, "ciudad", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">ESTADO</label>
-                    <input
-                      type="text"
-                      value={referencia.estado}
-                      onChange={(e) =>
-                        handleReferenciaChange(index, "estado", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">CÓDIGO POSTAL</label>
-                    <input
-                      type="text"
-                      value={referencia.codigo_postal}
-                      onChange={(e) =>
-                        handleReferenciaChange(
-                          index,
-                          "codigo_postal",
-                          e.target.value
-                        )
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">TELÉFONO</label>
-                    <input
-                      type="text"
-                      value={referencia.telefono}
-                      onChange={(e) =>
-                        handleReferenciaChange(
-                          index,
-                          "telefono",
-                          e.target.value
-                        )
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">DOMICILIO</label>
+                  <input
+                    type="text"
+                    name="ref1_domicilio"
+                    value={formData.ref1_domicilio}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
                 </div>
+              </div>
 
-                <div className="rodval-form-row">
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">CONTACTO</label>
-                    <input
-                      type="text"
-                      value={referencia.contacto}
-                      onChange={(e) =>
-                        handleReferenciaChange(
-                          index,
-                          "contacto",
-                          e.target.value
-                        )
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">PUESTO</label>
-                    <input
-                      type="text"
-                      value={referencia.puesto}
-                      onChange={(e) =>
-                        handleReferenciaChange(index, "puesto", e.target.value)
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
-                  <div className="rodval-form-group">
-                    <label className="rodval-label">
-                      RELACIÓN COMERCIAL DESDE
-                    </label>
-                    <input
-                      type="date"
-                      value={referencia.relacion_comercial_desde}
-                      onChange={(e) =>
-                        handleReferenciaChange(
-                          index,
-                          "relacion_comercial_desde",
-                          e.target.value
-                        )
-                      }
-                      required
-                      className="rodval-input"
-                    />
-                  </div>
+              <div className="rodval-form-row rodval-form-row-5">
+                <div className="rodval-form-group">
+                  <label className="rodval-label">PAÍS</label>
+                  <input
+                    type="text"
+                    name="ref1_pais"
+                    value={formData.ref1_pais}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">CIUDAD</label>
+                  <input
+                    type="text"
+                    name="ref1_ciudad"
+                    value={formData.ref1_ciudad}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">ESTADO</label>
+                  <input
+                    type="text"
+                    name="ref1_estado"
+                    value={formData.ref1_estado}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">CÓDIGO POSTAL</label>
+                  <input
+                    type="text"
+                    name="ref1_codigo_postal"
+                    value={formData.ref1_codigo_postal}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">TELÉFONO</label>
+                  <input
+                    type="text"
+                    name="ref1_telefono"
+                    value={formData.ref1_telefono}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+              </div>
+
+              <div className="rodval-form-row">
+                <div className="rodval-form-group">
+                  <label className="rodval-label">CONTACTO</label>
+                  <input
+                    type="text"
+                    name="ref1_contacto"
+                    value={formData.ref1_contacto}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">PUESTO</label>
+                  <input
+                    type="text"
+                    name="ref1_puesto"
+                    value={formData.ref1_puesto}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">
+                    RELACIÓN COMERCIAL DESDE
+                  </label>
+                  <input
+                    type="date"
+                    name="ref1_relacion_comercial_desde"
+                    value={formData.ref1_relacion_comercial_desde}
+                    onChange={handleDateChange}
+                    className="rodval-input"
+                  />
                 </div>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Referencia Comercial 2 */}
+          <div className="rodval-section">
+            <h2 className="rodval-section-title">
+              REFERENCIA COMERCIAL 2
+            </h2>
+
+            <div className="rodval-reference-card">
+              <div className="rodval-form-row">
+                <div className="rodval-form-group">
+                  <label className="rodval-label">EMPRESA</label>
+                  <input
+                    type="text"
+                    name="ref2_empresa"
+                    value={formData.ref2_empresa}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">DOMICILIO</label>
+                  <input
+                    type="text"
+                    name="ref2_domicilio"
+                    value={formData.ref2_domicilio}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+              </div>
+
+              <div className="rodval-form-row rodval-form-row-5">
+                <div className="rodval-form-group">
+                  <label className="rodval-label">PAÍS</label>
+                  <input
+                    type="text"
+                    name="ref2_pais"
+                    value={formData.ref2_pais}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">CIUDAD</label>
+                  <input
+                    type="text"
+                    name="ref2_ciudad"
+                    value={formData.ref2_ciudad}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">ESTADO</label>
+                  <input
+                    type="text"
+                    name="ref2_estado"
+                    value={formData.ref2_estado}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">CÓDIGO POSTAL</label>
+                  <input
+                    type="text"
+                    name="ref2_codigo_postal"
+                    value={formData.ref2_codigo_postal}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">TELÉFONO</label>
+                  <input
+                    type="text"
+                    name="ref2_telefono"
+                    value={formData.ref2_telefono}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+              </div>
+
+              <div className="rodval-form-row">
+                <div className="rodval-form-group">
+                  <label className="rodval-label">CONTACTO</label>
+                  <input
+                    type="text"
+                    name="ref2_contacto"
+                    value={formData.ref2_contacto}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">PUESTO</label>
+                  <input
+                    type="text"
+                    name="ref2_puesto"
+                    value={formData.ref2_puesto}
+                    onChange={handleInputChange}
+                    className="rodval-input"
+                  />
+                </div>
+                <div className="rodval-form-group">
+                  <label className="rodval-label">
+                    RELACIÓN COMERCIAL DESDE
+                  </label>
+                  <input
+                    type="date"
+                    name="ref2_relacion_comercial_desde"
+                    value={formData.ref2_relacion_comercial_desde}
+                    onChange={handleDateChange}
+                    className="rodval-input"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Botones del formulario */}
           <div className="rodval-form-actions">
             <button
-              type="button"
+              type="submit"
               className="rodval-button rodval-button-primary"
               disabled={loading}
-              style={{
-                backgroundColor: isEditing ? '#008CBA' : '#008CBA',
-                color: 'white',
-                padding: '10px 20px',
-                border: 'none',
-                borderRadius: '999px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-              }}
             >
               {loading
                 ? "Procesando..."

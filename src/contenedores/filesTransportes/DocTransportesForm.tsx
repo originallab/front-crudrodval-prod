@@ -16,10 +16,10 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ImageIcon from "@mui/icons-material/Image";
 import CloseIcon from "@mui/icons-material/Close";
-import { Grid } from '@mui/material'; // Importación directa
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton'; // Importación directa
-import CircularProgress from '@mui/material/CircularProgress';
+import { Grid } from "@mui/material"; // Importación directa
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton"; // Importación directa
+import CircularProgress from "@mui/material/CircularProgress";
 
 type Item = {
   id_documentoTransportes: number;
@@ -583,259 +583,359 @@ export default function DocTransportesForm() {
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
       <Modal
-  open={openModal}
-  onClose={handleCloseModal}
-  aria-labelledby="modal-modal-title"
-  aria-describedby="modal-modal-description"
->
-  <Box
-    sx={{
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      width: { xs: "90%", sm: "70%", md: "60%" }, // Responsive width
-      maxWidth: "800px",
-      maxHeight: "90vh",
-      bgcolor: "background.paper",
-      border: "2px solid",
-      borderColor: "primary.main",
-      borderRadius: "12px",
-      boxShadow: 24,
-      overflow: "hidden",
-      display: "flex",
-      flexDirection: "column",
-    }}
-  >
-    {/* Header del Modal */}
-    <Box
-      sx={{
-        padding: "16px 24px",
-        background: "linear-gradient(135deg, #0709ab 0%, #2196f3 100%)",
-        color: "white",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
-      }}
-    >
-      <Typography
-        id="modal-modal-title"
-        variant="h6"
-        component="h2"
-        sx={{
-          fontSize: "1.5rem",
-          fontWeight: "600",
-          letterSpacing: "0.5px",
-        }}
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
       >
-        Documentos de Transporte
-      </Typography>
-      <IconButton
-        onClick={handleCloseModal}
-        sx={{
-          color: "white",
-          '&:hover': {
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-          },
-        }}
-      >
-        <CloseIcon />
-      </IconButton>
-    </Box>
-
-    {/* Contenido del Modal */}
-    <Box
-      sx={{
-        p: 4,
-        overflowY: "auto",
-        background: "linear-gradient(145deg, #f9f9ff, #ffffff)",
-        flex: 1,
-      }}
-    >
-      {currentItem && (
         <Box
           sx={{
-            mb: 4,
-            p: 3,
-            borderRadius: '8px',
-            background: 'rgba(25, 118, 210, 0.05)',
-            border: '1px solid rgba(25, 118, 210, 0.2)',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: { xs: "90%", sm: "70%", md: "60%" }, // Responsive width
+            maxWidth: "800px",
+            maxHeight: "90vh",
+            bgcolor: "background.paper",
+            border: "2px solid",
+            borderColor: "primary.main",
+            borderRadius: "12px",
+            boxShadow: 24,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          <Typography variant="h6" sx={{ color: '#1976d2', textAlign: 'center', mb: 2 }}>
-            Detalles del registro de transportes
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid >
-              <Typography><strong>ID Documento:</strong> {currentItem.id_documentoTransportes}</Typography>
-            </Grid>
-            <Grid >
-              <Typography><strong>Unidad:</strong> {getNombreUnidad(currentItem.id_unidad)}</Typography>
-            </Grid>
-            <Grid>
-              <Typography><strong>Fecha Registro:</strong> {currentItem.fecha_registro}</Typography>
-            </Grid>
-          </Grid>
-        </Box>
-      )}
+          {/* Header del Modal */}
+          <Box
+            sx={{
+              padding: "16px 24px",
+              background: "linear-gradient(135deg, #0709ab 0%, #2196f3 100%)",
+              color: "white",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
+            }}
+          >
+            <Typography
+              id="modal-modal-title"
+              variant="h6"
+              component="h2"
+              sx={{
+                fontSize: "1.5rem",
+                fontWeight: "600",
+                letterSpacing: "0.5px",
+              }}
+            >
+              Documentos de Transporte
+            </Typography>
+            <IconButton
+              onClick={handleCloseModal}
+              sx={{
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
 
-      {loadingUrls ? (
-        <Box sx={{ textAlign: 'center', py: 4, color: '#1976d2' }}>
-          <CircularProgress color="inherit" />
-          <Typography variant="body1" sx={{ mt: 2 }}>Cargando documentos...</Typography>
-        </Box>
-      ) : (
-        <Box>
-          {currentFileView.type ? (
-            renderFilePreview()
-          ) : (
-            <Grid container spacing={3}>
-              {/* Tarjeta Registro Mercantil */}
-              <Grid >
-                <Box sx={{
-                  height: '100%',
+          {/* Contenido del Modal */}
+          <Box
+            sx={{
+              p: 4,
+              overflowY: "auto",
+              background: "linear-gradient(145deg, #f9f9ff, #ffffff)",
+              flex: 1,
+            }}
+          >
+            {currentItem && (
+              <Box
+                sx={{
+                  mb: 4,
                   p: 3,
-                  border: '1px solid rgba(25, 118, 210, 0.3)',
-                  borderRadius: '8px',
-                  backgroundColor: 'white',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                  },
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <InsertDriveFileIcon sx={{ color: '#1976d2', mr: 1 }} />
-                    <Typography variant="subtitle1" sx={{ color: '#1976d2', fontWeight: 'medium' }}>
-                      Registro Mercantil
+                  borderRadius: "8px",
+                  background: "rgba(25, 118, 210, 0.05)",
+                  border: "1px solid rgba(25, 118, 210, 0.2)",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)",
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{ color: "#1976d2", textAlign: "center", mb: 2 }}
+                >
+                  Detalles del registro de transportes
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid>
+                    <Typography>
+                      <strong>ID Documento:</strong>{" "}
+                      {currentItem.id_documentoTransportes}
                     </Typography>
-                  </Box>
-                  {fileUrls.registroMercantil && currentItem?.registroMercantil ? (
-                    <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleViewFile("registroMercantil", fileUrls.registroMercantil, currentItem.registroMercantil)}
-                        sx={{
-                          background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
-                          color: 'white',
-                          fontWeight: '600',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
-                          }
-                        }}
-                        fullWidth
-                      >
-                        Ver Archivo
-                      </Button>
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" sx={{ color: 'text.disabled', mt: 'auto' }}>No disponible</Typography>
-                  )}
-                </Box>
-              </Grid>
+                  </Grid>
+                  <Grid>
+                    <Typography>
+                      <strong>Unidad:</strong>{" "}
+                      {getNombreUnidad(currentItem.id_unidad)}
+                    </Typography>
+                  </Grid>
+                  <Grid>
+                    <Typography>
+                      <strong>Fecha Registro:</strong>{" "}
+                      {currentItem.fecha_registro}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
 
-              {/* Tarjeta Seguro */}
-              <Grid >
-                <Box sx={{
-                  height: '100%',
-                  p: 3,
-                  border: '1px solid rgba(25, 118, 210, 0.3)',
-                  borderRadius: '8px',
-                  backgroundColor: 'white',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                  },
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <InsertDriveFileIcon sx={{ color: '#1976d2', mr: 1 }} />
-                    <Typography variant="subtitle1" sx={{ color: '#1976d2', fontWeight: 'medium' }}>
-                      Seguro
-                    </Typography>
-                  </Box>
-                  {fileUrls.seguro && currentItem?.seguro ? (
-                    <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleViewFile("seguro", fileUrls.seguro, currentItem.seguro)}
+            {loadingUrls ? (
+              <Box sx={{ textAlign: "center", py: 4, color: "#1976d2" }}>
+                <CircularProgress color="inherit" />
+                <Typography variant="body1" sx={{ mt: 2 }}>
+                  Cargando documentos...
+                </Typography>
+              </Box>
+            ) : (
+              <Box>
+                {currentFileView.type ? (
+                  renderFilePreview()
+                ) : (
+                  <Grid container spacing={3}>
+                    {/* Tarjeta Registro Mercantil */}
+                    <Grid>
+                      <Box
                         sx={{
-                          background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
-                          color: 'white',
-                          fontWeight: '600',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
-                          }
+                          height: "100%",
+                          p: 3,
+                          border: "1px solid rgba(25, 118, 210, 0.3)",
+                          borderRadius: "8px",
+                          backgroundColor: "white",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            transform: "translateY(-2px)",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                          },
+                          display: "flex",
+                          flexDirection: "column",
                         }}
-                        fullWidth
                       >
-                        Ver Archivo
-                      </Button>
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" sx={{ color: 'text.disabled', mt: 'auto' }}>No disponible</Typography>
-                  )}
-                </Box>
-              </Grid>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                        >
+                          <InsertDriveFileIcon
+                            sx={{ color: "#1976d2", mr: 1 }}
+                          />
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ color: "#1976d2", fontWeight: "medium" }}
+                          >
+                            Registro Mercantil
+                          </Typography>
+                        </Box>
+                        {fileUrls.registroMercantil &&
+                        currentItem?.registroMercantil ? (
+                          <Box
+                            sx={{
+                              mt: "auto",
+                              display: "flex",
+                              justifyContent: "flex-end",
+                            }}
+                          >
+                            <Button
+                              variant="contained"
+                              onClick={() =>
+                                handleViewFile(
+                                  "registroMercantil",
+                                  fileUrls.registroMercantil,
+                                  currentItem.registroMercantil
+                                )
+                              }
+                              sx={{
+                                background:
+                                  "linear-gradient(45deg, #1976d2 30%, #2196f3 90%)",
+                                color: "white",
+                                fontWeight: "600",
+                                "&:hover": {
+                                  background:
+                                    "linear-gradient(45deg, #1565c0 30%, #1976d2 90%)",
+                                },
+                              }}
+                              fullWidth
+                            >
+                              Ver Archivo
+                            </Button>
+                          </Box>
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "text.disabled", mt: "auto" }}
+                          >
+                            No disponible
+                          </Typography>
+                        )}
+                      </Box>
+                    </Grid>
 
-              {/* Tarjeta Circulación */}
-              <Grid >
-                <Box sx={{
-                  height: '100%',
-                  p: 3,
-                  border: '1px solid rgba(25, 118, 210, 0.3)',
-                  borderRadius: '8px',
-                  backgroundColor: 'white',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                  },
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <InsertDriveFileIcon sx={{ color: '#1976d2', mr: 1 }} />
-                    <Typography variant="subtitle1" sx={{ color: '#1976d2', fontWeight: 'medium' }}>
-                      Tarjeta de Circulación
-                    </Typography>
-                  </Box>
-                  {fileUrls.tarjetaCirculacion && currentItem?.tarjetaCirculacion ? (
-                    <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleViewFile("tarjetaCirculacion", fileUrls.tarjetaCirculacion, currentItem.tarjetaCirculacion)}
+                    {/* Tarjeta Seguro */}
+                    <Grid>
+                      <Box
                         sx={{
-                          background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
-                          color: 'white',
-                          fontWeight: '600',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #1565c0 30%, #1976d2 90%)',
-                          }
+                          height: "100%",
+                          p: 3,
+                          border: "1px solid rgba(25, 118, 210, 0.3)",
+                          borderRadius: "8px",
+                          backgroundColor: "white",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            transform: "translateY(-2px)",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                          },
+                          display: "flex",
+                          flexDirection: "column",
                         }}
-                        fullWidth
                       >
-                        Ver Archivo
-                      </Button>
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" sx={{ color: 'text.disabled', mt: 'auto' }}>No disponible</Typography>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
-          )}
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                        >
+                          <InsertDriveFileIcon
+                            sx={{ color: "#1976d2", mr: 1 }}
+                          />
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ color: "#1976d2", fontWeight: "medium" }}
+                          >
+                            Seguro
+                          </Typography>
+                        </Box>
+                        {fileUrls.seguro && currentItem?.seguro ? (
+                          <Box
+                            sx={{
+                              mt: "auto",
+                              display: "flex",
+                              justifyContent: "flex-end",
+                            }}
+                          >
+                            <Button
+                              variant="contained"
+                              onClick={() =>
+                                handleViewFile(
+                                  "seguro",
+                                  fileUrls.seguro,
+                                  currentItem.seguro
+                                )
+                              }
+                              sx={{
+                                background:
+                                  "linear-gradient(45deg, #1976d2 30%, #2196f3 90%)",
+                                color: "white",
+                                fontWeight: "600",
+                                "&:hover": {
+                                  background:
+                                    "linear-gradient(45deg, #1565c0 30%, #1976d2 90%)",
+                                },
+                              }}
+                              fullWidth
+                            >
+                              Ver Archivo
+                            </Button>
+                          </Box>
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "text.disabled", mt: "auto" }}
+                          >
+                            No disponible
+                          </Typography>
+                        )}
+                      </Box>
+                    </Grid>
+
+                    {/* Tarjeta Circulación */}
+                    <Grid>
+                      <Box
+                        sx={{
+                          height: "100%",
+                          p: 3,
+                          border: "1px solid rgba(25, 118, 210, 0.3)",
+                          borderRadius: "8px",
+                          backgroundColor: "white",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            transform: "translateY(-2px)",
+                            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                          },
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                        >
+                          <InsertDriveFileIcon
+                            sx={{ color: "#1976d2", mr: 1 }}
+                          />
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ color: "#1976d2", fontWeight: "medium" }}
+                          >
+                            Tarjeta de Circulación
+                          </Typography>
+                        </Box>
+                        {fileUrls.tarjetaCirculacion &&
+                        currentItem?.tarjetaCirculacion ? (
+                          <Box
+                            sx={{
+                              mt: "auto",
+                              display: "flex",
+                              justifyContent: "flex-end",
+                            }}
+                          >
+                            <Button
+                              variant="contained"
+                              onClick={() =>
+                                handleViewFile(
+                                  "tarjetaCirculacion",
+                                  fileUrls.tarjetaCirculacion,
+                                  currentItem.tarjetaCirculacion
+                                )
+                              }
+                              sx={{
+                                background:
+                                  "linear-gradient(45deg, #1976d2 30%, #2196f3 90%)",
+                                color: "white",
+                                fontWeight: "600",
+                                "&:hover": {
+                                  background:
+                                    "linear-gradient(45deg, #1565c0 30%, #1976d2 90%)",
+                                },
+                              }}
+                              fullWidth
+                            >
+                              Ver Archivo
+                            </Button>
+                          </Box>
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            sx={{ color: "text.disabled", mt: "auto" }}
+                          >
+                            No disponible
+                          </Typography>
+                        )}
+                      </Box>
+                    </Grid>
+                  </Grid>
+                )}
+              </Box>
+            )}
+          </Box>
         </Box>
-      )}
-    </Box>
-  </Box>
-</Modal>
+      </Modal>
       <form onSubmit={handleSubmit} className="form">
         {isEditing && (
           <div className="mb-4">
@@ -972,12 +1072,9 @@ export default function DocTransportesForm() {
             type="submit"
             className="button button-primary"
             disabled={loading}
-            
           >
-            
             {loading ? "Procesando..." : isEditing ? "Actualizar" : "Agregar"}
           </button>
-          
 
           {isEditing && (
             <button
@@ -1067,7 +1164,7 @@ export default function DocTransportesForm() {
                           padding: "4px",
                         }}
                         onMouseOver={(e) =>
-                          (e.currentTarget.style.color = "#3b82f6")
+                          (e.currentTarget.style.color = " #0A2D5A")
                         }
                         onMouseOut={(e) =>
                           (e.currentTarget.style.color = "#0447fb")
@@ -1145,7 +1242,7 @@ export default function DocTransportesForm() {
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
-                color: currentPage === 1 ? "#ccc" : "#3b82f6",
+                color: currentPage === 1 ? "#ccc" : " #0A2D5A",
               }}
             >
               <ArrowBackIosIcon fontSize="medium" />
@@ -1166,7 +1263,7 @@ export default function DocTransportesForm() {
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
-                color: currentPage === totalPages ? "#ccc" : "#3b82f6",
+                color: currentPage === totalPages ? "#ccc" : " #0A2D5A",
               }}
             >
               <ArrowForwardIosIcon fontSize="medium" />

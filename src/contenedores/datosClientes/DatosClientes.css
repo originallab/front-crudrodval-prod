@@ -10,14 +10,14 @@
   .rodval-header {
     text-align: center;
     margin-bottom: 30px;
-    border-bottom: 2px solid #0056b3;
+    border-bottom: 2px solid #0A2D5A;
     padding-bottom: 20px;
   }
   
   .rodval-logo {
     font-size: 24px;
     font-weight: bold;
-    color: #0056b3;
+    color: #0A2D5A;
     margin-bottom: 10px;
   }
   
@@ -38,7 +38,7 @@
   }
   
   .rodval-section-title {
-    color: #0056b3;
+    color: #0A2D5A;
     margin-top: 0;
     margin-bottom: 20px;
     font-size: 18px;
@@ -83,7 +83,7 @@
   }
   
   .rodval-input:focus {
-    border-color: #0056b3;
+    border-color: #0A2D5A;
     outline: none;
     box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
   }
@@ -116,7 +116,7 @@
   .rodval-contact-title {
     font-size: 16px;
     font-weight: bold;
-    color: #0056b3;
+    color: #0A2D5A;
     margin-bottom: 15px;
   }
   
@@ -136,7 +136,7 @@
   }
   
   .rodval-required {
-    color: red;
+    color: #0A2D5A;
     margin-right: 8px;
     font-weight: bold;
   }
@@ -157,12 +157,12 @@
   }
   
   .rodval-button-primary {
-    background-color: #0056b3;
+    background-color: #0A2D5A;
     color: white;
   }
   
   .rodval-button-primary:hover {
-    background-color: #003d82;
+    background-color: #0A2D5A;;
   }
   
   .rodval-button-secondary {
@@ -194,8 +194,9 @@
     transition: background-color 0.2s;
   }
   
+   
   .rodval-edit {
-    color: #0056b3;
+    color: #0A2D5A;
   }
   
   .rodval-edit:hover {
@@ -203,7 +204,7 @@
   }
   
   .rodval-delete {
-    color: #dc3545;
+    color: #0A2D5A;
   }
   
   .rodval-delete:hover {
@@ -233,6 +234,7 @@
   
   .rodval-table-wrapper {
     overflow-x: auto;
+    
   }
   
   .rodval-table {
@@ -242,7 +244,7 @@
   }
   
   .rodval-table th {
-    background-color: #0056b3;
+    background-color: #0A2D5A;
     color: white;
     padding: 12px;
     text-align: left;

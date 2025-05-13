@@ -1,7 +1,7 @@
 /* Header - Versión corregida */
 .app-header {
   width: 100%;
-  background-color: #0709ab !important; /* Forzamos el color azul */
+  background-color: #0A2D5A !important; /* Forzamos el color azul */
   box-shadow: 0 2px 4px rgba(254, 249, 249, 0.1);
   padding: 1.5rem 1rem;
   position: fixed;

@@ -9,7 +9,8 @@ export default function DocOperadores() {
     <div className="container">
       <div className="card">
         <div className="p-6">
-          <h1 className="title">Mantenedor de archivos de operadores</h1>
+        <h1 className="title"></h1>
+        <h1 className="title"></h1>
           {/* Pestañas */}
           <div className="tabs">
             <button

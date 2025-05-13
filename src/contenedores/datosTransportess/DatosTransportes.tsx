@@ -11,7 +11,7 @@ export default function DatosTransportes() {
     <div className="container">
       <div className="card">
         <div className="p-6">
-          <h1 className="title">Mantenedor de datos de operadores y transportes</h1>
+          <h1 className="title"></h1>
           
           {/* Pestañas */}
           <div className="tabs">

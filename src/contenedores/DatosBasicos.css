@@ -1,15 +1,4 @@
 /* Estilos generales */
-body {
-  margin: 0;
-  font-family: 'Arial', sans-serif;
-  min-height: 100vh;
-  background-image: url('../../src/assets/images/rodval.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  color: #333;
-}
 
 /* Contenedor principal */
 .container {
@@ -73,7 +62,7 @@ body {
 }
 
 .tab.active {
-  background-color: #0056b3;
+  background-color: #0A2D5A;
   color: white;
 }
 
@@ -139,12 +128,12 @@ body {
 }
 
 .button-primary {
-  background-color: #0056b3;
+  background-color: #0A2D5A ;
   color: white;
 }
 
 .button-primary:hover {
-  background-color: #003d82;
+  background-color:  #0A2D5A;
   transform: translateY(-1px);
   box-shadow: 0 5px 10px rgba(0,0,0,0.15);
 }
@@ -166,7 +155,7 @@ body {
 }
 
 .table th {
-  background-color: #0056b3;
+  background-color: #7e8690;
   color: white;
   padding: 12px;
   text-align: left;
@@ -282,7 +271,7 @@ body {
 .pagination-button {
   margin: 0 10px;
   padding: 5px 10px;
-  background-color: #0056b3;
+  background-color:  #0A2D5A;
   color: white;
   border: none;
   border-radius: 4px;
@@ -296,7 +285,7 @@ body {
 
 .Edit-button {
   padding: 0.5rem;
-  background-color: #0056b3;
+  background-color: #0A2D5A;
   color: white;
   border: none;
   border-radius: 4px;
@@ -306,7 +295,7 @@ body {
 
 .Delete-button {
   padding: 0.5rem;
-  background-color: #dc3545;
+  background-color: #0A2D5A;
   color: white;
   border: none;
   border-radius: 4px;

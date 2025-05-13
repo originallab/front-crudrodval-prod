@@ -10,7 +10,7 @@ export default function DatosBasicos() {
     <div className="container">
       <div className="card">
         <div className="p-6">
-          <h1 className="title">Mantenedor de datos Basicos</h1>
+          <h1 className="title"></h1>
           
           {/* Pestañas */}
           <div className="tabs">

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import './../DatosBasicos.css';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import "./../DatosBasicos.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditSquareIcon from "@mui/icons-material/EditSquare";
 
@@ -17,20 +17,22 @@ export default function Operadores() {
 
   // Estados
   const [items, setItems] = useState<Item[]>([]);
-  const [formData, setFormData] = useState<Omit<Item, 'id_operador'> & { id_operador?: number }>({
-    nombre_operador: '',
-    rfc: '',
-    telefono: '',
-    licencia: '',
-   
+  const [formData, setFormData] = useState<
+    Omit<Item, "id_operador"> & { id_operador?: number }
+  >({
+    nombre_operador: "",
+    rfc: "",
+    telefono: "",
+    licencia: "",
   });
-  const [busqueda, setBusqueda] = useState('');
+  const [busqueda, setBusqueda] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Configuración de la API
-  const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
+  const API_BASE_URL =
+    "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
   const tableName = "operadores"; // Cambiar el nombre de la tabla
 
@@ -45,17 +47,17 @@ export default function Operadores() {
     try {
       const response = await axios.get(`${API_BASE_URL}/${tableName}/all`, {
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-          'apikey': API_KEY,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "Cache-Control": "no-cache",
+          apikey: API_KEY,
         },
         timeout: 30000,
       });
       setItems(response.data.records); // Asegúrate de que response.data.records sea un array
     } catch (err) {
-      setError('Error al cargar los datos');
-      console.error('Error en fetchItems:', err);
+      setError("Error al cargar los datos");
+      console.error("Error en fetchItems:", err);
     } finally {
       setLoading(false);
     }
@@ -66,21 +68,22 @@ export default function Operadores() {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = isEditing && formData.id_operador
-        ? `${API_BASE_URL}/${tableName}/${formData.id_operador}`
-        : `${API_BASE_URL}/${tableName}`;
+      const url =
+        isEditing && formData.id_operador
+          ? `${API_BASE_URL}/${tableName}/${formData.id_operador}`
+          : `${API_BASE_URL}/${tableName}`;
 
-      const method = isEditing && formData.id_operador ? 'patch' : 'post';
+      const method = isEditing && formData.id_operador ? "patch" : "post";
 
       const response = await axios[method](
         url,
         { data: formData },
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache',
-            'apikey': API_KEY,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+            apikey: API_KEY,
           },
           timeout: 30000,
         }
@@ -88,17 +91,21 @@ export default function Operadores() {
 
       const result = response.data;
       if (isEditing) {
-        setItems(items.map(item => (item.id_operador === formData.id_operador ? result : item)));
+        setItems(
+          items.map((item) =>
+            item.id_operador === formData.id_operador ? result : item
+          )
+        );
       } else {
         setItems([...items, result]);
       }
 
       // Limpiar el formulario
-      setFormData({ nombre_operador: '', rfc: '', telefono: '', licencia: '' });
+      setFormData({ nombre_operador: "", rfc: "", telefono: "", licencia: "" });
       setIsEditing(false);
     } catch (err) {
-      setError('Error al guardar los datos');
-      console.error('Error en handleSubmit:', err);
+      setError("Error al guardar los datos");
+      console.error("Error en handleSubmit:", err);
     } finally {
       setLoading(false);
     }
@@ -106,22 +113,22 @@ export default function Operadores() {
 
   // Función para eliminar un elemento
   const handleDelete = async (id_operador: number) => {
-    if (window.confirm('¿Estás seguro de eliminar este elemento?')) {
+    if (window.confirm("¿Estás seguro de eliminar este elemento?")) {
       setLoading(true);
       try {
         await axios.delete(`${API_BASE_URL}/${tableName}/${id_operador}`, {
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache',
-            'apikey': API_KEY,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+            apikey: API_KEY,
           },
           timeout: 30000,
         });
-        setItems(items.filter(item => item.id_operador !== id_operador));
+        setItems(items.filter((item) => item.id_operador !== id_operador));
       } catch (err) {
-        setError('Error al eliminar el elemento');
-        console.error('Error en handleDelete:', err);
+        setError("Error al eliminar el elemento");
+        console.error("Error en handleDelete:", err);
       } finally {
         setLoading(false);
       }
@@ -135,9 +142,10 @@ export default function Operadores() {
   };
 
   // Filtrar elementos según la búsqueda
-  const filteredItems = items.filter(item =>
-    item.nombre_operador.toLowerCase().includes(busqueda.toLowerCase()) ||
-    item.rfc.toLowerCase().includes(busqueda.toLowerCase())
+  const filteredItems = items.filter(
+    (item) =>
+      item.nombre_operador.toLowerCase().includes(busqueda.toLowerCase()) ||
+      item.rfc.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
@@ -166,7 +174,9 @@ export default function Operadores() {
           <input
             type="text"
             value={formData.nombre_operador}
-            onChange={(e) => setFormData({ ...formData, nombre_operador: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, nombre_operador: e.target.value })
+            }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Ingrese el nombre del operador"
@@ -194,7 +204,9 @@ export default function Operadores() {
           <input
             type="text"
             value={formData.telefono}
-            onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, telefono: e.target.value })
+            }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Ingrese el teléfono"
@@ -208,14 +220,14 @@ export default function Operadores() {
           <input
             type="text"
             value={formData.licencia}
-            onChange={(e) => setFormData({ ...formData, licencia: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, licencia: e.target.value })
+            }
             required
             className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             placeholder="Ingrese la licencia"
           />
         </div>
-
-       
 
         <div className="flex gap-2">
           <button
@@ -223,22 +235,27 @@ export default function Operadores() {
             className="button button-primary"
             disabled={loading}
             style={{
-              backgroundColor: isEditing ? '#008CBA' : '#008CBA',
-              color: 'white',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: '999px',
-              cursor: loading ? 'not-allowed' : 'pointer',
+              backgroundColor: isEditing ? "#0A2D5A " : "#0A2D5A ",
+              color: "white",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "999px",
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            {loading ? 'Procesando...' : isEditing ? 'Actualizar' : 'Agregar'}
+            {loading ? "Procesando..." : isEditing ? "Actualizar" : "Agregar"}
           </button>
 
           {isEditing && (
             <button
               type="button"
               onClick={() => {
-                setFormData({ nombre_operador: '', rfc: '', telefono: '', licencia: '' });
+                setFormData({
+                  nombre_operador: "",
+                  rfc: "",
+                  telefono: "",
+                  licencia: "",
+                });
                 setIsEditing(false);
               }}
               className="button button-secondary"
@@ -281,104 +298,95 @@ export default function Operadores() {
       </div>
 
       {/* Botón de recargar */}
-      <div style={{ overflow: 'hidden' }}>
+      <div style={{ overflow: "hidden" }}>
         <button
           onClick={fetchItems}
           className="button button-primary"
           disabled={loading}
-       // Mueve el botón a la derecha
+          // Mueve el botón a la derecha
           style={{
-            backgroundColor: isEditing ? '#008CBA' : '#008CBA',
-           float: 'right' ,
-            color: 'white',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '999px',
-            cursor: loading ? 'not-allowed' : 'pointer',
+            backgroundColor: isEditing ? "#0A2D5A " : "#0A2D5A ",
+            float: "right",
+            color: "white",
+            padding: "10px 20px",
+            border: "none",
+            borderRadius: "999px",
+            cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? 'Recargando...' : 'Recargar Tabla'}
+          {loading ? "Recargando..." : "Recargar Tabla"}
         </button>
       </div>
 
       {/* Tabla */}
-      <div className="overflow-x-auto">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre del Operador</th>
-              <th>RFC</th>
-              <th>Teléfono</th>
-              <th>Licencia</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={7} className="text-center">Cargando...</td>
-              </tr>
-            ) : filteredItems.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="text-center">No hay elementos disponibles</td>
-              </tr>
-            ) : (
-              filteredItems.map(item => (
-                <tr key={item.id_operador}>
-                  <td>{item.id_operador}</td>
-                  <td>{item.nombre_operador}</td>
-                  <td>{item.rfc}</td>
-                  <td>{item.telefono}</td>
-                  <td>{item.licencia}</td>
-                  <td>
-                    <div className="flex gap-2">
-                      <button
-                          onClick={() => handleEdit(item)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#0447fb",
-                            cursor: "pointer",
-                            padding: "4px",
-                          }}
-                          onMouseOver={(e) =>
-                            (e.currentTarget.style.color = "#0447fb")
-                          }
-                          onMouseOut={(e) =>
-                            (e.currentTarget.style.color = "#0447fb")
-                          }
-                        >
-                          <EditSquareIcon fontSize="small" />
-                        </button>
-                     
-                      <button
-                        onClick={() => handleDelete(item.id_operador)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#ef4444",
-                          cursor: "pointer",
-                          padding: "4px",
-                        }}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.color = "#dc2626")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.color = "#ef4444")
-                        }
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </button>
-
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <div className="rodval-table-wrapper">
+  <table className="rodval-table">
+    <thead>
+      <tr>
+        <th>ID Operador</th>
+        <th>Nombre del Operador</th>
+        <th>RFC</th>
+        <th>Teléfono</th>
+        <th>Licencia</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {loading && !filteredItems.length ? (
+        <tr>
+          <td colSpan={6} className="rodval-no-data">
+            <div className="rodval-loading-spinner"></div>
+            Cargando operadores...
+          </td>
+        </tr>
+      ) : filteredItems.length === 0 ? (
+        <tr>
+          <td colSpan={6} className="rodval-no-data">
+            No se encontraron operadores
+          </td>
+        </tr>
+      ) : (
+        filteredItems.map((item) => (
+          <tr key={item.id_operador}>
+            <td>{item.id_operador}</td>
+            <td className="rodval-truncate" title={item.nombre_operador}>
+              {item.nombre_operador || <span className="rodval-empty">Sin nombre</span>}
+            </td>
+            <td className="rodval-truncate" title={item.rfc}>
+              {item.rfc || <span className="rodval-empty">Sin RFC</span>}
+            </td>
+            <td className="rodval-truncate" title={item.telefono}>
+              {item.telefono || <span className="rodval-empty">Sin teléfono</span>}
+            </td>
+            <td className="rodval-truncate" title={item.licencia}>
+              {item.licencia || <span className="rodval-empty">Sin licencia</span>}
+            </td>
+            <td>
+              <div className="rodval-actions">
+                <button
+                  onClick={() => handleEdit(item)}
+                  className="rodval-icon-button rodval-edit"
+                  title="Editar operador"
+                  disabled={loading}
+                >
+                  <EditSquareIcon fontSize="small" />
+                </button>
+                <button
+                  onClick={() => handleDelete(item.id_operador)}
+                  className="rodval-icon-button rodval-delete"
+                  title="Eliminar operador"
+                  disabled={loading}
+                >
+                  <DeleteIcon fontSize="small" />
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
     </div>
   );
 }

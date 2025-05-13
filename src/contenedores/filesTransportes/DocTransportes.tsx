@@ -9,7 +9,7 @@ export default function DocTransportes() {
     <div className="container">
       <div className="card">
         <div className="p-6">
-          <h1 className="title">Mantenedor de documentos de transportes</h1>
+        
           {/* Pestañas */}
           <div className="tabs">
             <button

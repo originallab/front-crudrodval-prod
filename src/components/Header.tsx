@@ -31,13 +31,13 @@ const Header: React.FC<HeaderProps> = ({
 
         <div className="header-title-container">
           <img
-            src={iconoRodval}
-            className="header-logo-image"
-            alt="Logo RODVAL"
+            //src={iconoRodval}
+            //className="header-logo-image"
+            //alt="Logo RODVAL"
           />
           <h1 className="header-title-text">{title}</h1>
         </div>
-        <h1 className="header-title-text">Sistema de logistica RODVAL</h1>
+        <h1 className="header-title-text">   Sistema de logistica RODVAL</h1>
         <div className="header-controls">
           <button className="dark-mode-toggle" onClick={toggleDarkMode}>
             {darkMode ? "☀️" : "🌙"}

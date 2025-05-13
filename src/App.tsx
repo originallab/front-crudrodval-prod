@@ -12,6 +12,7 @@ import DatosTransportes from "./contenedores/datosTransportess/DatosTransportes"
 import DatosClientes from "./contenedores/datosClientes/DatosClientes";
 import DocOperadores from "./contenedores/filesOperadores/DocOperadores";
 import DocTransportes from "./contenedores/filesTransportes/DocTransportes";
+import Cotizador from "./contenedores/cotizador/Cotizador";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -73,9 +74,12 @@ function App() {
       ],
     },
     {
-      title: "Contacto",
-      id: "contacto",
-      subMenu: [],
+      title: "Cotizador",
+      id: "cotizador",
+      subMenu: [
+        { title: "Cotizador de las rutas de transportes", id: "Cotizador" },
+      
+      ],
     },
   ];
 
@@ -98,12 +102,8 @@ function App() {
         return <DocOperadores />;
       case "DocTransportes":
         return <DocTransportes />;
-      case "contacto":
-        return (
-          <div className="page-content">
-            <h2>Página de Contacto</h2>
-          </div>
-        );
+      case "Cotizador":
+        return <Cotizador />;
       //default:
       //return <div className="page-content"><h2>Página de Inicio</h2></div>;
     }

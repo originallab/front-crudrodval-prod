@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import './../DatosBasicos.css';
-import Select from 'react-select';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import "./../DatosBasicos.css";
+import Select from "react-select";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditSquareIcon from "@mui/icons-material/EditSquare";
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 export default function OrigenForm() {
   // Definir tipos de datos
@@ -23,14 +23,16 @@ export default function OrigenForm() {
   // Estados
   const [items, setItems] = useState<Item[]>([]);
   const [zonasDestino, setZonasDestino] = useState<ZonaDestino[]>([]);
-  const [formData, setFormData] = useState<Omit<Item, 'id_origen'> & { id_origen?: number }>({
-    origen: '',
+  const [formData, setFormData] = useState<
+    Omit<Item, "id_origen"> & { id_origen?: number }
+  >({
+    origen: "",
     id_zonasDestino: 0,
   });
-  const [busqueda, setBusqueda] = useState('');
+  const [busqueda, setBusqueda] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [dataLoaded, setDataLoaded] = useState(false);
 
   // Paginación
@@ -38,7 +40,8 @@ export default function OrigenForm() {
   const [itemsPerPage] = useState(5);
 
   // Configuración de la API
-  const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
+  const API_BASE_URL =
+    "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
   const tableName = "origen";
   const zonasTableName = "zona_destinos";
@@ -51,7 +54,7 @@ export default function OrigenForm() {
         await fetchItems();
         setDataLoaded(true);
       } catch (err) {
-        setError('Error al cargar los datos iniciales');
+        setError("Error al cargar los datos iniciales");
       }
     };
     loadData();
@@ -63,17 +66,17 @@ export default function OrigenForm() {
     try {
       const response = await axios.get(`${API_BASE_URL}/${tableName}/all`, {
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-          'apikey': API_KEY,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "Cache-Control": "no-cache",
+          apikey: API_KEY,
         },
         timeout: 30000,
       });
       setItems(response.data.records);
     } catch (err) {
-      setError('Error al cargar los orígenes');
-      console.error('Error en fetchItems:', err);
+      setError("Error al cargar los orígenes");
+      console.error("Error en fetchItems:", err);
     } finally {
       setLoading(false);
     }
@@ -82,31 +85,34 @@ export default function OrigenForm() {
   // Función para obtener las zonas destino
   const fetchZonasDestino = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/${zonasTableName}/all`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-          'apikey': API_KEY,
-        },
-        timeout: 30000,
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/${zonasTableName}/all`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+            apikey: API_KEY,
+          },
+          timeout: 30000,
+        }
+      );
       setZonasDestino(response.data.records);
     } catch (err) {
-      setError('Error al cargar las zonas destino');
-      console.error('Error en fetchZonasDestino:', err);
+      setError("Error al cargar las zonas destino");
+      console.error("Error en fetchZonasDestino:", err);
     }
   };
 
   // Función para recargar todos los datos
   const reloadData = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       await fetchZonasDestino();
       await fetchItems();
     } catch (err) {
-      setError('Error al recargar datos');
+      setError("Error al recargar datos");
       console.error(err);
     } finally {
       setLoading(false);
@@ -116,7 +122,7 @@ export default function OrigenForm() {
   // Función para manejar cambios en el formulario
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -126,24 +132,25 @@ export default function OrigenForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const url = isEditing && formData.id_origen
-        ? `${API_BASE_URL}/${tableName}/${formData.id_origen}`
-        : `${API_BASE_URL}/${tableName}`;
+      const url =
+        isEditing && formData.id_origen
+          ? `${API_BASE_URL}/${tableName}/${formData.id_origen}`
+          : `${API_BASE_URL}/${tableName}`;
 
-      const method = isEditing && formData.id_origen ? 'patch' : 'post';
+      const method = isEditing && formData.id_origen ? "patch" : "post";
 
       const response = await axios[method](
         url,
         { data: formData },
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache',
-            'apikey': API_KEY,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+            apikey: API_KEY,
           },
           timeout: 30000,
         }
@@ -151,17 +158,21 @@ export default function OrigenForm() {
 
       const result = response.data;
       if (isEditing) {
-        setItems(items.map(item => (item.id_origen === formData.id_origen ? result : item)));
+        setItems(
+          items.map((item) =>
+            item.id_origen === formData.id_origen ? result : item
+          )
+        );
       } else {
         setItems([...items, result]);
       }
 
       // Limpiar el formulario
-      setFormData({ origen: '', id_zonasDestino: 0 });
+      setFormData({ origen: "", id_zonasDestino: 0 });
       setIsEditing(false);
     } catch (err) {
-      setError('Error al guardar los datos');
-      console.error('Error en handleSubmit:', err);
+      setError("Error al guardar los datos");
+      console.error("Error en handleSubmit:", err);
     } finally {
       setLoading(false);
     }
@@ -169,22 +180,22 @@ export default function OrigenForm() {
 
   // Función para eliminar un origen
   const handleDelete = async (id_origen: number) => {
-    if (window.confirm('¿Estás seguro de eliminar este origen?')) {
+    if (window.confirm("¿Estás seguro de eliminar este origen?")) {
       setLoading(true);
       try {
         await axios.delete(`${API_BASE_URL}/${tableName}/${id_origen}`, {
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Cache-Control': 'no-cache',
-            'apikey': API_KEY,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+            apikey: API_KEY,
           },
           timeout: 30000,
         });
-        setItems(items.filter(item => item.id_origen !== id_origen));
+        setItems(items.filter((item) => item.id_origen !== id_origen));
       } catch (err) {
-        setError('Error al eliminar el origen');
-        console.error('Error en handleDelete:', err);
+        setError("Error al eliminar el origen");
+        console.error("Error en handleDelete:", err);
       } finally {
         setLoading(false);
       }
@@ -199,14 +210,17 @@ export default function OrigenForm() {
 
   // Obtener nombre de zona destino
   const getNombreZonaDestino = (id: number): string => {
-    const zona = zonasDestino.find(z => z.id_zonasDestino === id);
-    return zona ? zona.nombre : 'No encontrado';
+    const zona = zonasDestino.find((z) => z.id_zonasDestino === id);
+    return zona ? zona.nombre : "No encontrado";
   };
 
   // Filtrar elementos según la búsqueda
-  const filteredItems = items.filter(item =>
-    item.origen.toLowerCase().includes(busqueda.toLowerCase()) ||
-    getNombreZonaDestino(item.id_zonasDestino).toLowerCase().includes(busqueda.toLowerCase())
+  const filteredItems = items.filter(
+    (item) =>
+      item.origen.toLowerCase().includes(busqueda.toLowerCase()) ||
+      getNombreZonaDestino(item.id_zonasDestino)
+        .toLowerCase()
+        .includes(busqueda.toLowerCase())
   );
 
   // Cálculos para paginación
@@ -255,17 +269,22 @@ export default function OrigenForm() {
         <div className="mb-4">
           <label>Zona Destino:</label>
           <Select
-            options={zonasDestino.map(zona => ({
+            options={zonasDestino.map((zona) => ({
               value: zona.id_zonasDestino,
-              label: zona.nombre
+              label: zona.nombre,
             }))}
             value={zonasDestino
-              .filter(zona => zona.id_zonasDestino === formData.id_zonasDestino)
-              .map(zona => ({ value: zona.id_zonasDestino, label: zona.nombre }))}
-            onChange={(selectedOption) => 
+              .filter(
+                (zona) => zona.id_zonasDestino === formData.id_zonasDestino
+              )
+              .map((zona) => ({
+                value: zona.id_zonasDestino,
+                label: zona.nombre,
+              }))}
+            onChange={(selectedOption) =>
               setFormData({
                 ...formData,
-                id_zonasDestino: selectedOption?.value || 0
+                id_zonasDestino: selectedOption?.value || 0,
               })
             }
             placeholder="Seleccione una zona destino"
@@ -283,14 +302,14 @@ export default function OrigenForm() {
             className="button button-primary"
             disabled={loading}
           >
-            {loading ? 'Procesando...' : isEditing ? 'Actualizar' : 'Agregar'}
+            {loading ? "Procesando..." : isEditing ? "Actualizar" : "Agregar"}
           </button>
 
           {isEditing && (
             <button
               type="button"
               onClick={() => {
-                setFormData({ origen: '', id_zonasDestino: 0 });
+                setFormData({ origen: "", id_zonasDestino: 0 });
                 setIsEditing(false);
               }}
               className="button button-secondary"
@@ -314,14 +333,14 @@ export default function OrigenForm() {
       </div>
 
       {/* Botón de recargar */}
-      <div style={{ overflow: 'hidden' }}>
+      <div style={{ overflow: "hidden" }}>
         <button
           onClick={reloadData}
           className="button button-primary"
           disabled={loading}
-          style={{ float: 'right' }}
+          style={{ float: "right" }}
         >
-          {loading ? 'Recargando...' : 'Recargar Tabla'}
+          {loading ? "Recargando..." : "Recargar Tabla"}
         </button>
       </div>
 
@@ -339,14 +358,18 @@ export default function OrigenForm() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={4} className="text-center">Cargando...</td>
+                <td colSpan={4} className="text-center">
+                  Cargando...
+                </td>
               </tr>
             ) : currentItems.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center">No hay orígenes disponibles</td>
+                <td colSpan={4} className="text-center">
+                  No hay orígenes disponibles
+                </td>
               </tr>
             ) : (
-              currentItems.map(item => (
+              currentItems.map((item) => (
                 <tr key={item.id_origen}>
                   <td>{item.id_origen}</td>
                   <td>{item.origen}</td>
@@ -365,7 +388,7 @@ export default function OrigenForm() {
                       >
                         <EditSquareIcon fontSize="small" />
                       </button>
-                     
+
                       <button
                         onClick={() => handleDelete(item.id_origen)}
                         style={{
@@ -390,23 +413,28 @@ export default function OrigenForm() {
         {filteredItems.length > itemsPerPage && (
           <div className="pagination-container">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1 || loading}
               className="pagination-button"
             >
-              <ArrowBackIosIcon fontSize="medium" sx={{ color: '#3b82f6' }} />
+              <ArrowBackIosIcon fontSize="medium" sx={{ color: " #0A2D5A" }} />
             </button>
-            
+
             <span className="pagination-info">
               Página {currentPage} de {totalPages}
             </span>
-            
+
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages || loading}
               className="pagination-button"
             >
-              <ArrowForwardIosIcon fontSize="medium" sx={{ color: '#3b82f6' }} />
+              <ArrowForwardIosIcon
+                fontSize="medium"
+                sx={{ color: " #0A2D5A" }}
+              />
             </button>
           </div>
         )}
