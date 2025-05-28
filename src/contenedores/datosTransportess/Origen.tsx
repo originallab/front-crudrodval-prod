@@ -7,6 +7,7 @@ import EditSquareIcon from "@mui/icons-material/EditSquare";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
+
 export default function OrigenForm() {
   // Definir tipos de datos
   type Item = {
@@ -287,7 +288,7 @@ export default function OrigenForm() {
                 id_zonasDestino: selectedOption?.value || 0,
               })
             }
-            placeholder="Seleccione una zona destino"
+            placeholder="Seleccione una zona destino 222"
             className="basic-single"
             classNamePrefix="select"
             isClearable={false}

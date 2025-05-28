@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Sidebar.css';
-
+import iconoRodval from '../assets/images/iconoRodval.svg';
 interface MenuItem {
   title: string;
   id: string;
@@ -16,19 +16,19 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, menuItems, onClose, onItemClick }) => {
   const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({});
-  
+
   const toggleSubMenu = (title: string) => {
     setExpandedMenus(prev => ({
       ...prev,
       [title]: !prev[title]
     }));
   };
-  
+
   const handleItemClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     onItemClick(id);
   };
-  
+
   return (
     <>
       <div className={`sidebar-overlay ${isOpen ? 'active' : ''}`} onClick={onClose}></div>
@@ -36,6 +36,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, menuItems, onClose, onItemCli
         <div className="sidebar-header">
           <button className="close-button" onClick={onClose}>×</button>
         </div>
+
+        {/* Imagen superior */}
+        <div className="sidebar-image-container">
+          <img src="/iconoRodval.svg" className="sidebar-image" />
+        </div>
+
         <nav className="sidebar-nav">
           <ul className="menu">
             {menuItems.map((item, index) => (

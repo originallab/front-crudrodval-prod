@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import Login from "./components/login/Login";
-import iconoRodval from "./imagenes/iconoRodval.svg";
+
+import HomeFile from "./components/Home/HomeFile";
+
 
 import "./App.css";
 
@@ -17,7 +19,7 @@ import Cotizador from "./contenedores/cotizador/Cotizador";
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [currentPage, setCurrentPage] = useState("inicio");
+  const [currentPage, setCurrentPage] = useState("HomeFile");
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Estado de autenticación
 
   const toggleSidebar = () => {
@@ -40,19 +42,20 @@ function App() {
   // Función para manejar el login exitoso
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
+    setCurrentPage("HomeFile");
   };
 
   // Función para manejar el logout
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setCurrentPage("inicio");
+    setCurrentPage("HomeFile");
   };
 
   // Estructura del menú con submenús
   const menuItems = [
     {
-      title: "",
-      id: "",
+      title: "Inicio",
+      id: "HomeFile",
       subMenu: [],
     },
 
@@ -86,12 +89,8 @@ function App() {
   // Función para renderizar el componente actual basado en currentPage
   const renderCurrentPage = () => {
     switch (currentPage) {
-      case "contacto2":
-        return (
-          <div className="page-content">
-            <h2>Página de Contacto2</h2>
-          </div>
-        );
+      case "HomeFile":
+        return <HomeFile />;
       case "DatosBasicos":
         return <DatosBasicos />;
       case "DatosClientes":
@@ -104,8 +103,7 @@ function App() {
         return <DocTransportes />;
       case "Cotizador":
         return <Cotizador />;
-      //default:
-      //return <div className="page-content"><h2>Página de Inicio</h2></div>;
+     
     }
   };
 

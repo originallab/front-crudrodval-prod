@@ -100,7 +100,7 @@ export default function DocOperadoresForm() {
   const API_KEY = "lety";
   const tableName = "doc_operadore";
   const operadoresTableName = "operadores";
-  const CORS_ANYWHERE_URL = "";
+  const CORS_ANYWHERE_URL = "https://thingproxy.freeboard.io/fetch/";
 
   const filteredItems = items.filter(
     (item) =>

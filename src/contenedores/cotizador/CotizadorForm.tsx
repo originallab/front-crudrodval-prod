@@ -31,8 +31,8 @@ interface InvoiceTotals {
 
 const CotizadorForm: React.FC = () => {
   // Estados
-  const [customer] = useState({ name: "John Smith", email: "john_s@mail.com" });
-  const [subject, setSubject] = useState("Service per June 2025");
+  const [customer] = useState({ name: "Sergio Partida", email: "sergipart12@gmail.com" });
+  const [subject, setSubject] = useState("Agregar una descripción");
   const [dueDate, setDueDate] = useState("2025-11-10");
   const [currency] = useState("IDR");
   const [products, setProducts] = useState<ProductItem[]>([
@@ -169,15 +169,14 @@ const CotizadorForm: React.FC = () => {
       {/* Header Section */}
       <header className="dashboard-header">
         <div className="logo-section">
-          <div className="logo">Arto+</div>
-          <h2>Create Invoice</h2>
+          <div className="logo">RODVAL</div>
+          <h2>Cotizador de los viajes de los transportes</h2>
         </div>
         <div className="help-section">
           <div className="help-button">
             <i className="fas fa-question-circle"></i>
-            <span>Do you need help?</span>
           </div>
-          <button className="close-button">×</button>
+          
         </div>
       </header>
 
@@ -185,12 +184,12 @@ const CotizadorForm: React.FC = () => {
         {/* Left Panel - Invoice Details */}
         <div className="left-panel">
           <div className="section invoice-details">
-            <h3>Invoice Details</h3>
+            <h3>Cotización del viaje</h3>
 
             {/* People Section */}
             <div className="form-group">
               <label>
-                People <span className="required">*</span>
+                Operador :<span className="required">*</span>
               </label>
               <div className="client-select">
                 <div className="client-avatar">JS</div>
@@ -199,7 +198,6 @@ const CotizadorForm: React.FC = () => {
                   <div className="client-email">{customer.email}</div>
                 </div>
                 <span className="dropdown-arrow">
-                  <button className="client-type-btn">On Arto+</button>
                   <i className="fas fa-pen"></i>
                 </span>
               </div>
@@ -208,7 +206,7 @@ const CotizadorForm: React.FC = () => {
             {/* Subject */}
             <div className="form-group">
               <label>
-                Subject <span className="required">*</span>
+                Descripción del servicio:<span className="required">*</span>
               </label>
               <input
                 type="text"
@@ -220,7 +218,7 @@ const CotizadorForm: React.FC = () => {
 
             {/* Due Date */}
             <div className="form-group">
-              <label>Due date</label>
+              <label>Fecha del servicio:</label>
               <input
                 type="date"
                 value={dueDate}
@@ -229,11 +227,22 @@ const CotizadorForm: React.FC = () => {
               />
             </div>
 
-            {/* Currency */}
+            {/* Origen */}
             <div className="form-group">
-              <label>Currency</label>
+              <label>Origen</label>
               <select className="form-input">
-                <option>🇮🇩 IDR - Indonesian Rupiah</option>
+                <option>🇮🇩 IDR - Cancún Mexico</option>
+                <option>🇺🇸 USD - New York, USA</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Destino */}
+            <div className="form-group">
+              <label>Origen</label>
+              <select className="form-input">
+                <option>🇮🇩 IDR - Cancún Mexico</option>
+                <option>🇺🇸 USD - New York, USA</option>
               </select>
             </div>
           </div>

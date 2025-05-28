@@ -401,3 +401,13 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+/* estilos para el select*/
+
+.react-select-container {
+  width: 100%;
+}
+.react-select__control {
+  min-height: 38px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+}

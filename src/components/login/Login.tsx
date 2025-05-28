@@ -40,7 +40,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h1> Sistema de Logistica Rodval</h1>
+        <h1> Sistema de Logistica RODVAL</h1>
         <h3>Iniciar Sesion</h3>
         {loading ? (
   <div className="loading-container">

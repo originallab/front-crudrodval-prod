@@ -20,8 +20,23 @@ body {
     display: flex;
     flex-direction: column;
 }
+/*Estilos para manejar la imagen del icono de rodval*/
+.rodval-image {
+  width: 70%;           
+  max-height: 70px;    
+  right: 80px;
+  object-fit: contain;
+}
 
-/* Header Styles */
+.rodval-image-preview {
+  width: 70%;           
+  max-height: 70px;  
+  left: -10px;   
+  object-fit: contain;
+  position: relative;     
+}
+
+/* Estilos de header del dashboard */
 .dashboard-header {
     background: white;
     padding: 1rem 2rem;
@@ -38,9 +53,9 @@ body {
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: bold;
-    color: #6366f1;
+    color: #0A2D5A;
 }
 
 .logo-section h2 {
@@ -418,7 +433,7 @@ body {
 }
 
 .invoice-header {
-    text-align: right;
+    text-align: left;
     margin-bottom: 2rem;
 }
 
@@ -521,7 +536,12 @@ body {
     color: #6b7280;
     margin-bottom: 0.5rem;
 }
-
+/* Estilos para el texto del encabezado */
+.label-headed {
+    font-size: 0.8rem;
+    color: #000000;
+    margin-bottom: 0.5rem;
+}
 .attachment-item {
     display: flex;
     align-items: center;

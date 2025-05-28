@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import "./../DatosBasicos.css";
+import "./../styles.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditSquareIcon from "@mui/icons-material/EditSquare";
-import ChatIcon from "@mui/icons-material/Chat";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -16,15 +16,16 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import ImageIcon from "@mui/icons-material/Image";
 import CloseIcon from "@mui/icons-material/Close";
-import { Grid } from "@mui/material"; // Importación directa
+import Stack from "@mui/material";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton"; // Importación directa
+import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
+import Grid from "@mui/material/Grid";
 
 type Item = {
   id_documentoTransportes: number;
-  fecha_registro: string;
   id_unidad: number;
+  fecha_registro: string;
   registroMercantil: string;
   seguro: string;
   tarjetaCirculacion: string;
@@ -32,7 +33,14 @@ type Item = {
 
 type Unidad = {
   id_unidad: number;
-  nombre: string;
+  nombre?: string;
+  [key: string]: any;
+};
+
+type Operador = {
+  id_operador: string;
+  nombre_operador?: string;
+  [key: string]: any;
 };
 
 export default function DocTransportesForm() {
@@ -53,11 +61,9 @@ export default function DocTransportesForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string>("");
   const [unidades, setUnidades] = useState<Unidad[]>([]);
-  const [fileRegistroMercantil, setFileRegistroMercantil] =
-    useState<File | null>(null);
+  const [fileRegistroMercantil, setFileRegistroMercantil] = useState<File | null>(null);
   const [fileSeguro, setFileSeguro] = useState<File | null>(null);
-  const [fileTarjetaCirculacion, setFileTarjetaCirculacion] =
-    useState<File | null>(null);
+  const [fileTarjetaCirculacion, setFileTarjetaCirculacion] = useState<File | null>(null);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [fileUrls, setFileUrls] = useState({
     registroMercantil: "",
@@ -74,12 +80,11 @@ export default function DocTransportesForm() {
     fileName: string;
   }>({ type: null, url: "", fileName: "" });
 
-  const API_BASE_URL =
-    "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
+  const API_BASE_URL = "http://theoriginallab-crud-rodval-back.m0oqwu.easypanel.host";
   const API_KEY = "lety";
   const tableName = "docs_Transportes";
   const unidadesTableName = "tipos_unidades";
-  const CORS_ANYWHERE_URL = "https://cors-anywhere.herokuapp.com/";
+  const CORS_ANYWHERE_URL = "https://thingproxy.freeboard.io/fetch/";
 
   const filteredItems = items.filter(
     (item) =>
@@ -125,13 +130,12 @@ export default function DocTransportesForm() {
     setCurrentFileView({ type: null, url: "", fileName: "" });
 
     try {
+      // Registro Mercantil
       if (item.registroMercantil) {
-        const registroMercantilRequestBody = {
-          fileName: item.registroMercantil,
-        };
+        const getAWSRequestBody = { fileName: item.registroMercantil };
         const getResponse = await axios.post<{ url?: string }>(
           `${CORS_ANYWHERE_URL}https://kneib5mp53.execute-api.us-west-2.amazonaws.com/dev/getObject`,
-          registroMercantilRequestBody,
+          getAWSRequestBody,
           {
             headers: {
               "Content-Type": "application/json",
@@ -149,11 +153,12 @@ export default function DocTransportesForm() {
         }
       }
 
+      // Seguro
       if (item.seguro) {
-        const seguroRequestBody = { fileName: item.seguro };
+        const postAWSRequestBody = { fileName: item.seguro };
         const postResponse = await axios.post<{ url?: string }>(
           `${CORS_ANYWHERE_URL}https://kneib5mp53.execute-api.us-west-2.amazonaws.com/dev/getObject`,
-          seguroRequestBody,
+          postAWSRequestBody,
           {
             headers: {
               "Content-Type": "application/json",
@@ -171,13 +176,12 @@ export default function DocTransportesForm() {
         }
       }
 
+      // Tarjeta de Circulación
       if (item.tarjetaCirculacion) {
-        const tarjetaCirculacionRequestBody = {
-          fileName: item.tarjetaCirculacion,
-        };
-        const tarjetaCirculacionResponse = await axios.post<{ url?: string }>(
+        const tarjetaCirculacionBody = { fileName: item.tarjetaCirculacion };
+        const tarjetaResponse = await axios.post<{ url?: string }>(
           `${CORS_ANYWHERE_URL}https://kneib5mp53.execute-api.us-west-2.amazonaws.com/dev/getObject`,
-          tarjetaCirculacionRequestBody,
+          tarjetaCirculacionBody,
           {
             headers: {
               "Content-Type": "application/json",
@@ -187,10 +191,10 @@ export default function DocTransportesForm() {
           }
         );
 
-        if (tarjetaCirculacionResponse.data?.url) {
+        if (tarjetaResponse.data?.url) {
           setFileUrls((prev) => ({
             ...prev,
-            tarjetaCirculacion: tarjetaCirculacionResponse.data.url || "",
+            tarjetaCirculacion: tarjetaResponse.data.url || "",
           }));
         }
       }
@@ -342,25 +346,53 @@ export default function DocTransportesForm() {
 
       const updatedFormData = { ...formData, fecha_registro: fechaFormateada };
 
+      // Subir archivos y actualizar nombres en formData
+      const uploadPromises = [];
+
       if (fileRegistroMercantil) {
-        const uploadResult = await uploadFile(
-          fileRegistroMercantil,
-          "registroMercantil"
-        ).catch((error: unknown) => {
-          throw new Error(
-            `Fallo subida Registro Mercantil: ${
-              error instanceof Error ? error.message : "Error desconocido"
-            }`
-          );
-        });
-        if (uploadResult.success) {
-          updatedFormData.registroMercantil = fileRegistroMercantil.name;
-        }
-      } else {
-        if (formData.registroMercantil !== undefined) {
-          updatedFormData.registroMercantil = formData.registroMercantil;
-        }
+        uploadPromises.push(
+          uploadFile(fileRegistroMercantil, "registroMercantil")
+            .then((result) => {
+              if (result.success) {
+                updatedFormData.registroMercantil = fileRegistroMercantil.name;
+              }
+            })
+            .catch((error) => {
+              throw new Error(`Fallo subida archivo registro mercantil: ${error.message}`);
+            })
+        );
       }
+
+      if (fileSeguro) {
+        uploadPromises.push(
+          uploadFile(fileSeguro, "seguro")
+            .then((result) => {
+              if (result.success) {
+                updatedFormData.seguro = fileSeguro.name;
+              }
+            })
+            .catch((error) => {
+              throw new Error(`Fallo subida archivo seguro: ${error.message}`);
+            })
+        );
+      }
+
+      if (fileTarjetaCirculacion) {
+        uploadPromises.push(
+          uploadFile(fileTarjetaCirculacion, "tarjetaCirculacion")
+            .then((result) => {
+              if (result.success) {
+                updatedFormData.tarjetaCirculacion = fileTarjetaCirculacion.name;
+              }
+            })
+            .catch((error) => {
+              throw new Error(`Fallo subida archivo tarjeta circulación: ${error.message}`);
+            })
+        );
+      }
+
+      // Esperar a que todas las subidas terminen
+      await Promise.all(uploadPromises);
 
       const url =
         isEditing && formData.id_documentoTransportes
@@ -508,20 +540,26 @@ export default function DocTransportesForm() {
 
   const handleCloseModal = () => {
     setOpenModal(false);
-    setFileUrls({ registroMercantil: "", seguro: "", tarjetaCirculacion: "" });
-    setCurrentItem(null);
+    // Resetear todos los estados relacionados con archivos
+    setFileUrls({
+      registroMercantil: "",
+      seguro: "",
+      tarjetaCirculacion: "",
+    });
     setCurrentFileView({ type: null, url: "", fileName: "" });
+    setCurrentItem(null);
+    setLoadingUrls(false);
   };
 
   const renderFileIcon = (fileName: string) => {
     const type = getFileType(fileName);
     switch (type) {
       case "pdf":
-        return <PictureAsPdfIcon style={{ color: "#e53935" }} />;
+        return <PictureAsPdfIcon style={{ color: "#0A2D5A" }} />;
       case "image":
-        return <ImageIcon style={{ color: "#43a047" }} />;
+        return <ImageIcon style={{ color: "#0A2D5A" }} />;
       default:
-        return <InsertDriveFileIcon style={{ color: "#757575" }} />;
+        return <InsertDriveFileIcon style={{ color: "#0A2D5A" }} />;
     }
   };
 
@@ -582,6 +620,7 @@ export default function DocTransportesForm() {
       <h2>Documentos de Transportes</h2>
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
+
       <Modal
         open={openModal}
         onClose={handleCloseModal}
@@ -590,11 +629,11 @@ export default function DocTransportesForm() {
       >
         <Box
           sx={{
-            position: "absolute",
+            position: "absolute" as const,
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: { xs: "90%", sm: "70%", md: "60%" }, // Responsive width
+            width: "80%",
             maxWidth: "800px",
             maxHeight: "90vh",
             bgcolor: "background.paper",
@@ -607,7 +646,6 @@ export default function DocTransportesForm() {
             flexDirection: "column",
           }}
         >
-          {/* Header del Modal */}
           <Box
             sx={{
               padding: "16px 24px",
@@ -644,7 +682,6 @@ export default function DocTransportesForm() {
             </IconButton>
           </Box>
 
-          {/* Contenido del Modal */}
           <Box
             sx={{
               p: 4,
@@ -668,28 +705,37 @@ export default function DocTransportesForm() {
                   variant="h6"
                   sx={{ color: "#1976d2", textAlign: "center", mb: 2 }}
                 >
-                  Detalles del registro de transportes
+                  Detalles del registro de transporte
                 </Typography>
-                <Grid container spacing={2}>
-                  <Grid>
-                    <Typography>
-                      <strong>ID Documento:</strong>{" "}
-                      {currentItem.id_documentoTransportes}
-                    </Typography>
-                  </Grid>
-                  <Grid>
-                    <Typography>
-                      <strong>Unidad:</strong>{" "}
-                      {getNombreUnidad(currentItem.id_unidad)}
-                    </Typography>
-                  </Grid>
-                  <Grid>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Box
+                    sx={{
+                      width: "100%",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 2,
+                    }}
+                  >
+                    <Box sx={{ width: { xs: "100%", md: "calc(50% - 16px)" } }}>
+                      <Typography>
+                        <strong>ID Documento:</strong>{" "}
+                        {currentItem.id_documentoTransportes}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ width: { xs: "100%", md: "calc(50% - 16px)" } }}>
+                      <Typography>
+                        <strong>Unidad:</strong>{" "}
+                        {getNombreUnidad(currentItem.id_unidad)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Box sx={{ width: { xs: "100%", md: "calc(50% - 16px)" } }}>
                     <Typography>
                       <strong>Fecha Registro:</strong>{" "}
                       {currentItem.fecha_registro}
                     </Typography>
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
               </Box>
             )}
 
@@ -706,12 +752,12 @@ export default function DocTransportesForm() {
                   renderFilePreview()
                 ) : (
                   <Grid container spacing={3}>
-                    {/* Tarjeta Registro Mercantil */}
-                    <Grid>
+                    {/* Registro Mercantil */}
+                    <Grid item xs={12} sm={6} md={4}>
                       <Box
                         sx={{
                           height: "100%",
-                          p: 3,
+                          p: 2,
                           border: "1px solid rgba(25, 118, 210, 0.3)",
                           borderRadius: "8px",
                           backgroundColor: "white",
@@ -720,12 +766,10 @@ export default function DocTransportesForm() {
                             transform: "translateY(-2px)",
                             boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
                           },
-                          display: "flex",
-                          flexDirection: "column",
                         }}
                       >
                         <Box
-                          sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                          sx={{ display: "flex", alignItems: "center", mb: 1 }}
                         >
                           <InsertDriveFileIcon
                             sx={{ color: "#1976d2", mr: 1 }}
@@ -737,14 +781,9 @@ export default function DocTransportesForm() {
                             Registro Mercantil
                           </Typography>
                         </Box>
-                        {fileUrls.registroMercantil &&
-                        currentItem?.registroMercantil ? (
+                        {fileUrls.registroMercantil && currentItem?.registroMercantil ? (
                           <Box
-                            sx={{
-                              mt: "auto",
-                              display: "flex",
-                              justifyContent: "flex-end",
-                            }}
+                            sx={{ display: "flex", justifyContent: "flex-end" }}
                           >
                             <Button
                               variant="contained"
@@ -765,7 +804,6 @@ export default function DocTransportesForm() {
                                     "linear-gradient(45deg, #1565c0 30%, #1976d2 90%)",
                                 },
                               }}
-                              fullWidth
                             >
                               Ver Archivo
                             </Button>
@@ -773,7 +811,7 @@ export default function DocTransportesForm() {
                         ) : (
                           <Typography
                             variant="body2"
-                            sx={{ color: "text.disabled", mt: "auto" }}
+                            sx={{ color: "text.disabled" }}
                           >
                             No disponible
                           </Typography>
@@ -781,12 +819,12 @@ export default function DocTransportesForm() {
                       </Box>
                     </Grid>
 
-                    {/* Tarjeta Seguro */}
-                    <Grid>
+                    {/* Seguro */}
+                    <Grid item xs={12} sm={6} md={4}>
                       <Box
                         sx={{
                           height: "100%",
-                          p: 3,
+                          p: 2,
                           border: "1px solid rgba(25, 118, 210, 0.3)",
                           borderRadius: "8px",
                           backgroundColor: "white",
@@ -795,12 +833,10 @@ export default function DocTransportesForm() {
                             transform: "translateY(-2px)",
                             boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
                           },
-                          display: "flex",
-                          flexDirection: "column",
                         }}
                       >
                         <Box
-                          sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                          sx={{ display: "flex", alignItems: "center", mb: 1 }}
                         >
                           <InsertDriveFileIcon
                             sx={{ color: "#1976d2", mr: 1 }}
@@ -814,11 +850,7 @@ export default function DocTransportesForm() {
                         </Box>
                         {fileUrls.seguro && currentItem?.seguro ? (
                           <Box
-                            sx={{
-                              mt: "auto",
-                              display: "flex",
-                              justifyContent: "flex-end",
-                            }}
+                            sx={{ display: "flex", justifyContent: "flex-end" }}
                           >
                             <Button
                               variant="contained"
@@ -839,7 +871,6 @@ export default function DocTransportesForm() {
                                     "linear-gradient(45deg, #1565c0 30%, #1976d2 90%)",
                                 },
                               }}
-                              fullWidth
                             >
                               Ver Archivo
                             </Button>
@@ -847,7 +878,7 @@ export default function DocTransportesForm() {
                         ) : (
                           <Typography
                             variant="body2"
-                            sx={{ color: "text.disabled", mt: "auto" }}
+                            sx={{ color: "text.disabled" }}
                           >
                             No disponible
                           </Typography>
@@ -856,11 +887,11 @@ export default function DocTransportesForm() {
                     </Grid>
 
                     {/* Tarjeta Circulación */}
-                    <Grid>
+                    <Grid item xs={12} sm={6} md={4}>
                       <Box
                         sx={{
                           height: "100%",
-                          p: 3,
+                          p: 2,
                           border: "1px solid rgba(25, 118, 210, 0.3)",
                           borderRadius: "8px",
                           backgroundColor: "white",
@@ -869,12 +900,10 @@ export default function DocTransportesForm() {
                             transform: "translateY(-2px)",
                             boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
                           },
-                          display: "flex",
-                          flexDirection: "column",
                         }}
                       >
                         <Box
-                          sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                          sx={{ display: "flex", alignItems: "center", mb: 1 }}
                         >
                           <InsertDriveFileIcon
                             sx={{ color: "#1976d2", mr: 1 }}
@@ -883,17 +912,12 @@ export default function DocTransportesForm() {
                             variant="subtitle1"
                             sx={{ color: "#1976d2", fontWeight: "medium" }}
                           >
-                            Tarjeta de Circulación
+                            Tarjeta Circulación
                           </Typography>
                         </Box>
-                        {fileUrls.tarjetaCirculacion &&
-                        currentItem?.tarjetaCirculacion ? (
+                        {fileUrls.tarjetaCirculacion && currentItem?.tarjetaCirculacion ? (
                           <Box
-                            sx={{
-                              mt: "auto",
-                              display: "flex",
-                              justifyContent: "flex-end",
-                            }}
+                            sx={{ display: "flex", justifyContent: "flex-end" }}
                           >
                             <Button
                               variant="contained"
@@ -914,7 +938,6 @@ export default function DocTransportesForm() {
                                     "linear-gradient(45deg, #1565c0 30%, #1976d2 90%)",
                                 },
                               }}
-                              fullWidth
                             >
                               Ver Archivo
                             </Button>
@@ -922,7 +945,7 @@ export default function DocTransportesForm() {
                         ) : (
                           <Typography
                             variant="body2"
-                            sx={{ color: "text.disabled", mt: "auto" }}
+                            sx={{ color: "text.disabled" }}
                           >
                             No disponible
                           </Typography>
@@ -936,138 +959,146 @@ export default function DocTransportesForm() {
           </Box>
         </Box>
       </Modal>
-      <form onSubmit={handleSubmit} className="form">
-        {isEditing && (
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-medium mb-2">
-              ID Documento:
-            </label>
-            <input
-              type="text"
-              value={formData.id_documentoTransportes || ""}
-              disabled
-              className="w-full max-w-lg p-2 border border-gray-300 rounded-md bg-gray-100"
+      <form onSubmit={handleSubmit} className="form-uniform">
+        {/* Primera fila */}
+        <div className="form-row-uniform">
+          {isEditing && (
+            <div className="form-group-uniform">
+              <label className="uniform-label">ID Documento:</label>
+              <input
+                type="text"
+                value={formData.id_documentoTransportes || ""}
+                disabled
+                className="uniform-input bg-gray-100"
+              />
+            </div>
+          )}
+
+          <div className="form-group-uniform">
+            <label className="uniform-label">Unidad:</label>
+           
+                      <Select
+                          options={unidades.map((unidad) => ({
+                            value: unidad.id_unidad,
+                       
+                             label: unidad.nombre || `Unidad ${unidad.id_unidad}`,
+                          }))}
+                          value={
+                            formData.id_unidad
+                              ? {
+                                   value: formData.id_unidad,
+                                   label: getNombreUnidad(formData.id_unidad),
+                                }
+                              : null
+                          }
+                          onChange={(selectedOption) =>
+                            setFormData({
+                             ...formData,
+                             id_unidad: selectedOption?.value || 0,
+                            })
+                          }
+                          placeholder="Seleccione la unidad"
+                          className="uniform-select"
+                          isDisabled={loading}
+                        />
+          </div>
+
+          <div className="form-group-uniform">
+            <label className="uniform-label">Fecha de Registro:</label>
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date: Date | null) => setSelectedDate(date)}
+              dateFormat="yyyy-MM-dd"
+              className="uniform-input"
+              placeholderText="Seleccione la fecha"
+              disabled={loading}
             />
           </div>
-        )}
-
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-medium mb-2">
-            Unidad:
-          </label>
-          <Select
-            options={unidades.map((unidad) => ({
-              value: unidad.id_unidad,
-              label: unidad.nombre || `Unidad ${unidad.id_unidad}`,
-            }))}
-            value={
-              formData.id_unidad
-                ? {
-                    value: formData.id_unidad,
-                    label: getNombreUnidad(formData.id_unidad),
-                  }
-                : null
-            }
-            onChange={(selectedOption) =>
-              setFormData({
-                ...formData,
-                id_unidad: selectedOption?.value || 0,
-              })
-            }
-            placeholder="Seleccione una unidad"
-            className="w-full max-w-lg"
-            isDisabled={loading}
-          />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-medium mb-2">
-            Fecha de Registro:
-          </label>
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date: Date | null) => setSelectedDate(date)}
-            dateFormat="yyyy-MM-dd"
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            placeholderText="Seleccione la fecha"
-            disabled={loading}
-          />
+        {/* Segunda fila */}
+        <div className="form-row-uniform">
+          <div className="form-group-uniform">
+            <label className="uniform-label">Registro Mercantil:</label>
+            <div className="uniform-file-upload">
+              <input
+                type="file"
+                id="file-registro"
+                onChange={handleFileRegistroMercantilChange}
+                className="uniform-file-input"
+                disabled={loading}
+                required={!isEditing || (isEditing && !formData.registroMercantil)}
+              />
+              <label htmlFor="file-registro" className="uniform-file-button">
+                📄 Registro Mercantil
+              </label>
+              {fileRegistroMercantil && (
+                <p className="uniform-file-info">{fileRegistroMercantil.name}</p>
+              )}
+              {isEditing && !fileRegistroMercantil && formData.registroMercantil && (
+                <p className="uniform-file-info">
+                  Archivo actual: {formData.registroMercantil}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="form-group-uniform">
+            <label className="uniform-label">Seguro:</label>
+            <div className="uniform-file-upload">
+              <input
+                type="file"
+                id="file-seguro"
+                onChange={handleFileSeguroChange}
+                className="uniform-file-input"
+                disabled={loading}
+                required={!isEditing || (isEditing && !formData.seguro)}
+              />
+              <label htmlFor="file-seguro" className="uniform-file-button">
+                🏥 Seguro
+              </label>
+              {fileSeguro && (
+                <p className="uniform-file-info">{fileSeguro.name}</p>
+              )}
+              {isEditing && !fileSeguro && formData.seguro && (
+                <p className="uniform-file-info">
+                  Archivo actual: {formData.seguro}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-medium mb-2">
-            Archivo Registro Mercantil:
-          </label>
-          <input
-            type="file"
-            onChange={handleFileRegistroMercantilChange}
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            disabled={loading}
-            required={!isEditing || (isEditing && !formData.registroMercantil)}
-          />
-          {fileRegistroMercantil && (
-            <p className="mt-2 text-sm text-gray-600">
-              Archivo seleccionado: {fileRegistroMercantil.name}
-            </p>
-          )}
-          {isEditing &&
-            !fileRegistroMercantil &&
-            formData.registroMercantil && (
-              <p className="mt-2 text-sm text-gray-600">
-                Archivo actual: {formData.registroMercantil}
-              </p>
-            )}
+        {/* Tercera fila */}
+        <div className="form-row-uniform">
+          <div className="form-group-uniform">
+            <label className="uniform-label">Tarjeta de Circulación:</label>
+            <div className="uniform-file-upload">
+              <input
+                type="file"
+                id="file-tarjeta"
+                onChange={handleFileTarjetaCirculacionChange}
+                className="uniform-file-input"
+                disabled={loading}
+                required={!isEditing || (isEditing && !formData.tarjetaCirculacion)}
+              />
+              <label htmlFor="file-tarjeta" className="uniform-file-button">
+                🚗 Tarjeta Circulación
+              </label>
+              {fileTarjetaCirculacion && (
+                <p className="uniform-file-info">{fileTarjetaCirculacion.name}</p>
+              )}
+              {isEditing && !fileTarjetaCirculacion && formData.tarjetaCirculacion && (
+                <p className="uniform-file-info">
+                  Archivo actual: {formData.tarjetaCirculacion}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-medium mb-2">
-            Archivo Seguro:
-          </label>
-          <input
-            type="file"
-            onChange={handleFileSeguroChange}
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            disabled={loading}
-            required={!isEditing || (isEditing && !formData.seguro)}
-          />
-          {fileSeguro && (
-            <p className="mt-2 text-sm text-gray-600">
-              Archivo seleccionado: {fileSeguro.name}
-            </p>
-          )}
-          {isEditing && !fileSeguro && formData.seguro && (
-            <p className="mt-2 text-sm text-gray-600">
-              Archivo actual: {formData.seguro}
-            </p>
-          )}
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-medium mb-2">
-            Archivo Tarjeta de Circulación:
-          </label>
-          <input
-            type="file"
-            onChange={handleFileTarjetaCirculacionChange}
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            disabled={loading}
-            required={!isEditing || (isEditing && !formData.tarjetaCirculacion)}
-          />
-          {fileTarjetaCirculacion && (
-            <p className="mt-2 text-sm text-gray-600">
-              Archivo seleccionado: {fileTarjetaCirculacion.name}
-            </p>
-          )}
-          {isEditing &&
-            !fileTarjetaCirculacion &&
-            formData.tarjetaCirculacion && (
-              <p className="mt-2 text-sm text-gray-600">
-                Archivo actual: {formData.tarjetaCirculacion}
-              </p>
-            )}
-        </div>
-
-        <div className="flex gap-2">
+        {/* Botones */}
+        <div className="form-buttons-uniform">
           <button
             type="submit"
             className="button button-primary"
@@ -1080,7 +1111,7 @@ export default function DocTransportesForm() {
             <button
               type="button"
               onClick={resetForm}
-              className="button button-secondary"
+              className="uniform-cancel-button"
               disabled={loading}
             >
               Cancelar
@@ -1089,36 +1120,55 @@ export default function DocTransportesForm() {
         </div>
       </form>
 
+      {/* Seccion de buscador de los registros de los documentos */}
       <div className="search-container">
         <label className="block text-gray-700 text-sm font-medium mb-2">
-          Buscar en documentos:
+          Buscar en documentos de transporte:
         </label>
         <input
           type="text"
           placeholder="Buscar..."
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
+          required
           className="search-input w-full max-w-lg p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-          disabled={loading}
         />
+        <span className="search-icon">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </span>
       </div>
 
+      {/* Botón de recargar */}
       <div style={{ overflow: "hidden" }}>
         <button
-          onClick={() => {
-            fetchItems();
-            fetchUnidades();
-          }}
+          onClick={fetchItems}
           className="button button-primary"
           disabled={loading}
-          style={{ float: "right" }}
+          style={{
+            backgroundColor: loading ? "#0A2D5A" : "#0A2D5A",
+            float: "right",
+          }}
         >
           {loading ? "Recargando..." : "Recargar Tabla"}
         </button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="table">
+      {/* Tabla de documentos de transporte */}
+      <div className="rodval-table-wrapper">
+        <table className="rodval-table">
           <thead>
             <tr>
               <th>ID Documento</th>
@@ -1133,13 +1183,13 @@ export default function DocTransportesForm() {
           <tbody>
             {loading && !currentItems.length ? (
               <tr>
-                <td colSpan={7} className="text-center">
+                <td colSpan={7} className="rodval-no-data">
                   Cargando...
                 </td>
               </tr>
             ) : currentItems.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center">
+                <td colSpan={7} className="rodval-no-data">
                   No hay documentos disponibles
                 </td>
               </tr>
@@ -1149,68 +1199,46 @@ export default function DocTransportesForm() {
                   <td>{item.id_documentoTransportes}</td>
                   <td>{getNombreUnidad(item.id_unidad)}</td>
                   <td>{item.fecha_registro}</td>
-                  <td>{item.registroMercantil || "No disponible"}</td>
-                  <td>{item.seguro || "No disponible"}</td>
-                  <td>{item.tarjetaCirculacion || "No disponible"}</td>
+                  <td
+                    className="rodval-truncate"
+                    title={item.registroMercantil || undefined}
+                  >
+                    {item.registroMercantil || "No disponible"}
+                  </td>
+                  <td
+                    className="rodval-truncate"
+                    title={item.seguro || undefined}
+                  >
+                    {item.seguro || "No disponible"}
+                  </td>
+                  <td
+                    className="rodval-truncate"
+                    title={item.tarjetaCirculacion || undefined}
+                  >
+                    {item.tarjetaCirculacion || "No disponible"}
+                  </td>
                   <td>
-                    <div className="flex gap-2">
+                    <div className="rodval-actions">
                       <button
                         onClick={() => handleEdit(item)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#0447fb",
-                          cursor: "pointer",
-                          padding: "4px",
-                        }}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.color = " #0A2D5A")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.color = "#0447fb")
-                        }
+                        className="rodval-icon-button rodval-edit"
+                        title="Editar"
                         disabled={loading}
                       >
                         <EditSquareIcon fontSize="small" />
                       </button>
-
                       <button
                         onClick={() => handleOpenModal(item)}
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#10b981",
-                          cursor: "pointer",
-                          padding: "4px",
-                        }}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.color = "#059669")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.color = "#10b981")
-                        }
+                        className="rodval-icon-button rodval-view"
+                        title="Ver documentos"
                         disabled={loading}
                       >
                         <ImageIcon fontSize="small" />
                       </button>
-
                       <button
-                        onClick={() =>
-                          handleDelete(item.id_documentoTransportes)
-                        }
-                        style={{
-                          background: "none",
-                          border: "none",
-                          color: "#ef4444",
-                          cursor: "pointer",
-                          padding: "4px",
-                        }}
-                        onMouseOver={(e) =>
-                          (e.currentTarget.style.color = "#dc2626")
-                        }
-                        onMouseOut={(e) =>
-                          (e.currentTarget.style.color = "#ef4444")
-                        }
+                        onClick={() => handleDelete(item.id_documentoTransportes)}
+                        className="rodval-icon-button rodval-delete"
+                        title="Eliminar"
                         disabled={loading}
                       >
                         <DeleteIcon fontSize="small" />
@@ -1222,55 +1250,55 @@ export default function DocTransportesForm() {
             )}
           </tbody>
         </table>
+      </div>
 
-        {filteredItems.length > itemsPerPage && (
-          <div
+      {filteredItems.length > itemsPerPage && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "20px",
+            gap: "15px",
+          }}
+        >
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
             style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
               display: "flex",
-              justifyContent: "center",
               alignItems: "center",
-              marginTop: "20px",
-              gap: "15px",
+              color: currentPage === 1 ? "#ccc" : " #0A2D5A",
             }}
           >
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                color: currentPage === 1 ? "#ccc" : " #0A2D5A",
-              }}
-            >
-              <ArrowBackIosIcon fontSize="medium" />
-            </button>
+            <ArrowBackIosIcon fontSize="medium" />
+          </button>
 
-            <span style={{ margin: "0 10px" }}>
-              Página {currentPage} de {totalPages}
-            </span>
+          <span style={{ margin: "0 10px" }}>
+            Página {currentPage} de {totalPages}
+          </span>
 
-            <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              disabled={currentPage === totalPages}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                color: currentPage === totalPages ? "#ccc" : " #0A2D5A",
-              }}
-            >
-              <ArrowForwardIosIcon fontSize="medium" />
-            </button>
-          </div>
-        )}
-      </div>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              color: currentPage === totalPages ? "#ccc" : " #0A2D5A",
+            }}
+          >
+            <ArrowForwardIosIcon fontSize="medium" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
