@@ -1,0 +1,3 @@
+[submodule "rodval"]
+	path = rodval
+	url = https://github.com/originallab/frontend_LogisticaRodval.git
