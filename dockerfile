@@ -4,19 +4,15 @@ WORKDIR /app
 
 
 COPY package.json package-lock.json ./
-RUN npm install -g npm@latest && \
-    npm ci --no-audit --prefer-offline && \
-    npm update react-scripts postcss tailwindcss
-
+RUN npm ci --no-audit --prefer-offline && \
+    npm update react-scripts postcss tailwindcss --no-audit
 
 COPY . .
 
 RUN DISABLE_ESLINT_PLUGIN=true \
     GENERATE_SOURCEMAP=false \
     TAILWIND_MODE=build \
-    npm run build || \
-    { echo "Build falló, intentando con --force"; npm run build -- --force; }
-
+    npm run build
 
 FROM nginx:1.25-alpine
 
