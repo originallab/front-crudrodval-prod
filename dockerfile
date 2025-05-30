@@ -9,8 +9,7 @@ RUN npm install --silent
 
 COPY . .
 
-RUN npm run build --no-minify
-
+RUN CI=true npm run build
 
 FROM nginx:1.25-alpine
 
