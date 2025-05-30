@@ -4,7 +4,6 @@ WORKDIR /app
 
 
 COPY package.json package-lock.json ./
-COPY craco.config.js ./  # Si usas Craco para Tailwind
 RUN npm install --frozen-lockfile
 
 
