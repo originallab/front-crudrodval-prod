@@ -1,25 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import "./Cotizador.css";
+import { FaTruck, FaQuestionCircle, FaFilePdf,  FaTrash, FaPlus, FaFilePdf as FaFilePdfIcon } from "react-icons/fa";
+import "./Cotizador.css"
+import logo from '../../assets/images/iconoRodval.svg';
 
-// Definición de interfaces
+ {/* Referencias las tablas auxiliares de acceso */}
+
 interface ProductItem {
   id: string;
   name: string;
   price: number;
   qty: number;
   tax: number;
-}
-
-interface InvoiceData {
-  customer: {
-    name: string;
-    email: string;
-  };
-  subject: string;
-  dueDate: string;
-  currency: string;
-  products: ProductItem[];
-  discount: number;
 }
 
 interface InvoiceTotals {
@@ -30,7 +21,6 @@ interface InvoiceTotals {
 }
 
 const CotizadorForm: React.FC = () => {
-  // Estados
   const [customer] = useState({ name: "Sergio Partida", email: "sergipart12@gmail.com" });
   const [subject, setSubject] = useState("Agregar una descripción");
   const [dueDate, setDueDate] = useState("2025-11-10");
@@ -38,61 +28,59 @@ const CotizadorForm: React.FC = () => {
   const [products, setProducts] = useState<ProductItem[]>([
     {
       id: "1",
-      name: "Summer 2K23 T-shirt",
+      name: "Torton de 50 toneladas",
       price: 125000,
       qty: 1,
-      tax: 10,
+      tax: 50,
+    },
+    {
+      id: "2",
+      name: "Plataforma de 50 toneladas",
+      price: 150000,
+      qty: 1,
+      tax: 50,
     },
   ]);
   const [discountRate] = useState(0.1);
   const [lastSaved, setLastSaved] = useState("Today at 4:30 PM");
   const [activePreviewTab, setActivePreviewTab] = useState("pdf");
+  const [showPreview, setShowPreview] = useState(true);
 
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Calculo de totales
   const calculateTotals = (): InvoiceTotals => {
     let subtotal = 0;
-
     products.forEach((product) => {
       subtotal += product.price * product.qty;
     });
-
     const discount = subtotal * discountRate;
-    const tax = (subtotal - discount) * 0.1; // 10% tax rate
+    const tax = (subtotal - discount) * 0.16;
     const total = subtotal - discount + tax;
-
     return { subtotal, discount, tax, total };
   };
 
-  // Formatear moneda
   const formatCurrency = (num: number): string => {
-    return (
-      new Intl.NumberFormat("id-ID", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(num) + " IDR"
-    );
+    return new Intl.NumberFormat("id-ID", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num) + " Pesos";
   };
 
-  // Agregar nuevo producto
   const addNewProduct = () => {
     const newProduct: ProductItem = {
       id: Date.now().toString(),
       name: "New Product",
       price: 0,
       qty: 1,
-      tax: 10,
+      tax: 50,
     };
     setProducts([...products, newProduct]);
   };
 
-  // Eliminar producto
   const deleteProduct = (id: string) => {
     setProducts(products.filter((product) => product.id !== id));
   };
 
-  // Actualizar producto
   const updateProduct = (id: string, field: keyof ProductItem, value: any) => {
     setProducts(
       products.map((product) => {
@@ -104,7 +92,6 @@ const CotizadorForm: React.FC = () => {
     );
   };
 
-  // Autoguardado
   useEffect(() => {
     if (saveTimer.current) {
       clearTimeout(saveTimer.current);
@@ -118,7 +105,6 @@ const CotizadorForm: React.FC = () => {
         hour12: true,
       });
       setLastSaved(`Today at ${timeString}`);
-      console.log("Factura guardada automáticamente");
     }, 1000);
 
     return () => {
@@ -128,7 +114,6 @@ const CotizadorForm: React.FC = () => {
     };
   }, [products, subject, dueDate]);
 
-  // Procesar factura
   const processInvoice = () => {
     if (!customer.name) {
       alert("Por favor, selecciona un cliente.");
@@ -141,21 +126,8 @@ const CotizadorForm: React.FC = () => {
     }
 
     alert("Procesando factura...");
-
-    setTimeout(() => {
-      console.log("Procesando factura:", {
-        customer,
-        subject,
-        dueDate,
-        currency,
-        products,
-        discount: discountRate,
-      });
-      alert("Factura procesada exitosamente!");
-    }, 1000);
   };
 
-  // Cancelar factura
   const cancelInvoice = () => {
     if (window.confirm("¿Estás seguro de que quieres cancelar? Los cambios no guardados se perderán.")) {
       window.history.back();
@@ -166,33 +138,27 @@ const CotizadorForm: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      {/* Header Section */}
+      {/* Header con icono */}
       <header className="dashboard-header">
         <div className="logo-section">
-          <div className="logo">RODVAL</div>
-          <h2>Cotizador de los viajes de los transportes</h2>
-        </div>
-        <div className="help-section">
-          <div className="help-button">
-            <i className="fas fa-question-circle"></i>
-          </div>
-          
+          <img src={logo} alt="RODVAL Logo" className="logo-image" width="310" height="310"  />
+          <h2 style={{ textAlign: 'left', margin: 15, padding: 20 }}>Cotizador de los viajes de los transportes</h2>
         </div>
       </header>
 
       <div className="main-content">
-        {/* Left Panel - Invoice Details */}
-        <div className="left-panel">
+        {/* Panel de formulario */}
+         
+        <div className="form-panel">
+          
+          <div className="invoice-container">
           <div className="section invoice-details">
-            <h3>Cotización del viaje</h3>
-
-            {/* People Section */}
+            <div className="invoice-info">
+             <h3>Información General</h3>
             <div className="form-group">
-              <label>
-                Operador :<span className="required">*</span>
-              </label>
+              <label>Operador :<span className="required">*</span></label>
               <div className="client-select">
-                <div className="client-avatar">JS</div>
+                <div className="client-avatar">SP</div>
                 <div className="client-info">
                   <div className="client-name">{customer.name}</div>
                   <div className="client-email">{customer.email}</div>
@@ -203,11 +169,8 @@ const CotizadorForm: React.FC = () => {
               </div>
             </div>
 
-            {/* Subject */}
             <div className="form-group">
-              <label>
-                Descripción del servicio:<span className="required">*</span>
-              </label>
+              <label>Descripción del servicio:<span className="required">*</span></label>
               <input
                 type="text"
                 value={subject}
@@ -216,7 +179,6 @@ const CotizadorForm: React.FC = () => {
               />
             </div>
 
-            {/* Due Date */}
             <div className="form-group">
               <label>Fecha del servicio:</label>
               <input
@@ -227,7 +189,6 @@ const CotizadorForm: React.FC = () => {
               />
             </div>
 
-            {/* Origen */}
             <div className="form-group">
               <label>Origen</label>
               <select className="form-input">
@@ -235,28 +196,29 @@ const CotizadorForm: React.FC = () => {
                 <option>🇺🇸 USD - New York, USA</option>
               </select>
             </div>
-          </div>
 
-          {/* Destino */}
             <div className="form-group">
-              <label>Origen</label>
+              <label>Destino</label>
               <select className="form-input">
                 <option>🇮🇩 IDR - Cancún Mexico</option>
                 <option>🇺🇸 USD - New York, USA</option>
               </select>
             </div>
           </div>
-
-          {/* Product Section */}
+         </div>
+       
+        {/*Seccion de los serviccios alineados a la izquierda*/}
+         <div className="invoice-services">
           <div className="section product-section">
-            <h3>Product</h3>
-
+            <h3>Servicios</h3>
             <table className="product-table">
               <thead>
                 <tr>
-                  <th>Item</th>
-                  <th>Qty</th>
-                  <th>Tax</th>
+                  <th>Servicio</th>
+                  <th>Origen</th>
+                  <th>Destino</th>
+                  <th>Kilometraje</th>
+                  <th>Precio</th>
                   <th></th>
                 </tr>
               </thead>
@@ -265,7 +227,6 @@ const CotizadorForm: React.FC = () => {
                   <tr key={product.id}>
                     <td>
                       <div className="product-item">
-                        <div className="product-image"></div>
                         <div className="product-info">
                           <div className="product-name">{product.name}</div>
                           <div className="product-price">
@@ -310,91 +271,54 @@ const CotizadorForm: React.FC = () => {
                         className="delete-btn"
                         onClick={() => deleteProduct(product.id)}
                       >
-                        <i className="fas fa-trash"></i>
+                        <FaTrash />
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-
             <button className="add-item-btn" onClick={addNewProduct}>
-              <i className="fas fa-plus"></i>
-              Add New Line
+              <FaPlus />
+              Agregar servicio
             </button>
-
-            {/* Action Buttons */}
-            <div className="action-buttons">
-              <button className="coupon-btn">Add Coupon</button>
-              <button className="discount-btn">Add Discount</button>
-              <select className="discount-select">
-                <option>Summer Sale 10th</option>
-              </select>
-            </div>
           </div>
-
-          {/* Footer Information */}
           <div className="footer-info">
-            <span>Last saved: {lastSaved}</span>
+            <span>Último guardado: {lastSaved}</span>
             <div className="footer-buttons">
-              <button className="cancel-btn" onClick={cancelInvoice}>
-                Cancel
-              </button>
               <button className="process-btn" onClick={processInvoice}>
-                Processing Invoice
+                Guardar Cotizacion
               </button>
             </div>
           </div>
         </div>
-
-        {/* Right Panel - Preview */}
-        <div className="right-panel">
-          <div className="preview-header">
-            <h3>Preview</h3>
-            <button className="info-tooltip">i</button>
-          </div>
-
+        </div>
+      </div>
+      </div>
+      
+      {showPreview && (
+        <div className="preview-container">
           <div className="preview-buttons">
             <button
-              className={`preview-btn ${
-                activePreviewTab === "pdf" ? "active" : ""
-              }`}
+              className={`preview-btn ${activePreviewTab === "pdf" ? "active" : ""}`}
               onClick={() => setActivePreviewTab("pdf")}
             >
-              <i className="fas fa-file-pdf"></i>
-              PDF
+              <FaFilePdf />
+              PREVISUALIZACIÓN
             </button>
-            <button
-              className={`preview-btn ${
-                activePreviewTab === "email" ? "active" : ""
-              }`}
-              onClick={() => setActivePreviewTab("email")}
-            >
-              <i className="fas fa-envelope"></i>
-              Email
-            </button>
-            <button
-              className={`preview-btn ${
-                activePreviewTab === "payment" ? "active" : ""
-              }`}
-              onClick={() => setActivePreviewTab("payment")}
-            >
-              <i className="fas fa-credit-card"></i>
-              Payment page
-            </button>
+           
           </div>
 
-          {/* Invoice Preview */}
           <div className="invoice-preview">
             <div className="invoice-header">
-              <div className="invoice-number">INV2398-09-097</div>
+              <div className="invoice-number">Cotización RODVAL</div>
             </div>
 
             <div className="invoice-info-grid">
               <div className="invoice-field">
-                <label>Due date</label>
+                <label>Fecha</label>
                 <div>
-                  {new Date(dueDate).toLocaleDateString("en-US", {
+                  {new Date(dueDate).toLocaleDateString("es-MX", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",
@@ -402,39 +326,33 @@ const CotizadorForm: React.FC = () => {
                 </div>
               </div>
               <div className="invoice-field">
-                <label>Subject</label>
+                <label>Descripción</label>
                 <div>{subject}</div>
               </div>
               <div className="invoice-field">
-                <label>From</label>
+                <label>Operador</label>
                 <div>{customer.name}</div>
                 <div>{customer.email}</div>
               </div>
               <div className="invoice-field">
-                <label>Currency</label>
-                <div>IDR - Indonesian Rupiah</div>
+                <label>Moneda</label>
+                <div>IDR - Rupia Indonesia</div>
               </div>
             </div>
 
-            {/* Invoice Items Table */}
             <table className="invoice-table">
               <thead>
                 <tr>
-                  <th>DESCRIPTION</th>
-                  <th>QTY</th>
-                  <th>UNIT PRICE</th>
-                  <th>AMOUNT</th>
+                  <th>DESCRIPCIÓN</th>
+                  <th>CANTIDAD</th>
+                  <th>PRECIO UNITARIO</th>
+                  <th>IMPORTE</th>
                 </tr>
               </thead>
               <tbody>
                 {products.map((product) => (
                   <tr key={product.id}>
-                    <td>
-                      <div className="item-description">
-                        <div className="item-image"></div>
-                        <span>{product.name}</span>
-                      </div>
-                    </td>
+                    <td>{product.name}</td>
                     <td>{product.qty}</td>
                     <td>{formatCurrency(product.price)}</td>
                     <td>{formatCurrency(product.price * product.qty)}</td>
@@ -443,38 +361,28 @@ const CotizadorForm: React.FC = () => {
               </tbody>
             </table>
 
-            {/* Invoice Totals */}
             <div className="invoice-totals">
               <div className="total-row">
                 <span>Subtotal</span>
                 <span>{formatCurrency(totals.subtotal)}</span>
               </div>
               <div className="total-row">
-                <span>Discount 10%</span>
+                <span>Descuento 10%</span>
                 <span>-{formatCurrency(totals.discount)}</span>
               </div>
               <div className="total-row">
-                <span>Tax</span>
+                <span>Impuestos</span>
                 <span>{formatCurrency(totals.tax)}</span>
               </div>
               <div className="total-row final-amount">
-                <span>Amount due</span>
+                <span>Total a pagar</span>
                 <span>{formatCurrency(totals.total)}</span>
-              </div>
-            </div>
-
-            {/* Attachment Section */}
-            <div className="attachment-section">
-              <div className="attachment-label">Attachment</div>
-              <div className="attachment-item">
-                <i className="fas fa-file-pdf"></i>
-                <span>Product list PDF</span>
-                <button className="download-btn">Download ⬇</button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+    </div>
   );
 };
 

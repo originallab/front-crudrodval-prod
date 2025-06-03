@@ -19,6 +19,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    
 }
 /*Estilos para manejar la imagen del icono de rodval*/
 .rodval-image {
@@ -38,18 +39,25 @@ body {
 
 /* Estilos de header del dashboard */
 .dashboard-header {
-    background: white;
+    background-color: #0A2D5A !important;
     padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #e0e6ed;
+    border-bottom: 1px solid #0077ff;
 }
+
+.logo-image {
+    width: 120px;
+    height: 120px;
+    fill: #0077ff; 
+}
+
 
 .logo-section {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 20rem;
 }
 
 .logo {
@@ -59,9 +67,12 @@ body {
 }
 
 .logo-section h2 {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: 500;
-    color: #1f2937;
+    color: #f0f1f2;
+    left: -10px;
+    transform: translateX(0);
+    margin-left: auto; /* Empuja todo a la izquierda en flexbox */
 }
 
 .help-section {
@@ -93,14 +104,7 @@ body {
     overflow: hidden;
 }
 
-/* Left Panel */
-.left-panel {
-    flex: 1;
-    padding: 2rem;
-    background: white;
-    overflow-y: auto;
-    border-right: 1px solid #e0e6ed;
-}
+
 
 .section {
     margin-bottom: 2rem;
@@ -431,7 +435,22 @@ body {
     padding: 2rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+.invoice-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Mitad y mitad */
+  gap: 20px; /* Espacio entre columnas */
+  align-items: start; /* Alinea arriba */
+}
 
+.invoice-info, 
+.invoice-services {
+  background: rgb(255, 255, 255);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* Elimina márgenes negativos */
+  margin: 0;
+}
 .invoice-header {
     text-align: left;
     margin-bottom: 2rem;
@@ -596,4 +615,54 @@ body {
     .invoice-preview {
         padding: 1rem;
     }
+
+/* Estilos para que la parte de servicios se vaya a la derecha */
+.invoice-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.invoice-details {
+  flex: 0 0 40%;
+}
+
+.product-section {
+  flex: 1;
+  width: 100%;
+  left: 50px;
+}
+
+.footer-info {
+  flex-basis: 100%; /* El pie de página ocupa todo el ancho */
+}
+
+.main-container {
+  display: flex;
+  gap: 2rem; /* Espacio entre las columnas */
+}
+
+.content-left {
+  flex: 2; /* Ocupa 2/3 del espacio */
+}
+
+.services-panel {
+  flex: 1; /* Ocupa 1/3 del espacio */
+  background: #f8f9fa; /* Fondo diferenciado */
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  height: fit-content;
+  position: sticky;
+  top: 20px; /* Para que quede fijo al hacer scroll */
+}
+
+/* Ajustes para la tabla en el panel */
+.services-panel .product-table {
+  width: 100%;
+}
+
+.services-panel .qty-input {
+  width: 60px;
+}
 }

@@ -4,7 +4,7 @@ import './Login.css'; // Archivo CSS para los estilos
 
 
 interface LoginProps {
-  onLoginSuccess: () => void; // Prop requerida para manejar login exitoso
+  onLoginSuccess: () => void; 
 }
 
 const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
@@ -13,28 +13,28 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Credenciales válidas (en un caso real, esto vendría de una API o backend)
+  
   const validUsername = 'usuario';
-  const validPasswordHash = CryptoJS.SHA256('contraseña123').toString(); // Contraseña encriptada
+  const validPasswordHash = CryptoJS.SHA256('contraseña123').toString(); 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Simular llamada a API
+
     setTimeout(() => {
-      // Encriptar la contraseña ingresada para comparar
+    
       const enteredPasswordHash = CryptoJS.SHA256(password).toString();
       
       if (username === validUsername && enteredPasswordHash === validPasswordHash) {
         // Login exitoso
-        onLoginSuccess(); // Llamar a la función de éxito proporcionada por el padre
+        onLoginSuccess(); 
       } else {
         setError('Usuario o contraseña incorrectos');
       }
       setLoading(false);
-    }, 1500); // Simular tiempo de carga
+    }, 1500); 
   };
 
   return (
