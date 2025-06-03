@@ -4,15 +4,20 @@ WORKDIR /app
 
 
 COPY package.json package-lock.json ./
+
+
 RUN npm ci --no-audit --prefer-offline && \
-    npm update react-scripts postcss tailwindcss --no-audit
+    npm update react-scripts postcss tailwindcss autoprefixer --no-audit
+
 
 COPY . .
 
-RUN DISABLE_ESLINT_PLUGIN=true \
-    GENERATE_SOURCEMAP=false \
-    TAILWIND_MODE=build \
-    npm run build
+
+RUN export DISABLE_ESLINT_PLUGIN=true && \
+    export GENERATE_SOURCEMAP=true && \  # Cambiado a true para debug
+    export TAILWIND_MODE=build && \
+    npm run build || (cat /app/build/errors.log && exit 1)
+
 
 FROM nginx:1.25-alpine
 
@@ -24,7 +29,8 @@ COPY --from=builder /app/build /usr/share/nginx/html
 
 
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
+    chmod -R 755 /usr/share/nginx/html && \
+    find /usr/share/nginx/html -type f -exec chmod 644 {} \;
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
